@@ -62,29 +62,29 @@ class MasterProjectSlider {
     }
 
     addTouchSupport() {
-    let startX = 0, startY = 0;
-    const threshold = 50;
+        let startX = 0, startY = 0;
+        const threshold = 50;
 
-    document.querySelectorAll('.project-content').forEach(area => {
-        area.addEventListener('touchstart', e => {
-            startX = e.touches[0].clientX;
-            startY = e.touches[0].clientY;
-        }, { passive: true });
+        document.querySelectorAll('.project-content').forEach(area => {
+            area.addEventListener('touchstart', e => {
+                startX = e.touches[0].clientX;
+                startY = e.touches[0].clientY;
+            }, { passive: true });
 
-        area.addEventListener('touchend', e => {
-            const endX = e.changedTouches[0].clientX;
-            const endY = e.changedTouches[0].clientY;
+            area.addEventListener('touchend', e => {
+                const endX = e.changedTouches[0].clientX;
+                const endY = e.changedTouches[0].clientY;
 
-            const diffX = startX - endX;
-            const diffY = startY - endY;
+                const diffX = startX - endX;
+                const diffY = startY - endY;
 
-            // Only horizontal swipe
-            if (Math.abs(diffX) > Math.abs(diffY) && Math.abs(diffX) > threshold) {
-                diffX > 0 ? this.nextProject() : this.prevProject();
-            }
-        }, { passive: true });
-    });
-}
+                // Only horizontal swipe
+                if (Math.abs(diffX) > Math.abs(diffY) && Math.abs(diffX) > threshold) {
+                    diffX > 0 ? this.nextProject() : this.prevProject();
+                }
+            }, { passive: true });
+        });
+    }
     
     createIndicators() {
         for (let i = 0; i < this.totalProjects; i++) {
