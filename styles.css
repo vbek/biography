@@ -96,6 +96,9 @@ body {
     display: none;
     flex-direction: column;
     cursor: pointer;
+    position: relative;
+    z-index: 1100;
+    touch-action: manipulation;
 }
 
 .hamburger span {
@@ -728,6 +731,8 @@ body {
 @media (max-width: 968px) {
     .hamburger {
         display: flex;
+        position: relative;
+        z-index: 1100;
     }
 
     .nav-menu {
@@ -741,10 +746,13 @@ body {
         transition: 0.3s;
         box-shadow: 0 10px 27px rgba(0, 0, 0, 0.05);
         padding: 20px 0;
+        pointer-events: none;
+        z-index: 1050;
     }
 
     .nav-menu.active {
         left: 0;
+        pointer-events: auto;
     }
 
     .biography-content {
