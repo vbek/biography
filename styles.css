@@ -761,9 +761,12 @@ body {
         pointer-events: none;
     }
 
+    /* Find this section in your @media (max-width: 968px) block */
     .nav-menu.active {
-        left: 0; /* Slides menu in when hamburger is clicked */
+        left: 0; 
+        opacity: 1; /* ADD THIS LINE */
         pointer-events: auto;
+        visibility: visible; /* ADD THIS LINE for extra safety */
     }
 
     .biography-content {
