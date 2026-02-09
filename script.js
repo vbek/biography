@@ -144,6 +144,7 @@ class MasterProjectSlider {
             idx === 0 ? img.classList.add('active') : img.classList.remove('active');
         });
         
+        
         dots.forEach((dot, idx) => {
             idx === 0 ? dot.classList.add('active') : dot.classList.remove('active');
         });
