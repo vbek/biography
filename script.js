@@ -47,6 +47,9 @@ class MasterProjectSlider {
         
         // Initialize button states
         this.updateButtonStates();
+
+        // ADDED: Initialize Swipe Support for text areas
+        this.addTouchSupport();
         
         // Keyboard navigation
         document.addEventListener('keydown', (e) => {
@@ -55,6 +58,36 @@ class MasterProjectSlider {
             } else if (e.key === 'ArrowRight' && e.ctrlKey) {
                 this.nextProject();
             }
+        });
+    }
+
+    // NEW METHOD: Handles swiping on the project-content (text/topic) area
+    addTouchSupport() {
+        let touchStartX = 0;
+        let touchEndX = 0;
+        const threshold = 50; // Minimum distance to trigger a swipe
+
+        // Select all text/content containers
+        const textAreas = document.querySelectorAll('.project-content');
+
+        textAreas.forEach(area => {
+            area.addEventListener('touchstart', (e) => {
+                touchStartX = e.changedTouches[0].screenX;
+            }, { passive: true });
+
+            area.addEventListener('touchend', (e) => {
+                touchEndX = e.changedTouches[0].screenX;
+                const distance = touchStartX - touchEndX;
+
+                // Swipe Left (Next)
+                if (distance > threshold) {
+                    this.nextProject();
+                } 
+                // Swipe Right (Previous)
+                else if (distance < -threshold) {
+                    this.prevProject();
+                }
+            }, { passive: true });
         });
     }
     
@@ -72,24 +105,16 @@ class MasterProjectSlider {
     goToProject(index) {
         if (index === this.currentProjectIndex) return;
         
-        // Remove active from current
         this.projectSlides[this.currentProjectIndex].classList.remove('active');
         this.indicators[this.currentProjectIndex].classList.remove('active');
         
-        // Update index
         this.currentProjectIndex = index;
         
-        // Add active to new
         this.projectSlides[this.currentProjectIndex].classList.add('active');
         this.indicators[this.currentProjectIndex].classList.add('active');
         
-        // Update counter
         this.currentProjectSpan.textContent = this.currentProjectIndex + 1;
-        
-        // Update button states
         this.updateButtonStates();
-        
-        // Reset image slider for this project
         this.resetImageSlider();
     }
     
@@ -106,33 +131,21 @@ class MasterProjectSlider {
     }
     
     updateButtonStates() {
-        // Disable prev button on first project
         this.prevProjectBtn.disabled = this.currentProjectIndex === 0;
-        
-        // Disable next button on last project
         this.nextProjectBtn.disabled = this.currentProjectIndex === this.totalProjects - 1;
     }
     
     resetImageSlider() {
-        // Reset the image slider for the current project to first image
         const currentSlide = this.projectSlides[this.currentProjectIndex];
         const images = currentSlide.querySelectorAll('.slider-images img');
         const dots = currentSlide.querySelectorAll('.dot');
         
         images.forEach((img, idx) => {
-            if (idx === 0) {
-                img.classList.add('active');
-            } else {
-                img.classList.remove('active');
-            }
+            idx === 0 ? img.classList.add('active') : img.classList.remove('active');
         });
         
         dots.forEach((dot, idx) => {
-            if (idx === 0) {
-                dot.classList.add('active');
-            } else {
-                dot.classList.remove('active');
-            }
+            idx === 0 ? dot.classList.add('active') : dot.classList.remove('active');
         });
     }
 }
