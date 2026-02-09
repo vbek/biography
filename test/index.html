@@ -1,0 +1,409 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Bibek Koirala - Research Portfolio</title>
+    <meta name="description" content="Bibek Koirala - Graduate Researcher in Computer Science specializing in Computer Vision and Machine Learning">
+    <link rel="stylesheet" href="styles.css">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/css/all.min.css">
+</head>
+<body>
+    <!-- Navigation -->
+    <nav class="navbar">
+        <div class="container">
+            <div class="nav-brand">Bibek Koirala</div>
+            <ul class="nav-menu">
+                <li><a href="#biography">About</a></li>
+                <li><a href="#professional-path">Experience</a></li>
+                <li><a href="#research">Research</a></li>
+                <li><a href="#news">News</a></li>
+                <li><a href="#contact">Contact</a></li>
+            </ul>
+            <div class="hamburger">
+                <span></span>
+                <span></span>
+                <span></span>
+            </div>
+        </div>
+    </nav>
+
+    <!-- Biography Section -->
+    <section id="biography" class="biography-section">
+        <div class="container">
+            <div class="biography-content">
+                <div class="bio-image">
+                    <img src="images/profile.png" alt="Bibek Koirala">
+                </div>
+                <div class="bio-text">
+                    <h1>Bibek Koirala</h1>
+                    <h2>Graduate Researcher in Computer Science</h2>
+                    <p>Bibek Koirala is a graduate researcher in Computer Science at Southern Illinois University Carbondale and serves as a Research Assistant specializing in computer vision. His research focuses on instance-level segmentation and classification of microscopy images using Vision Transformers and Feature Pyramid Network architectures. In addition to computer vision, he has conducted interdisciplinary research spanning economics, criminology, and software development, applying econometric and machine learning techniques to analyze and predict inflation using macroeconomic indicators, assess crime-related perceptions and patterns, and develop data-driven software systems.</p>
+                    <a href="images/resume.pdf" class="btn btn-primary download-btn" download>
+                        <i class="fas fa-download"></i> Download Resume
+                    </a>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <!-- Professional Path Section -->
+    <section id="professional-path" class="professional-path-section">
+        <div class="container">
+            <h2 class="section-title">Professional Path</h2>
+            <div class="path-grid">
+                <div class="path-card">
+                    <div class="path-icon">
+                        <i class="fas fa-microscope"></i>
+                    </div>
+                    <h3>Research Assistant</h3>
+                    <p class="institution">Southern Illinois University Carbondale</p>
+                    <p class="description">Computer Vision & Machine Learning Research</p>
+                </div>
+                <div class="path-card">
+                    <div class="path-icon">
+                        <i class="fas fa-shield-alt"></i>
+                    </div>
+                    <h3>Lieutenant</h3>
+                    <p class="institution">Nepali Army</p>
+                    <p class="description">Military Leadership, R&D</p>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <!-- Research Projects Section with Master Slider -->
+    <section id="research" class="research-section">
+        <div class="container">
+            <h2 class="section-title">Research and Technical Insights</h2>
+            
+            <!-- Master Project Slider Container -->
+            <div class="master-project-slider">
+                <!-- Project Navigation Info -->
+                <div class="project-navigation-info">
+                    <span class="project-counter">
+                        <span class="current-project">1</span> / <span class="total-projects">6</span>
+                    </span>
+                </div>
+
+                <!-- Projects Container -->
+                <div class="projects-container">
+                    
+                    <!-- Project 1: Plant Disease Detection -->
+                    <div class="project-slide active" data-project="1">
+                        <div class="project-content">
+                            <h3>Plant Disease Detection using Vision Transformers</h3>
+                            <p>Developed a computer vision model utilizing Vision Transformers (ViT) for accurate plant disease detection from image data. This work explores transformer-based deep learning approaches for agricultural image classification, highlighting the potential of modern architectures in real-world biological and plant pathology tasks.</p>
+                            <a href="https://github.com/vbek/Plant-Disease-Detection" target="_blank" class="btn btn-secondary">
+                                <i class="fab fa-github"></i> View on GitHub
+                            </a>
+                        </div>
+                        <div class="project-image-slider">
+                            <div class="image-slider-container">
+                                <button class="image-slider-btn prev-btn"><i class="fas fa-chevron-left"></i></button>
+                                <div class="slider-images">
+                                    <img src="images/plant1.png" alt="Plant Disease 1" class="active">
+                                    <img src="images/plant2.png" alt="Plant Disease 2">
+                                    <img src="images/plant3.png" alt="Plant Disease 3">
+                                    <img src="images/plant4.png" alt="Plant Disease 4">
+                                    <img src="images/plant5.png" alt="Plant Disease 5">
+                                    <img src="images/plant6.png" alt="Plant Disease 6">
+                                    <img src="images/plant7.png" alt="Plant Disease 7">
+                                    <img src="images/plant8.png" alt="Plant Disease 8">
+                                    <img src="images/plant9.png" alt="Plant Disease 9">
+                                    <img src="images/plant10.png" alt="Plant Disease 10">
+                                    <img src="images/plant11.png" alt="Plant Disease 11">
+                                    <img src="images/plant12.png" alt="Plant Disease 12">
+                                </div>
+                                <button class="image-slider-btn next-btn"><i class="fas fa-chevron-right"></i></button>
+                            </div>
+                            <div class="slider-dots"></div>
+                        </div>
+                    </div>
+
+                    <!-- Project 2: Inflation Dynamics -->
+                    <div class="project-slide" data-project="2">
+                        <div class="project-content">
+                            <h3>Inflation Dynamics, Remittances, and Macroeconomic Indicators</h3>
+                            <p>Conducted an in-depth economic analysis of inflation trends in countries with high remittance-to-GDP ratios. Using cross-country macroeconomic data from 1960–2023, this project applied statistical and machine learning techniques — including regression models, random forests, neural networks, and clustering — to understand how remittances, real interest rates, and exchange rates interact with inflation.</p>
+                            <a href="https://github.com/vbek/Inflation-Dynamics" target="_blank" class="btn btn-secondary">
+                                <i class="fab fa-github"></i> View on GitHub
+                            </a>
+                        </div>
+                        <div class="project-image-slider">
+                            <div class="image-slider-container">
+                                <button class="image-slider-btn prev-btn"><i class="fas fa-chevron-left"></i></button>
+                                <div class="slider-images">
+                                    <img src="images/inflation1.png" alt="Inflation 1" class="active">
+                                    <img src="images/inflation2.png" alt="Inflation 2">
+                                    <img src="images/inflation3.png" alt="Inflation 3">
+                                    <img src="images/inflation4.png" alt="Inflation 4">
+                                    <img src="images/inflation5.png" alt="Inflation 5">
+                                    <img src="images/inflation6.png" alt="Inflation 6">
+                                </div>
+                                <button class="image-slider-btn next-btn"><i class="fas fa-chevron-right"></i></button>
+                            </div>
+                            <div class="slider-dots"></div>
+                        </div>
+                    </div>
+
+                    <!-- Project 3: Military Leave Management -->
+                    <div class="project-slide" data-project="3">
+                        <div class="project-content">
+                            <h3>Military Leave Management Dashboard</h3>
+                            <p>Developed a comprehensive dashboard system for managing military leave records with real-time visualization and administrative controls. This project integrates backend data management with interactive front-end displays to streamline personnel leave tracking and improve operational efficiency in organizational processes.</p>
+                            <a href="https://github.com/vbek/Military-Leave-Management-Dashboard" target="_blank" class="btn btn-secondary">
+                                <i class="fab fa-github"></i> View on GitHub
+                            </a>
+                        </div>
+                        <div class="project-image-slider">
+                            <div class="image-slider-container">
+                                <button class="image-slider-btn prev-btn"><i class="fas fa-chevron-left"></i></button>
+                                <div class="slider-images">
+                                    <img src="images/military1.png" alt="Military 1" class="active">
+                                    <img src="images/military2.png" alt="Military 2">
+                                    <img src="images/military3.png" alt="Military 3">
+                                    <img src="images/military4.png" alt="Military 4">
+                                    <img src="images/military5.png" alt="Military 5">
+
+                                </div>
+                                <button class="image-slider-btn next-btn"><i class="fas fa-chevron-right"></i></button>
+                            </div>
+                            <div class="slider-dots"></div>
+                        </div>
+                    </div>
+
+                    <!-- Project 4: News Credibility -->
+                    <div class="project-slide" data-project="4">
+                        <div class="project-content">
+                            <h3>News Credibility Detection</h3>
+                            <p>Implemented machine learning and natural language processing methods to automatically assess the credibility of news articles. This project investigates features and models that can distinguish between reliable and unreliable content, contributing to research on misinformation detection and automated trust signals in digital media.</p>
+                            <a href="https://github.com/vbek/News-Credibility" target="_blank" class="btn btn-secondary">
+                                <i class="fab fa-github"></i> View on GitHub
+                            </a>
+                        </div>
+                        <div class="project-image-slider">
+                            <div class="image-slider-container">
+                                <button class="image-slider-btn prev-btn"><i class="fas fa-chevron-left"></i></button>
+                                <div class="slider-images">
+                                    <img src="images/news1.png" alt="News 1" class="active">
+                                    <img src="images/news2.png" alt="News 2">
+                                    <img src="images/news3.png" alt="News 3">
+                                    <img src="images/news4.png" alt="News 4">
+                                    <img src="images/news5.png" alt="News 5">
+                                </div>
+                                <button class="image-slider-btn next-btn"><i class="fas fa-chevron-right"></i></button>
+                            </div>
+                            <div class="slider-dots"></div>
+                        </div>
+                    </div>
+
+                    <!-- Project 5: Multi-Label Classification -->
+                    <div class="project-slide" data-project="5">
+                        <div class="project-content">
+                            <h3>Multi-Label Comment Classification</h3>
+                            <p>Explored multi-label text classification methodologies for categorizing user comments across multiple thematic or sentiment dimensions. This repository applies techniques such as feature extraction, neural networks, and advanced evaluation metrics to handle overlapping or concurrent labels in textual data.</p>
+                            <a href="https://github.com/vbek/Multi-Label-Comment-Classification" target="_blank" class="btn btn-secondary">
+                                <i class="fab fa-github"></i> View on GitHub
+                            </a>
+                        </div>
+                        <div class="project-image-slider">
+                            <div class="image-slider-container">
+                                <button class="image-slider-btn prev-btn"><i class="fas fa-chevron-left"></i></button>
+                                <div class="slider-images">
+                                    <img src="images/multi1.png" alt="Multi-Label 1" class="active">
+                                    <img src="images/multi2.png" alt="Multi-Label 2">
+                                    <img src="images/multi3.png" alt="Multi-Label 3">
+                                    <img src="images/multi4.png" alt="Multi-Label 4">
+                                    <img src="images/multi5.png" alt="Multi-Label 5">
+                                    <img src="images/multi6.png" alt="Multi-Label 6">
+                                    <img src="images/multi7.png" alt="Multi-Label 7">
+                                </div>
+                                <button class="image-slider-btn next-btn"><i class="fas fa-chevron-right"></i></button>
+                            </div>
+                            <div class="slider-dots"></div>
+                        </div>
+                    </div>
+
+                    <!-- Project 6: Victim Crime Perception -->
+                    <div class="project-slide" data-project="6">
+                        <div class="project-content">
+                            <h3>Real Time Face and Emotion Detection</h3>
+                            <p>This project implements a lightweight YOLOv8 model for real-time face detection and evaluates CNN, vanilla ResNet, and fine-tuned ResNet architectures for emotion recognition, achieving under 50 ms inference with fewer than 1.3 M parameters and model size below 5 MB for fast deployment.</p>
+                            <a href="https://github.com/vbek/Real-Time-Face-Emotion-Detection" target="_blank" class="btn btn-secondary">
+                                <i class="fab fa-github"></i> View on GitHub
+                            </a>
+                        </div>
+
+                        <div class="project-image-slider">
+                            <div class="image-slider-container">
+                                <button class="image-slider-btn prev-btn"><i class="fas fa-chevron-left"></i></button>
+                                <div class="slider-images">
+                                    <img src="images/facial1.png" alt="recognition 1" class="active">
+                                    <img src="images/facial2.png" alt="recognition 2">
+                                    <img src="images/facial3.png" alt="recognition 3">
+                                    <img src="images/facial4.png" alt="recognition 4">
+                                    <img src="images/facial5.png" alt="recognition 5">
+                                    <img src="images/facial6.png" alt="recognition 6">
+                                    <img src="images/facial7.png" alt="recognition 7">
+                                    <img src="images/facial8.png" alt="recognition 8">
+                                    <img src="images/facial9.png" alt="recognition 9">
+                                </div>
+                                <button class="image-slider-btn next-btn"><i class="fas fa-chevron-right"></i></button>
+                            </div>
+                            <div class="slider-dots"></div>
+                        </div>
+                    </div>
+
+                    <!-- Project 7: Real-Time Face and Emotion Detection -->
+                    <div class="project-slide" data-project="7">
+                        <div class="project-content">
+                            <h3>Victim Crime Perception Analysis</h3>
+                            <p>Conducted data-driven analysis of crime perception among victims, using statistical and machine learning tools to identify patterns, correlations, and key factors influencing perceptions of crime. This work blends sociological insight with computational analysis to better understand human responses and sentiment in crime-related datasets.</p>
+                            <a href="https://github.com/vbek/Victim-Crime-Perception" target="_blank" class="btn btn-secondary">
+                                <i class="fab fa-github"></i> View on GitHub
+                            </a>
+                        </div>
+                        <div class="project-image-slider">
+                            <div class="image-slider-container">
+                                <button class="image-slider-btn prev-btn"><i class="fas fa-chevron-left"></i></button>
+                                <div class="slider-images">
+                                    <img src="images/victim1.png" alt="Victim Crime 1" class="active">
+                                    <img src="images/victim2.png" alt="Victim Crime 2">
+                                    <img src="images/victim3.png" alt="Victim Crime 3">
+                                </div>
+                                <button class="image-slider-btn next-btn"><i class="fas fa-chevron-right"></i></button>
+                            </div>
+                            <div class="slider-dots"></div>
+                        </div>
+                    </div>
+
+                </div>
+
+                <!-- Master Project Navigation Buttons -->
+                <div class="master-project-navigation">
+                    <button class="master-nav-btn prev-project-btn">
+                        <i class="fas fa-angle-double-left"></i>
+                        <span>Prev</span>
+                    </button>
+                    <button class="master-nav-btn next-project-btn">
+                        <span>Next</span>
+                        <i class="fas fa-angle-double-right"></i>
+                    </button>
+                </div>
+
+                <!-- Project Indicators (dots) -->
+                <div class="project-indicators"></div>
+            </div>
+        </div>
+    </section>
+
+    <!-- Current Research & News Section -->
+    <section id="news" class="news-section">
+        <div class="container">
+            <h2 class="section-title">Current Research and News</h2>
+                <div class="news-grid">
+                    <div class="news-card bg-news-research">
+                        <div class="news-overlay"></div>
+                        <div class="news-content">
+                            <span class="news-tag">Publication</span>
+                            <h3>Instance-Level Bacteria Segmentation Under Varying Growth Conditions</h3>
+                            <p>Published a Conference Paper at IEEE ICMLA 2025, exploring Deep Learning Feature Pyramid-based architectures for microscopy image analysis.</p>
+                            <div class="news-actions">
+                                <a href="raw/bacteria_seg.pdf" target="_blank" class="btn btn-primary btn-sm">
+                                    <i class="fas fa-book-open"></i> Read Paper
+                                </a>
+    
+                            </div>
+                        </div>
+                    </div>
+
+                    <div class="news-card bg-news-conference">
+                        <div class="news-overlay"></div>
+                        <div class="news-content">
+                            <span class="news-tag">Conference</span>
+                            <h3>Oral Presentation: Advanced Vision Models in Medical Imaging</h3>
+                            <p>Delivered insights on combining Deep Learning and Machine Learning architectures for segmentation tasks at international conference.</p>
+                            <div class="news-actions">
+                                <a href="https://drive.google.com/file/d/1DGtdYxJ98MXne5Vb0OSfBnTOaA3YuaHP/view" target="_blank" class="btn btn-primary btn-sm">
+                                    <i class="fas fa-external-link-alt"></i> View Presentation
+                                </a>
+                                
+                            </div>
+                        </div>
+                    </div>
+
+                    <div class="news-card bg-news-update">
+                        <div class="news-overlay"></div>
+                        <div class="news-content">
+                            <span class="news-tag">Research Update</span>
+                            <h3>Leadership in AI Research</h3>
+                            <p>SIU Researchers Use AI and Microscopy to Rapidly Detect Salmonella in Onions</p>
+                            <div class="news-actions">
+                                <a href="https://soc.siu.edu/news/articles/enhancing-food-safety-salmonella.php" target="_blank" class="btn btn-primary btn-sm">
+                                    <i class="fas fa-external-link-alt"></i> Read Story
+                                </a>
+                                
+                            </div>
+                        </div>
+                    </div>
+                </div>
+        </div>
+    </section>
+
+    <!-- CTA Section -->
+    <section class="cta-section">
+        <div class="container">
+            <h2>Ready to Push Frontiers of AI Research?</h2>
+            <p>Let's collaborate on cutting-edge computer vision and machine learning projects</p>
+            <div class="cta-buttons">
+                <a href="#contact" class="btn btn-primary">Get in Touch</a>
+                <a href="https://www.linkedin.com/in/bibek-koirala-2658a0189" target="_blank" class="btn btn-outline">
+                    <i class="fab fa-linkedin"></i> LinkedIn
+                </a>
+                <a href="https://github.com/vbek" target="_blank" class="btn btn-outline">
+                    <i class="fab fa-github"></i> GitHub
+                </a>
+            </div>
+        </div>
+    </section>
+
+    <!-- Contact Section -->
+    <section id="contact" class="contact-section">
+        <div class="container">
+            <h2 class="section-title">Contact Information</h2>
+            <div class="contact-content">
+                <div class="contact-info">
+                    <div class="contact-item">
+                        <i class="fas fa-envelope"></i>
+                        <a href="mailto:bibek.koirala@siu.edu">bibek.koirala@siu.edu</a>
+                    </div>
+                    <div class="social-links">
+                        <a href="https://www.linkedin.com/in/bibek-koirala-2658a0189/" target="_blank" aria-label="LinkedIn">
+                            <i class="fab fa-linkedin"></i>
+                        </a>
+                        <a href="https://github.com/vbek" target="_blank" aria-label="GitHub">
+                            <i class="fab fa-github"></i>
+                        </a>
+                        <a href="https://instagram.com/vbek_koirala" target="_blank" aria-label="Instagram">
+                            <i class="fab fa-instagram"></i>
+                        </a>
+                        <a href="https://x.com/_koire" target="_blank" aria-label="X (Twitter)">
+                            <i class="fab fa-x-twitter"></i>
+                        </a>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <!-- Footer -->
+    <footer class="footer">
+        <div class="container">
+            <p>&copy; 2026 Bibek Koirala. All rights reserved.</p>
+        </div>
+    </footer>
+
+    <script src="script.js"></script>
+</body>
+</html>

@@ -337,12 +337,6 @@ body {
     margin-bottom: 1.5rem;
 }
 
-.project-content {
-    overflow-y: auto;
-    -webkit-overflow-scrolling: touch;
-    touch-action: pan-y;
-}
-
 /* Project Image Slider */
 .project-image-slider {
     position: relative;

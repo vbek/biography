@@ -61,30 +61,35 @@ class MasterProjectSlider {
         });
     }
 
+    // NEW METHOD: Handles swiping on the project-content (text/topic) area
     addTouchSupport() {
-    let startX = 0, startY = 0;
-    const threshold = 50;
+        let touchStartX = 0;
+        let touchEndX = 0;
+        const threshold = 50; // Minimum distance to trigger a swipe
 
-    document.querySelectorAll('.project-content').forEach(area => {
-        area.addEventListener('touchstart', e => {
-            startX = e.touches[0].clientX;
-            startY = e.touches[0].clientY;
-        }, { passive: true });
+        // Select all text/content containers
+        const textAreas = document.querySelectorAll('.project-content');
 
-        area.addEventListener('touchend', e => {
-            const endX = e.changedTouches[0].clientX;
-            const endY = e.changedTouches[0].clientY;
+        textAreas.forEach(area => {
+            area.addEventListener('touchstart', (e) => {
+                touchStartX = e.changedTouches[0].screenX;
+            }, { passive: true });
 
-            const diffX = startX - endX;
-            const diffY = startY - endY;
+            area.addEventListener('touchend', (e) => {
+                touchEndX = e.changedTouches[0].screenX;
+                const distance = touchStartX - touchEndX;
 
-            // Only horizontal swipe
-            if (Math.abs(diffX) > Math.abs(diffY) && Math.abs(diffX) > threshold) {
-                diffX > 0 ? this.nextProject() : this.prevProject();
-            }
-        }, { passive: true });
-    });
-}
+                // Swipe Left (Next)
+                if (distance > threshold) {
+                    this.nextProject();
+                } 
+                // Swipe Right (Previous)
+                else if (distance < -threshold) {
+                    this.prevProject();
+                }
+            }, { passive: true });
+        });
+    }
     
     createIndicators() {
         for (let i = 0; i < this.totalProjects; i++) {
@@ -360,17 +365,16 @@ document.querySelectorAll('.btn, .icon-btn, .image-slider-btn, .master-nav-btn')
     });
 });
 
-// Prevent double-tap zoom ONLY on buttons (iOS-safe)
-document.querySelectorAll('button, .btn, .image-slider-btn, .master-nav-btn').forEach(el => {
-    let lastTouchEnd = 0;
-    el.addEventListener('touchend', e => {
-        const now = Date.now();
-        if (now - lastTouchEnd <= 300) {
-            e.preventDefault();
-        }
-        lastTouchEnd = now;
-    });
-});
+// Prevent double-tap zoom on buttons (iOS)
+let lastTouchEnd = 0;
+document.addEventListener('touchend', function(event) {
+    const now = Date.now();
+    if (now - lastTouchEnd <= 300) {
+        event.preventDefault();
+    }
+    lastTouchEnd = now;
+}, false);
+
 // Console message
 console.log('%c👋 Welcome to Bibek Koirala\'s Portfolio!', 'color: #4A90E2; font-size: 16px; font-weight: bold;');
 console.log('%cUse Ctrl+Left/Right to navigate between projects!', 'color: #2C3E50; font-size: 12px;');
