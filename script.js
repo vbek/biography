@@ -61,6 +61,7 @@ class MasterProjectSlider {
         });
     }
 
+    
     addTouchSupport() {
         let startX = 0, startY = 0;
         const threshold = 50;
