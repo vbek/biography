@@ -207,13 +207,27 @@ document.addEventListener('DOMContentLoaded', () => {
         new ImageSlider(slider);
     });
 
-    // 3. Mobile Menu Toggle
+    // 3. CLEANED UP MOBILE MENU LOGIC
     const hamburger = document.querySelector('.hamburger');
     const navMenu = document.querySelector('.nav-menu');
+    const navLinks = document.querySelectorAll('.nav-menu a');
+
     if (hamburger && navMenu) {
-        hamburger.addEventListener('click', () => {
+        // Toggle function
+        const toggleMenu = () => {
             navMenu.classList.toggle('active');
             hamburger.classList.toggle('active');
+        };
+
+        // Single click listener (works on mobile and desktop)
+        hamburger.addEventListener('click', toggleMenu);
+
+        // Close menu when a link is clicked
+        navLinks.forEach(link => {
+            link.addEventListener('click', () => {
+                navMenu.classList.remove('active');
+                hamburger.classList.remove('active');
+            });
         });
     }
 });

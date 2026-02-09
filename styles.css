@@ -739,35 +739,30 @@ body {
 /* Responsive Design */
 @media (max-width: 968px) {
     .hamburger {
-        display: flex;
+        display: flex; /* Ensures hamburger is visible on mobile */
         position: relative;
         z-index: 1100;
     }
 
     .nav-menu {
         position: fixed;
-        left: -100%;
-        top: 70px;.nav-logo {
-    width: 48px;
-    height: 48px;
-    border-radius: 50%;
-    object-fit: cover;
-    border: 2px solid var(--primary-color);
-    box-shadow: 0 4px 10px rgba(0, 0, 0, 0.15);
-}
+        left: -100%; /* Keeps menu hidden by default */
+        top: 0;
         flex-direction: column;
         background: white;
         width: 100%;
+        height: 100vh; /* Full screen height for easier mobile navigation */
+        justify-content: center;
         text-align: center;
-        transition: 0.3s;
+        transition: 0.3s ease;
         box-shadow: 0 10px 27px rgba(0, 0, 0, 0.05);
         padding: 20px 0;
-        pointer-events: none;
         z-index: 1050;
+        pointer-events: none;
     }
 
     .nav-menu.active {
-        left: 0;
+        left: 0; /* Slides menu in when hamburger is clicked */
         pointer-events: auto;
     }
 
@@ -834,7 +829,7 @@ body {
         font-size: 1.5rem;
     }
 
-    .slider-btn {
+    .image-slider-btn { /* Fixed selector name to match your HTML */
         width: 40px;
         height: 40px;
         font-size: 1rem;
