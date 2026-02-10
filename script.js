@@ -221,6 +221,18 @@ document.addEventListener('DOMContentLoaded', () => {
             });
         });
     }
+
+    // 4. ADD THIS: Scroll to Top on Logo Click
+    const navLogo = document.querySelector('.nav-logo');
+    if (navLogo) {
+        navLogo.addEventListener('click', (e) => {
+            e.preventDefault();
+            window.scrollTo({
+                top: 0,
+                behavior: 'smooth'
+            });
+        });
+    }
 });
 // Comment Button Functionality
 const commentButtons = document.querySelectorAll('.comment-btn');
