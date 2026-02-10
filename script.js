@@ -1,20 +1,7 @@
 
 
-// Mobile Menu Toggle
-const hamburger = document.querySelector('.hamburger');
-const navMenu = document.querySelector('.nav-menu');
 
-hamburger.addEventListener('click', () => {
-    navMenu.classList.toggle('active');
-    hamburger.classList.toggle('active');
-});
 
-document.querySelectorAll('.nav-menu a').forEach(link => {
-    link.addEventListener('click', () => {
-        navMenu.classList.remove('active');
-        hamburger.classList.remove('active');
-    });
-});
 
 // ============================================
 // MASTER PROJECT SLIDER (Handles Project Navigation)
@@ -207,19 +194,23 @@ document.addEventListener('DOMContentLoaded', () => {
         new ImageSlider(slider);
     });
 
-    // 3. CLEANED UP MOBILE MENU LOGIC
+    // 3. FIXED MOBILE MENU LOGIC
     const hamburger = document.querySelector('.hamburger');
     const navMenu = document.querySelector('.nav-menu');
     const navLinks = document.querySelectorAll('.nav-menu a');
 
     if (hamburger && navMenu) {
-        // Toggle function
-        const toggleMenu = () => {
+        const toggleMenu = (e) => {
+            // If it's a touch event, prevent the mouse click from firing afterwards
+            if (e.type === 'touchstart') e.preventDefault();
+            
             navMenu.classList.toggle('active');
             hamburger.classList.toggle('active');
         };
 
-        // Single click listener (works on mobile and desktop)
+        // Add 'touchstart' for instant mobile response
+        hamburger.addEventListener('touchstart', toggleMenu, { passive: false });
+        // Add 'click' for desktop users
         hamburger.addEventListener('click', toggleMenu);
 
         // Close menu when a link is clicked
