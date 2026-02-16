@@ -149,14 +149,26 @@ class ImageSlider {
         this.dots = this.dotsContainer.querySelectorAll('.dot');
     }
 
-    // Update goToSlide to use this.items
     goToSlide(index) {
         if (index === this.currentIndex) return;
+        
+        // Pause video if leaving it
+        const currentItem = this.items[this.currentIndex];
+        if (currentItem.tagName === 'VIDEO') {
+            currentItem.pause();
+        }
+        
         this.items[this.currentIndex].classList.remove('active');
         this.dots[this.currentIndex].classList.remove('active');
         this.currentIndex = index;
         this.items[this.currentIndex].classList.add('active');
         this.dots[this.currentIndex].classList.add('active');
+        
+        // Play video if entering it
+        const newItem = this.items[this.currentIndex];
+        if (newItem.tagName === 'VIDEO') {
+            newItem.play();
+        }
     }
 
     // Update nextSlide and prevSlide
