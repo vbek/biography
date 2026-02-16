@@ -103,9 +103,9 @@ class MasterProjectSlider {
     
     resetImageSlider() {
         const currentSlide = this.projectSlides[this.currentProjectIndex];
-        const images = currentSlide.querySelectorAll('.slider-images img');
+        const items = currentSlide.querySelectorAll('.slider-images img, .slider-images video'); // ✅ Include videos
         const dots = currentSlide.querySelectorAll('.dot');
-        images.forEach((img, idx) => idx === 0 ? img.classList.add('active') : img.classList.remove('active'));
+        items.forEach((item, idx) => idx === 0 ? item.classList.add('active') : item.classList.remove('active'));
         dots.forEach((dot, idx) => idx === 0 ? dot.classList.add('active') : dot.classList.remove('active'));
     }
 }
@@ -127,7 +127,8 @@ class ImageSlider {
 
     init() {
         this.createDots();
-        if (this.images.length > 0) this.images[0].classList.add('active');
+        this.items = this.slider.querySelectorAll('.slider-images img, .slider-images video'); // Change this line
+        if (this.items.length > 0) this.items[0].classList.add('active');
         
         this.prevBtn.addEventListener('click', (e) => { e.stopPropagation(); this.prevSlide(); });
         this.nextBtn.addEventListener('click', (e) => { e.stopPropagation(); this.nextSlide(); });
@@ -135,8 +136,10 @@ class ImageSlider {
         this.addTouchSupport();
     }
 
+    // Update the createDots method
     createDots() {
-        this.images.forEach((_, index) => {
+        const items = this.slider.querySelectorAll('.slider-images img, .slider-images video'); // Change this line
+        items.forEach((_, index) => {
             const dot = document.createElement('span');
             dot.classList.add('dot');
             if (index === 0) dot.classList.add('active');
@@ -146,21 +149,23 @@ class ImageSlider {
         this.dots = this.dotsContainer.querySelectorAll('.dot');
     }
 
+    // Update goToSlide to use this.items
     goToSlide(index) {
         if (index === this.currentIndex) return;
-        this.images[this.currentIndex].classList.remove('active');
+        this.items[this.currentIndex].classList.remove('active');
         this.dots[this.currentIndex].classList.remove('active');
         this.currentIndex = index;
-        this.images[this.currentIndex].classList.add('active');
+        this.items[this.currentIndex].classList.add('active');
         this.dots[this.currentIndex].classList.add('active');
     }
 
+    // Update nextSlide and prevSlide
     nextSlide() {
-        this.goToSlide((this.currentIndex + 1) % this.images.length);
+        this.goToSlide((this.currentIndex + 1) % this.items.length);
     }
 
     prevSlide() {
-        this.goToSlide((this.currentIndex - 1 + this.images.length) % this.images.length);
+        this.goToSlide((this.currentIndex - 1 + this.items.length) % this.items.length);
     }
 
     addTouchSupport() {
@@ -357,3 +362,4 @@ document.addEventListener('touchend', function(event) {
 // Console message
 console.log('%c👋 Welcome to Bibek Koirala\'s Portfolio!', 'color: #4A90E2; font-size: 16px; font-weight: bold;');
 console.log('%cUse Ctrl+Left/Right to navigate between projects!', 'color: #2C3E50; font-size: 12px;');
+
