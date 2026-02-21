@@ -367,14 +367,19 @@ if (downloadBtn) {
     });
 }
 
-// Add loading animation for images (excluding slider images)
 document.querySelectorAll('img:not(.slider-images img)').forEach(img => {
-    img.addEventListener('load', function() {
-        this.style.opacity = '1';
-    });
-    
-    img.style.opacity = '0';
-    img.style.transition = 'opacity 0.3s ease';
+    if (img.complete) {
+        img.style.opacity = '1'; // already loaded, show immediately
+    } else {
+        img.style.opacity = '0';
+        img.style.transition = 'opacity 0.3s ease';
+        img.addEventListener('load', function() {
+            this.style.opacity = '1';
+        });
+        img.addEventListener('error', function() {
+            this.style.opacity = '1'; // show even if broken
+        });
+    }
 });
 
 // Add touch feedback for mobile
