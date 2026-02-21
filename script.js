@@ -16,7 +16,19 @@ class MasterProjectSlider {
         this.indicatorsContainer = document.querySelector('.project-indicators');
         this.currentProjectSpan = document.querySelector('.current-project');
         this.totalProjectsSpan = document.querySelector('.total-projects');
-        
+
+        // Guard: bail out if any critical element is missing
+        if (!this.prevProjectBtn || !this.nextProjectBtn || !this.indicatorsContainer || 
+            !this.currentProjectSpan || !this.totalProjectsSpan || this.totalProjects === 0) {
+            console.error('MasterProjectSlider: required elements not found', {
+                prevBtn: this.prevProjectBtn,
+                nextBtn: this.nextProjectBtn,
+                indicators: this.indicatorsContainer,
+                slides: this.totalProjects
+            });
+            return;
+        }
+
         this.init();
     }
     
@@ -29,6 +41,7 @@ class MasterProjectSlider {
         
         this.updateButtonStates();
         this.addTouchSupport(); // Initialize Swipe for text areas
+        this.updateContainerHeight();
         
         document.addEventListener('keydown', (e) => {
             if (e.key === 'ArrowLeft' && e.ctrlKey) this.prevProject();
@@ -36,29 +49,42 @@ class MasterProjectSlider {
         });
     }
 
+    updateContainerHeight() {
+        const container = document.querySelector('.projects-container');
+        const activeSlide = this.projectSlides[this.currentProjectIndex];
+        if (container && activeSlide) {
+            container.style.minHeight = activeSlide.offsetHeight + 'px';
+        }
+    }
+
     addTouchSupport() {
         let touchStartX = 0;
         let touchEndX = 0;
-        const threshold = 60; 
+        let touchStartY = 0;
+        let touchFromImageSlider = false;
+        const threshold = 60;
 
-        // Target only the text area to change projects
-        const textAreas = document.querySelectorAll('.project-content');
+        const container = document.querySelector('.projects-container');
+        if (!container) return;
 
-        textAreas.forEach(area => {
-            area.addEventListener('touchstart', (e) => {
-                touchStartX = e.changedTouches[0].screenX;
-            }, { passive: true });
+        container.addEventListener('touchstart', (e) => {
+            touchFromImageSlider = !!e.target.closest('.project-image-slider');
+            touchStartX = e.changedTouches[0].screenX;
+            touchStartY = e.changedTouches[0].screenY;
+        }, { passive: true });
 
-            area.addEventListener('touchend', (e) => {
-                touchEndX = e.changedTouches[0].screenX;
-                const distance = touchStartX - touchEndX;
+        container.addEventListener('touchend', (e) => {
+            if (touchFromImageSlider) return;
+            touchEndX = e.changedTouches[0].screenX;
+            const touchEndY = e.changedTouches[0].screenY;
+            const distanceX = touchStartX - touchEndX;
+            const distanceY = Math.abs(touchStartY - touchEndY);
 
-                if (Math.abs(distance) > threshold) {
-                    if (distance > 0) this.nextProject();
-                    else this.prevProject();
-                }
-            }, { passive: true });
-        });
+            if (Math.abs(distanceX) > threshold && Math.abs(distanceX) > distanceY) {
+                if (distanceX > 0) this.nextProject();
+                else this.prevProject();
+            }
+        }, { passive: true });
     }
     
     createIndicators() {
@@ -82,6 +108,7 @@ class MasterProjectSlider {
         this.currentProjectSpan.textContent = this.currentProjectIndex + 1;
         this.updateButtonStates();
         this.resetImageSlider();
+        this.updateContainerHeight();
     }
     
     nextProject() {
