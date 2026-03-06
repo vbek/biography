@@ -247,7 +247,7 @@ document.addEventListener('DOMContentLoaded', () => {
         let menuTouched = false;
 
         hamburger.addEventListener('touchstart', (e) => {
-            e.preventDefault(); // prevent ghost click
+            e.preventDefault(); // stop ghost click
             menuTouched = true;
             navMenu.classList.toggle('active');
             hamburger.classList.toggle('active');
@@ -395,7 +395,7 @@ document.querySelectorAll('.btn, .icon-btn, .image-slider-btn, .master-nav-btn')
     });
 });
 
-// Double-tap zoom prevention removed — was blocking hamburger menu and swipe gestures
+// Note: double-tap zoom prevention removed — it was blocking swipe and button touches
 
 // Console message
 console.log('%c👋 Welcome to Bibek Koirala\'s Portfolio!', 'color: #4A90E2; font-size: 16px; font-weight: bold;');
