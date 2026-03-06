@@ -998,13 +998,28 @@ a:focus-visible {
     text-decoration: none;
 }
 
-/* Election nav link */
-.nav-menu a[href*="election"] {
-    color: #c0392b !important;
+
+
+/* Election always-visible nav button */
+.election-nav-btn {
+    display: flex;
+    align-items: center;
+    gap: 5px;
+    padding: 6px 13px;
+    background: linear-gradient(135deg, #c0392b, #1a3a6b);
+    color: #fff !important;
     font-weight: 700;
+    font-size: 13px;
+    border-radius: 20px;
+    text-decoration: none;
+    white-space: nowrap;
+    box-shadow: 0 2px 8px rgba(192,57,43,0.35);
+    transition: var(--transition);
+    margin-right: 10px;
 }
-.nav-menu a[href*="election"]:hover {
-    color: #e74c3c !important;
+.election-nav-btn:hover {
+    transform: scale(1.05);
+    box-shadow: 0 4px 14px rgba(192,57,43,0.5);
 }
 
 /* ── Nepal Election 2082 Floating Button ── */
