@@ -997,3 +997,79 @@ a:focus-visible {
     color: white !important;
     text-decoration: none;
 }
+
+/* Election nav link */
+.nav-menu a[href*="election"] {
+    color: #c0392b !important;
+    font-weight: 700;
+}
+.nav-menu a[href*="election"]:hover {
+    color: #e74c3c !important;
+}
+
+/* ── Nepal Election 2082 Floating Button ── */
+.election-fab {
+    position: fixed;
+    bottom: 28px;
+    right: 28px;
+    z-index: 1100;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    width: 72px;
+    height: 72px;
+    border-radius: 50%;
+    background: linear-gradient(135deg, #c0392b 0%, #e74c3c 50%, #1a3a6b 100%);
+    box-shadow: 0 4px 20px rgba(231, 76, 60, 0.45), 0 2px 8px rgba(0,0,0,0.18);
+    text-decoration: none;
+    transition: transform 0.25s ease, box-shadow 0.25s ease;
+    border: 2.5px solid rgba(255,255,255,0.25);
+    cursor: pointer;
+    animation: election-pulse 2.8s ease-in-out infinite;
+}
+
+.election-fab:hover {
+    transform: scale(1.12) translateY(-3px);
+    box-shadow: 0 8px 28px rgba(231, 76, 60, 0.55), 0 4px 12px rgba(0,0,0,0.22);
+    animation: none;
+}
+
+.election-fab-icon {
+    font-size: 24px;
+    line-height: 1;
+    margin-bottom: 1px;
+    filter: drop-shadow(0 1px 2px rgba(0,0,0,0.3));
+}
+
+.election-fab-label {
+    font-size: 8.5px;
+    font-weight: 700;
+    color: #fff;
+    text-align: center;
+    line-height: 1.2;
+    letter-spacing: 0.3px;
+    text-shadow: 0 1px 2px rgba(0,0,0,0.4);
+}
+
+@keyframes election-pulse {
+    0%, 100% {
+        box-shadow: 0 4px 20px rgba(231, 76, 60, 0.45), 0 2px 8px rgba(0,0,0,0.18);
+        transform: scale(1);
+    }
+    50% {
+        box-shadow: 0 4px 28px rgba(231, 76, 60, 0.7), 0 0 0 8px rgba(231, 76, 60, 0.1);
+        transform: scale(1.04);
+    }
+}
+
+@media (max-width: 480px) {
+    .election-fab {
+        width: 62px;
+        height: 62px;
+        bottom: 18px;
+        right: 16px;
+    }
+    .election-fab-icon { font-size: 20px; }
+    .election-fab-label { font-size: 7.5px; }
+}
