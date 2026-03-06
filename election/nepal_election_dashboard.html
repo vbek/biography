@@ -344,7 +344,9 @@ html.light .tag{background:rgba(201,148,10,.08);border-color:rgba(201,148,10,.2)
 .sbh-right span:nth-child(3){width:36px;text-align:right}
 .home-total{display:inline-flex;align-items:center;gap:8px;background:rgba(61,142,240,.07);border:1px solid rgba(61,142,240,.18);border-radius:4px;padding:5px 16px;margin-top:8px;font-size:10px;color:var(--blue);font-weight:600;font-family:var(--font-mono)}
 
-::-webkit-scrollbar{width:4px}
+.hd-title:hover h1 em{opacity:.8;transition:opacity .15s}
+.hd-title:hover p{color:rgba(255,255,255,.55);transition:color .15s}
+
 ::-webkit-scrollbar-track{background:transparent}
 ::-webkit-scrollbar-thumb{background:var(--border);border-radius:3px}
 
@@ -392,7 +394,7 @@ html.light .tag{background:rgba(201,148,10,.08);border-color:rgba(201,148,10,.2)
 <header>
   <div class="hd-left">
     <div class="flag-stripe"><span></span><span></span></div>
-    <div class="hd-title">
+    <div class="hd-title" id="homeBtn" title="Back to overview" style="cursor:pointer">
       <h1>NEPAL <em>ELECTION 2082</em></h1>
       <p>🏛 7 PROVINCES · 77 DISTRICTS · 10 CONSTITUENCIES · 3406 CANDIDATES</p>
     </div>
@@ -487,7 +489,17 @@ togBtn.addEventListener('click', function(){
   handleToggle();
 });
 
-/* ── mobile sidebar ── */
+/* ── home button ── */
+const homeBtn = document.getElementById('homeBtn');
+homeBtn.addEventListener('click', ()=>{
+  selProv=null; selDist=null; openProvs.clear();
+  buildSidebar(); renderHome();
+});
+homeBtn.addEventListener('touchstart', function(e){
+  e.preventDefault();
+  selProv=null; selDist=null; openProvs.clear();
+  buildSidebar(); renderHome();
+}, {passive:false});
 const sidebarEl = document.getElementById('sidebar');
 const mobBtn    = document.getElementById('mobSbBtn');
 const overlay   = document.getElementById('mobOverlay');
