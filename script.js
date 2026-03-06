@@ -244,18 +244,20 @@ document.addEventListener('DOMContentLoaded', () => {
     const navLinks = document.querySelectorAll('.nav-menu a');
 
     if (hamburger && navMenu) {
-        const toggleMenu = (e) => {
-            // If it's a touch event, prevent the mouse click from firing afterwards
-            if (e.type === 'touchstart') e.preventDefault();
-            
+        let menuTouched = false;
+
+        hamburger.addEventListener('touchstart', (e) => {
+            e.preventDefault(); // prevent ghost click
+            menuTouched = true;
             navMenu.classList.toggle('active');
             hamburger.classList.toggle('active');
-        };
+        }, { passive: false });
 
-        // Add 'touchstart' for instant mobile response
-        hamburger.addEventListener('touchstart', toggleMenu, { passive: false });
-        // Add 'click' for desktop users
-        hamburger.addEventListener('click', toggleMenu);
+        hamburger.addEventListener('click', () => {
+            if (menuTouched) { menuTouched = false; return; } // skip ghost click
+            navMenu.classList.toggle('active');
+            hamburger.classList.toggle('active');
+        });
 
         // Close menu when a link is clicked
         navLinks.forEach(link => {
@@ -393,15 +395,7 @@ document.querySelectorAll('.btn, .icon-btn, .image-slider-btn, .master-nav-btn')
     });
 });
 
-// Prevent double-tap zoom on buttons (iOS)
-let lastTouchEnd = 0;
-document.addEventListener('touchend', function(event) {
-    const now = Date.now();
-    if (now - lastTouchEnd <= 300) {
-        event.preventDefault();
-    }
-    lastTouchEnd = now;
-}, false);
+// Double-tap zoom prevention removed — was blocking hamburger menu and swipe gestures
 
 // Console message
 console.log('%c👋 Welcome to Bibek Koirala\'s Portfolio!', 'color: #4A90E2; font-size: 16px; font-weight: bold;');
