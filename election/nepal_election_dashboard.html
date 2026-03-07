@@ -624,48 +624,26 @@ function flashRefresh() {
   setTimeout(() => { pill.style.background = ''; pill.style.borderColor = ''; }, 800);
 }
 
-/* ── smart refresh ────────────────────────────────────────────────────────────
-   • run.py (localhost)  → SSE pushes "reload" the instant scrape finishes
-   • GitHub Pages / static host → SSE unavailable, falls back to polling
-   • file://             → polling only (SSE skipped entirely)
-──────────────────────────────────────────────────────────────────────────── */
+/* ── smart refresh: SSE from run.py pushes reload the moment scrape finishes ── */
 loadData(false);
 
 (function startSync() {
-  // file:// or no EventSource support → plain polling
-  if (location.protocol === 'file:' || typeof EventSource === 'undefined') {
-    setInterval(() => loadData(true), REFRESH_MS);
-    return;
-  }
-
-  // On localhost, try SSE so the browser updates the instant scrape finishes.
-  // On GitHub Pages / any static host, load once on open — no polling.
-  // Data refreshes simply by the user pushing a new CSV and reloading the page.
-  const isLocalhost = ['localhost','127.0.0.1','0.0.0.0'].includes(location.hostname);
-  if (!isLocalhost) return;  // static host — nothing to do, loadData(false) already ran
-
-  let confirmed = false;
-  const es = new EventSource('/sse');
-
-  // SSE confirmed working when we receive the first heartbeat/open on the stream
-  es.onopen = () => { confirmed = true; };
-  es.addEventListener('reload', () => { loadData(true); });
-
-  // If SSE hasn't confirmed within 4s, it's not available — fall back to polling
-  const fallbackTimer = setTimeout(() => {
-    if (!confirmed) {
-      es.close();
+  let sseOk = false;
+  if (typeof EventSource !== 'undefined' && location.protocol !== 'file:') {
+    const es = new EventSource('/sse');
+    es.addEventListener('reload', () => {
+      console.log('[SSE] reload event — refreshing CSV');
+      loadData(true);
+    });
+    es.onopen  = () => { sseOk = true; };
+    es.onerror = () => {
+      if (sseOk) return;            // transient error on a live connection — SSE is working
+      es.close();                   // /sse endpoint not available (no run.py), fall back
       setInterval(() => loadData(true), REFRESH_MS);
-    }
-  }, 4000);
-
-  // Clean error handler — if SSE was never confirmed, start polling
-  es.onerror = () => {
-    if (confirmed) return;   // already working, this is just a transient blip
-    clearTimeout(fallbackTimer);
-    es.close();
-    setInterval(() => loadData(true), REFRESH_MS);
-  };
+    };
+  } else {
+    setInterval(() => loadData(true), REFRESH_MS);  // file:// fallback
+  }
 })();
 
 function partyTotals(rows){
