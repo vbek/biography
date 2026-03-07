@@ -261,6 +261,9 @@ html.light .tag{background:rgba(201,148,10,.08);border-color:rgba(201,148,10,.2)
 .party-hero-2 .ph-bar-fill{background:linear-gradient(90deg,#3d8ef0,#1e60c8)}
 .party-hero-3 .ph-bar-fill{background:linear-gradient(90deg,#f5c842,#c89820)}
 .ph-pct{font-family:var(--font-mono);font-size:9px;color:rgba(255,255,255,.3);margin-top:4px}
+.ph-won-leading{display:flex;align-items:center;gap:7px;margin-bottom:7px;flex-wrap:wrap}
+.ph-won-badge{display:inline-flex;align-items:center;gap:4px;font-size:9px;font-weight:700;letter-spacing:.8px;font-family:var(--font-mono);padding:3px 8px;border-radius:3px;background:rgba(34,212,114,.13);color:#22d472;border:1px solid rgba(34,212,114,.25)}
+.ph-leading-badge{display:inline-flex;align-items:center;gap:4px;font-size:9px;font-weight:700;letter-spacing:.8px;font-family:var(--font-mono);padding:3px 8px;border-radius:3px;background:rgba(245,200,66,.09);color:var(--gold);border:1px solid rgba(245,200,66,.2)}
 
 /* ── RANKED LIST (positions 4+) ── */
 .party-list{display:grid;grid-template-columns:1fr 1fr;gap:8px;margin-bottom:28px}
@@ -291,6 +294,9 @@ html.light .tag{background:rgba(201,148,10,.08);border-color:rgba(201,148,10,.2)
   white-space:nowrap;overflow:hidden;text-overflow:ellipsis;position:relative;z-index:1}
 .pl-right{display:flex;align-items:center;gap:8px;flex-shrink:0;position:relative;z-index:1}
 .pl-seats{font-family:var(--font-display);font-size:22px;letter-spacing:.5px;line-height:1}
+.pl-wl{display:flex;align-items:center;gap:4px;flex-shrink:0}
+.pl-won{font-family:var(--font-mono);font-size:9px;font-weight:700;color:#22d472;background:rgba(34,212,114,.1);border:1px solid rgba(34,212,114,.2);border-radius:3px;padding:1px 5px;letter-spacing:.4px}
+.pl-lead{font-family:var(--font-mono);font-size:9px;font-weight:700;color:var(--gold);background:rgba(245,200,66,.08);border:1px solid rgba(245,200,66,.18);border-radius:3px;padding:1px 5px;letter-spacing:.4px}
 .pl-pct{font-size:9px;color:var(--muted);font-family:var(--font-mono)}
 
 /* ── TOTAL BAR across bottom ── */
@@ -349,6 +355,61 @@ html.light .tag{background:rgba(201,148,10,.08);border-color:rgba(201,148,10,.2)
 
 ::-webkit-scrollbar-track{background:transparent}
 ::-webkit-scrollbar-thumb{background:var(--border);border-radius:3px}
+
+/* ── PARLIAMENT BAR ── */
+.parl-bar-wrap{margin-bottom:20px}
+.parl-bar-track{height:36px;border-radius:8px;overflow:hidden;display:flex;border:1px solid var(--border);background:rgba(122,144,176,.04)}
+.parl-seg{height:100%;transition:width 1.2s cubic-bezier(.4,0,.2,1);position:relative}
+.parl-seg:first-child{border-radius:7px 0 0 7px}
+.parl-seg:last-child{border-radius:0 7px 7px 0}
+
+/* ── HERO CARD DUAL-STAT ── */
+.ph-dual-stats{display:flex;align-items:stretch;gap:0;margin-bottom:10px;background:rgba(0,0,0,.2);border-radius:8px;overflow:hidden}
+.ph-won-block{flex:1;padding:10px 12px;text-align:center}
+.ph-lead-block{flex:1;padding:10px 12px;text-align:center;background:rgba(0,0,0,.15)}
+.ph-divider{width:1px;background:rgba(255,255,255,.06)}
+.ph-won-num{font-family:var(--font-display);font-size:42px;line-height:1;letter-spacing:-1px;color:#22d472}
+.ph-won-lbl{font-size:8px;font-weight:700;letter-spacing:1.5px;color:#22d472;opacity:.7;font-family:var(--font-mono);margin-top:2px}
+.ph-lead-num{font-family:var(--font-display);font-size:28px;line-height:1;letter-spacing:-1px;color:var(--gold)}
+.ph-lead-lbl{font-size:8px;font-weight:700;letter-spacing:1.5px;color:var(--gold);opacity:.7;font-family:var(--font-mono);margin-top:2px}
+.ph-stacked-bar{position:relative;height:4px;background:rgba(255,255,255,.06);border-radius:2px;overflow:visible;margin-bottom:6px}
+.ph-won-fill{position:absolute;left:0;top:0;height:100%;border-radius:2px;z-index:2}
+.ph-lead-fill{position:absolute;left:0;top:0;height:100%;border-radius:2px;z-index:1}
+.ph-total-line{font-size:9px;color:rgba(255,255,255,.25);font-family:var(--font-mono);letter-spacing:.3px}
+.ph-total-line strong{color:rgba(255,255,255,.45)}
+
+/* ── PARTY TABLE ── */
+.pt-table{background:var(--card);border:1px solid var(--border);border-radius:12px;overflow:hidden;margin-bottom:24px}
+.pt-head{display:grid;grid-template-columns:28px 10px 1fr 120px 52px 64px 40px;gap:0 8px;padding:9px 14px;background:rgba(122,144,176,.04);border-bottom:1px solid var(--border);font-size:8px;font-weight:700;letter-spacing:1.5px;text-transform:uppercase;color:var(--muted);font-family:var(--font-mono);align-items:center}
+.pt-row{display:grid;grid-template-columns:28px 10px 1fr 120px 52px 64px 40px;gap:0 8px;padding:10px 14px;border-bottom:1px solid rgba(122,144,176,.04);align-items:center;transition:background .12s}
+.pt-row:last-child{border-bottom:none}
+.pt-row:hover{background:rgba(61,142,240,.04)}
+.pt-rank{font-size:10px;font-weight:700;font-family:var(--font-mono);color:var(--muted);text-align:right}
+.pt-dot{width:10px;height:10px;border-radius:50%;flex-shrink:0}
+.pt-name{font-size:11.5px;font-weight:600;color:var(--text);white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.pt-bar-col{min-width:0}
+.pt-bar-track{height:6px;background:rgba(122,144,176,.1);border-radius:3px;overflow:hidden;position:relative}
+.pt-won-bar{position:absolute;left:0;top:0;height:100%;border-radius:3px;z-index:2}
+.pt-lead-bar{position:absolute;left:0;top:0;height:100%;border-radius:3px;z-index:1}
+.pt-won-num{font-family:var(--font-mono);font-size:13px;font-weight:700;text-align:right}
+.pt-lead-num{font-family:var(--font-mono);font-size:12px;color:var(--muted);text-align:right}
+.pt-total{font-family:var(--font-mono);font-size:10px;color:var(--muted);text-align:right}
+
+@media(max-width:900px){
+  .pt-head{grid-template-columns:24px 10px 1fr 80px 44px 54px 34px}
+  .pt-row{grid-template-columns:24px 10px 1fr 80px 44px 54px 34px}
+}
+@media(max-width:700px){
+  .ph-dual-stats{flex-direction:row}
+  .ph-won-num{font-size:32px}
+  .ph-lead-num{font-size:22px}
+  .pt-head{grid-template-columns:20px 8px 1fr 60px 40px 46px}
+  .pt-row{grid-template-columns:20px 8px 1fr 60px 40px 46px}
+  .pt-head>:last-child,.pt-row>.pt-total{display:none}
+  .pt-name{font-size:10px}
+  .pt-won-num{font-size:11px}
+  .pt-lead-num{font-size:10px}
+}
 
 /* ── PR TAB STYLES ── */
 .view-tabs{display:flex;gap:0;margin-bottom:24px;border:1px solid var(--border);border-radius:10px;overflow:hidden;background:var(--surf)}
@@ -790,6 +851,28 @@ function seatsWon(rows){
   });
   return s;
 }
+
+/* ── won vs still-leading split ── */
+/* Status="Elected" = confirmed win; rank-1 without Elected = still leading */
+function wonLeadingCount(allData) {
+  const won={}, leading={};
+  const bc={};
+  allData.forEach(r=>{
+    const key=r.District+'::'+r.Constituency;
+    if(!bc[key])bc[key]=[];
+    bc[key].push(r);
+  });
+  Object.values(bc).forEach(cs=>{
+    const top=cs.reduce((a,b)=>a._v>b._v?a:b);
+    const p=top['Political Party'];
+    if((top['Status']||'').trim().toLowerCase()==='elected'){
+      won[p]=(won[p]||0)+1;
+    } else {
+      leading[p]=(leading[p]||0)+1;
+    }
+  });
+  return {won, leading};
+}
 function fmtV(n){return n>=1000?(n/1000).toFixed(1)+'K':n}
 
 function abbrParty(name){
@@ -891,7 +974,7 @@ function animateCount(el, target, duration){
 function renderHome(){
   const main = document.getElementById('main');
 
-  // Group by District::Constituency composite key
+  // Group by constituency
   const byConst = {};
   data.forEach(r=>{
     const key=r.District+'::'+r.Constituency;
@@ -900,80 +983,85 @@ function renderHome(){
   });
   const totalConsts = Object.keys(byConst).length;
 
-  // Find leading party per constituency
-  const leadCount = {};
-  Object.values(byConst).forEach(cs=>{
-    if(!cs.length) return;
-    const winner = cs.reduce((a,b) => a._v > b._v ? a : b);
-    const p = winner['Political Party'];
-    leadCount[p] = (leadCount[p]||0) + 1;
-  });
+  // Won vs still-leading split — sorted by won first, then by total
+  const {won: wonMap, leading: leadingMap} = wonLeadingCount(data);
+  const allParties = new Set([...Object.keys(wonMap), ...Object.keys(leadingMap)]);
+  const sorted = [...allParties].map(p => ({
+    p, won: wonMap[p]||0, lead: leadingMap[p]||0,
+    total: (wonMap[p]||0)+(leadingMap[p]||0)
+  })).filter(x=>x.total>0).sort((a,b)=>b.won!==a.won?b.won-a.won:b.total-a.total);
 
-  // Only parties with at least 1 lead, sorted desc
-  const sorted = Object.entries(leadCount)
-    .filter(([p,n]) => n > 0)
-    .sort((a,b) => b[1] - a[1]);
+  const totalWon  = sorted.reduce((s,x)=>s+x.won, 0);
+  const totalLead = sorted.reduce((s,x)=>s+x.lead, 0);
+  const maxTotal  = sorted[0]?.total || 1;
 
-  const maxLeads = sorted[0]?.[1] || 1;
+  // Parliament bar — won seats only, stacked by party
+  const wonParties = sorted.filter(x=>x.won>0);
+  const wonBarSegs = wonParties.map(x=>{
+    const w = ((x.won/(totalWon||1))*100).toFixed(2);
+    return `<div class="parl-seg" data-parl-w="${w}" style="width:0%;background:${pc(x.p)}" title="${x.p}: ${x.won} won"></div>`;
+  }).join('');
+  const wonBarLegend = wonParties.slice(0,8).map(x=>
+    `<div class="tbl-item"><div class="tbl-dot" style="background:${pc(x.p)}"></div>${x.p} <strong style="color:var(--text)">${x.won}</strong></div>`
+  ).join('');
 
-  // HERO CARDS — top 3
-  const heroColors = ['#22d472','#3d8ef0','#f5c842'];
-  const heroClass  = ['party-hero party-hero-1','party-hero party-hero-2','party-hero party-hero-3'];
-  const heroBadge  = ['🏆 LEADING','2ND PLACE','3RD PLACE'];
-
-  const heroHTML = sorted.slice(0,3).map(([p,n],i)=>{
-    const pct = ((n/totalConsts)*100).toFixed(1);
-    const barW = ((n/maxLeads)*100).toFixed(1);
-    const col = pc(p) !== '#94a3b8' ? pc(p) : heroColors[i];
+  // Hero cards — top 3 by won
+  const heroClass = ['party-hero party-hero-1','party-hero party-hero-2','party-hero party-hero-3'];
+  const heroBadge = ['🏆 #1','#2','#3'];
+  const heroHTML = sorted.slice(0,3).map((x,i)=>{
+    const col = pc(x.p);
+    const wonBarW  = ((x.won /maxTotal)*100).toFixed(1);
+    const leadBarW = ((x.lead/maxTotal)*100).toFixed(1);
     return `
     <div class="${heroClass[i]}">
       <div class="ph-glow"></div>
       <div class="ph-rank">${i+1}</div>
       <div class="ph-top">
         <div class="ph-badge">${heroBadge[i]}</div>
-        <div class="ph-name">${p}</div>
+        <div class="ph-name">${x.p}</div>
       </div>
       <div class="ph-bottom">
-        <div class="ph-seats-row">
-          <span class="ph-seats-num" data-hero-target="${n}">0</span>
-          <span class="ph-seats-lbl">CONSTITUENCIES<br>LEADING</span>
+        <div class="ph-dual-stats">
+          <div class="ph-won-block">
+            <div class="ph-won-num" data-hw="${x.won}">0</div>
+            <div class="ph-won-lbl">✓ WON</div>
+          </div>
+          <div class="ph-divider"></div>
+          <div class="ph-lead-block">
+            <div class="ph-lead-num" data-hl="${x.lead}">0</div>
+            <div class="ph-lead-lbl">~ LEADING</div>
+          </div>
         </div>
-        <div class="ph-bar-track">
-          <div class="ph-bar-fill" data-bar-target="${barW}" style="width:0%"></div>
+        <div class="ph-stacked-bar">
+          <div class="ph-won-fill"  data-bar-won="${wonBarW}"  style="width:0%;background:${col}"></div>
+          <div class="ph-lead-fill" data-bar-lead="${leadBarW}" style="width:0%;background:${col};opacity:.35"></div>
         </div>
-        <div class="ph-pct">${pct}% of ${totalConsts} total</div>
+        <div class="ph-total-line">Total: <strong>${x.total}</strong> constituencies</div>
       </div>
     </div>`;
   }).join('');
 
-  // LIST ROWS — 4th place onwards
-  const listHTML = sorted.slice(3).map(([p,n],i)=>{
-    const rk = i+4;
-    const pct = ((n/totalConsts)*100).toFixed(1);
-    const barW = ((n/maxLeads)*100).toFixed(1);
-    const col = pc(p);
+  // Full party table
+  const tableHTML = sorted.map((x,i)=>{
+    const col = pc(x.p);
+    const wonW  = ((x.won /maxTotal)*100).toFixed(1);
+    const leadW = ((x.lead/maxTotal)*100).toFixed(1);
     return `
-    <div class="pl-row">
-      <div class="pl-fill" data-pl-target="${barW}" style="width:0%;background:${col}"></div>
-      <div class="pl-rank">${rk}</div>
-      <div class="pl-dot" style="background:${col}"></div>
-      <div class="pl-name" title="${p}">${p}</div>
-      <div class="pl-right">
-        <span class="pl-seats" style="color:${col}" data-list-target="${n}">0</span>
-        <span class="pl-pct">${pct}%</span>
+    <div class="pt-row">
+      <div class="pt-rank">${i+1}</div>
+      <div class="pt-dot" style="background:${col}"></div>
+      <div class="pt-name" title="${x.p}">${x.p}</div>
+      <div class="pt-bar-col">
+        <div class="pt-bar-track">
+          <div class="pt-won-bar"  data-tw="${wonW}"  style="width:0%;background:${col}"></div>
+          <div class="pt-lead-bar" data-tl="${leadW}" style="width:0%;background:${col};opacity:.3"></div>
+        </div>
       </div>
+      <div class="pt-won-num" style="color:${col}" data-tw-n="${x.won}">${x.won>0?`<span>0</span>`:'—'}</div>
+      <div class="pt-lead-num" data-tl-n="${x.lead}">${x.lead>0?`<span>0</span>`:'—'}</div>
+      <div class="pt-total">${x.total}</div>
     </div>`;
   }).join('');
-
-  // TOTAL BAR segments
-  const segColors = sorted.map(([p])=>pc(p));
-  const segs = sorted.map(([p,n],i)=>{
-    const w = ((n/totalConsts)*100).toFixed(2);
-    return `<div class="total-bar-seg" data-seg-target="${w}" style="width:0%;background:${pc(p)}" title="${p}: ${n}"></div>`;
-  }).join('');
-  const legend = sorted.slice(0,6).map(([p,n])=>
-    `<div class="tbl-item"><div class="tbl-dot" style="background:${pc(p)}"></div>${p} (${n})</div>`
-  ).join('');
 
   main.innerHTML = `
     <div class="home-wrap">
@@ -986,78 +1074,87 @@ function renderHome(){
           </div>
           <div class="home-banner-stats">
             <div class="hbs-item">
+              <div class="hbs-num" style="color:var(--green)" id="banner-won">0</div>
+              <div class="hbs-lbl">SEATS WON</div>
+            </div>
+            <div class="hbs-item">
+              <div class="hbs-num" style="color:var(--gold)" id="banner-lead">0</div>
+              <div class="hbs-lbl">LEADING</div>
+            </div>
+            <div class="hbs-item">
               <div class="hbs-num">${totalConsts}</div>
-              <div class="hbs-lbl">CONSTITUENCIES</div>
-            </div>
-            <div class="hbs-item">
-              <div class="hbs-num">${data.length}</div>
-              <div class="hbs-lbl">CANDIDATES</div>
-            </div>
-            <div class="hbs-item">
-              <div class="hbs-num">${new Set(data.map(r=>r['Political Party'])).size}</div>
-              <div class="hbs-lbl">PARTIES</div>
+              <div class="hbs-lbl">TOTAL SEATS</div>
             </div>
           </div>
         </div>
       </div>
 
+      ${totalWon>0?`
       <div class="section-label">
-        <span>TOP PARTIES</span>
+        <span>SEATS WON</span>
         <div class="section-label-line"></div>
-        <span class="section-sublabel">BY CONSTITUENCIES LED</span>
+        <span class="section-sublabel">${totalWon} OF ${totalConsts} DECLARED</span>
+      </div>
+      <div class="parl-bar-wrap">
+        <div class="parl-bar-track">${wonBarSegs}</div>
+        <div class="total-bar-legend" style="margin-top:10px">${wonBarLegend}</div>
+      </div>`:''}
+
+      <div class="section-label" style="margin-top:${totalWon>0?'24px':'0'}">
+        <span>PARTY STANDINGS</span>
+        <div class="section-label-line"></div>
+        <span class="section-sublabel">WON · LEADING · TOTAL</span>
       </div>
 
       <div class="hero-grid">${heroHTML}</div>
 
-      ${sorted.length > 3 ? `
-      <div class="party-list">${listHTML}</div>
-      ` : ''}
-
-      <div class="section-label">
-        <span>SEAT SHARE</span>
-        <div class="section-label-line"></div>
-        <span class="section-sublabel">PROPORTIONAL VIEW</span>
-      </div>
-      <div class="total-bar-section">
-        <div class="total-bar-track">${segs}</div>
-        <div class="total-bar-legend">${legend}</div>
+      <div class="pt-table">
+        <div class="pt-head">
+          <div></div><div></div>
+          <div>Party</div>
+          <div></div>
+          <div style="color:var(--green)">✓ Won</div>
+          <div style="color:var(--gold)">~ Leading</div>
+          <div>Total</div>
+        </div>
+        ${tableHTML}
       </div>
 
-      <div class="home-hint">★ DATA FROM ELECTION COMMISSION, NEPAL</div>
+      <div class="home-hint">← SELECT A PROVINCE OR DISTRICT TO EXPLORE DETAILED RESULTS</div>
     </div>
   `;
 
-  // Animate everything
-  requestAnimationFrame(()=>{
-    setTimeout(()=>{
-      // Hero seat counters
-      main.querySelectorAll('[data-hero-target]').forEach(el=>{
-        animateCount(el, parseInt(el.dataset.heroTarget)||0, 1400);
-      });
-      // Hero bars
-      main.querySelectorAll('.ph-bar-fill[data-bar-target]').forEach(el=>{
-        el.style.transition='width 1.4s cubic-bezier(.4,0,.2,1)';
-        el.style.width=el.dataset.barTarget+'%';
-      });
-      // List counters
-      main.querySelectorAll('[data-list-target]').forEach(el=>{
-        animateCount(el, parseInt(el.dataset.listTarget)||0, 900);
-      });
-      // List fill bars
-      main.querySelectorAll('.pl-fill[data-pl-target]').forEach(el=>{
-        el.style.transition='width 1.2s cubic-bezier(.4,0,.2,1)';
-        el.style.width=el.dataset.plTarget+'%';
-      });
-      // Total bar segments
-      main.querySelectorAll('.total-bar-seg[data-seg-target]').forEach((el,i)=>{
-        setTimeout(()=>{
-          el.style.transition='width 1.5s cubic-bezier(.4,0,.2,1)';
-          el.style.width=el.dataset.segTarget+'%';
-        }, i*30);
-      });
-    }, 60);
-  });
-  // Inject tab bar
+  requestAnimationFrame(()=>{ setTimeout(()=>{
+    animateCount(main.querySelector('#banner-won'),  totalWon,  1200);
+    animateCount(main.querySelector('#banner-lead'), totalLead, 1200);
+    main.querySelectorAll('[data-hw]').forEach(el=>animateCount(el, parseInt(el.dataset.hw)||0, 1400));
+    main.querySelectorAll('[data-hl]').forEach(el=>animateCount(el, parseInt(el.dataset.hl)||0, 1200));
+    main.querySelectorAll('.ph-won-fill[data-bar-won]').forEach(el=>{
+      el.style.transition='width 1.4s cubic-bezier(.4,0,.2,1)';
+      el.style.width=el.dataset.barWon+'%';
+    });
+    main.querySelectorAll('.ph-lead-fill[data-bar-lead]').forEach(el=>{
+      el.style.transition='width 1.4s cubic-bezier(.4,0,.2,1) .1s';
+      el.style.width=el.dataset.barLead+'%';
+    });
+    main.querySelectorAll('.parl-seg[data-parl-w]').forEach((el,i)=>{
+      setTimeout(()=>{ el.style.transition='width 1.2s cubic-bezier(.4,0,.2,1)'; el.style.width=el.dataset.parlW+'%'; }, i*25);
+    });
+    main.querySelectorAll('.pt-won-bar[data-tw]').forEach((el,i)=>{
+      setTimeout(()=>{ el.style.transition='width .9s cubic-bezier(.4,0,.2,1)'; el.style.width=el.dataset.tw+'%'; }, i*20);
+    });
+    main.querySelectorAll('.pt-lead-bar[data-tl]').forEach((el,i)=>{
+      setTimeout(()=>{ el.style.transition='width .9s cubic-bezier(.4,0,.2,1) .05s'; el.style.width=el.dataset.tl+'%'; }, i*20);
+    });
+    main.querySelectorAll('[data-tw-n]').forEach(el=>{
+      const span=el.querySelector('span'); if(!span)return;
+      animateCount(span, parseInt(el.dataset.twN)||0, 900);
+    });
+    main.querySelectorAll('[data-tl-n]').forEach(el=>{
+      const span=el.querySelector('span'); if(!span)return;
+      animateCount(span, parseInt(el.dataset.tlN)||0, 900);
+    });
+  }, 60); });
   renderTabBar(main);
 }
 
@@ -1378,24 +1475,7 @@ function renderPR() {
           </div>
         </div>
 
-        <!-- Horizontal bars -->
-        <div class="pr-bars-card">
-          <div class="ctitle" style="margin-bottom:16px">VOTES RECEIVED BY PARTY — TOP ${Math.min(national.length,12)}</div>
-          ${national.slice(0,12).map((p,i) => {
-            const w = ((p.votes / maxVotes) * 100).toFixed(1);
-            const share = ((p.votes / totalVotes) * 100).toFixed(2);
-            return `<div class="pr-bar-row">
-              <div class="pr-bar-rank">${i+1}</div>
-              <div class="pr-bar-name" title="${p.party}">${p.party}</div>
-              <div class="pr-bar-track">
-                <div class="pr-bar-fill" data-pr-w="${w}" style="width:0%;background:${prColor(p.party)}">
-                  <span>${p.votes.toLocaleString()}</span>
-                </div>
-              </div>
-              <div class="pr-bar-pct">${share}%</div>
-            </div>`;
-          }).join('')}
-        </div>
+
       </div>
 
 
@@ -1429,15 +1509,12 @@ function renderPR() {
           </div>`).join('')}
       </div>` : ''}
 
-      <div class="pr-note">★ DATA FROM ELECTION COMMISSION, NEPAL</div>
+      <div class="pr-note">★ DATA FROM nepal_pr_votes.csv · TOP 5 PARTIES PER PROVINCE PER ELECTION COMMISSION OFFICIAL RESULTS</div>
     </div>
   `;
 
   // Animate bars
   requestAnimationFrame(() => setTimeout(() => {
-    main.querySelectorAll('[data-pr-w]').forEach(el => {
-      el.style.width = el.dataset.prW + '%';
-    });
     main.querySelectorAll('[data-pr-all-w]').forEach((el, i) => {
       setTimeout(() => {
         el.style.transition = 'width .8s cubic-bezier(.4,0,.2,1)';
