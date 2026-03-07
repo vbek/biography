@@ -350,6 +350,99 @@ html.light .tag{background:rgba(201,148,10,.08);border-color:rgba(201,148,10,.2)
 ::-webkit-scrollbar-track{background:transparent}
 ::-webkit-scrollbar-thumb{background:var(--border);border-radius:3px}
 
+/* ── PR TAB STYLES ── */
+.view-tabs{display:flex;gap:0;margin-bottom:24px;border:1px solid var(--border);border-radius:10px;overflow:hidden;background:var(--surf)}
+.view-tab{flex:1;padding:11px 0;border:none;background:none;cursor:pointer;font-family:var(--font-body);font-size:12px;font-weight:600;color:var(--muted);letter-spacing:.4px;transition:all .18s;touch-action:manipulation;-webkit-tap-highlight-color:transparent;}
+.view-tab:not(:last-child){border-right:1px solid var(--border)}
+.view-tab:hover{color:var(--text);background:rgba(61,142,240,.05)}
+.view-tab.active{color:var(--gold);background:rgba(245,200,66,.06)}
+
+/* PR banner */
+.pr-banner{
+  position:relative;overflow:hidden;
+  background:linear-gradient(135deg,#0d1020 0%,#141830 50%,#0a0d18 100%);
+  border:1px solid var(--border);border-radius:14px;
+  padding:32px 36px;margin-bottom:28px;
+}
+.pr-banner::before{
+  content:'';position:absolute;inset:0;
+  background:radial-gradient(ellipse 60% 80% at 80% 50%,rgba(61,142,240,.07) 0%,transparent 70%);
+  pointer-events:none;
+}
+.pr-banner-grid{display:grid;grid-template-columns:1fr auto;gap:24px;align-items:center}
+.pr-banner-left h2{font-family:var(--font-display);font-size:48px;letter-spacing:3px;color:#fff;line-height:.95;margin-bottom:8px}
+.pr-banner-left h2 em{color:#3d8ef0;font-style:normal}
+.pr-banner-left p{font-size:12px;color:rgba(255,255,255,.4);font-family:var(--font-mono);letter-spacing:.5px}
+.pr-banner-stats{display:flex;flex-direction:column;gap:8px;align-items:flex-end}
+.pr-flag-decor{position:absolute;right:200px;top:50%;transform:translateY(-50%);opacity:.04;font-size:120px;pointer-events:none;user-select:none}
+
+/* donut + top-parties row */
+.pr-main-grid{display:grid;grid-template-columns:260px 1fr;gap:18px;margin-bottom:22px}
+
+/* donut */
+.pr-donut-card{background:var(--card);border:1px solid var(--border);border-radius:12px;padding:20px;display:flex;flex-direction:column;align-items:center}
+.pr-donut-wrap{position:relative;width:180px;height:180px;flex-shrink:0;margin-bottom:14px}
+.pr-donut-wrap svg{width:180px;height:180px;transform:rotate(-90deg)}
+.pr-donut-center{position:absolute;inset:0;display:flex;flex-direction:column;align-items:center;justify-content:center;pointer-events:none}
+.pr-donut-total{font-family:var(--font-display);font-size:28px;color:var(--text);letter-spacing:1px;line-height:1}
+.pr-donut-lbl{font-size:8px;color:var(--muted);letter-spacing:1.5px;text-transform:uppercase;font-family:var(--font-mono)}
+.pr-legend{width:100%;display:flex;flex-direction:column;gap:5px}
+.pr-leg-item{display:flex;align-items:center;gap:7px;font-size:10.5px;color:var(--sub);cursor:default}
+.pr-leg-dot{width:8px;height:8px;border-radius:50%;flex-shrink:0}
+.pr-leg-name{flex:1;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.pr-leg-pct{font-family:var(--font-mono);font-size:9px;color:var(--muted);flex-shrink:0}
+
+/* horizontal bar list */
+.pr-bars-card{background:var(--card);border:1px solid var(--border);border-radius:12px;padding:18px 20px;overflow:hidden}
+.pr-bar-row{display:flex;align-items:center;gap:10px;margin-bottom:10px}
+.pr-bar-row:last-child{margin-bottom:0}
+.pr-bar-rank{width:20px;font-size:9px;font-weight:700;font-family:var(--font-mono);color:var(--muted);text-align:right;flex-shrink:0}
+.pr-bar-name{font-size:11.5px;font-weight:600;color:var(--text);min-width:0;flex:0 0 200px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.pr-bar-track{flex:1;height:20px;background:rgba(122,144,176,.07);border-radius:3px;overflow:hidden;position:relative}
+.pr-bar-fill{height:100%;border-radius:3px;display:flex;align-items:center;padding-left:8px;min-width:3px;transition:width 1.2s cubic-bezier(.4,0,.2,1)}
+.pr-bar-fill span{font-size:9px;font-family:var(--font-mono);font-weight:600;color:rgba(255,255,255,.9);white-space:nowrap}
+.pr-bar-pct{font-family:var(--font-mono);font-size:10px;color:var(--muted);min-width:42px;text-align:right;flex-shrink:0}
+.pr-bar-votes{font-family:var(--font-mono);font-size:9px;color:var(--muted);min-width:52px;text-align:right;flex-shrink:0}
+
+/* province breakdown grid */
+.pr-prov-grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(280px,1fr));gap:12px;margin-bottom:24px}
+.pr-prov-card{background:var(--card);border:1px solid var(--border);border-radius:10px;padding:14px 16px;transition:border-color .18s}
+.pr-prov-card:hover{border-color:var(--blue)}
+.pr-prov-title{font-size:10px;font-weight:700;letter-spacing:1px;text-transform:uppercase;color:var(--muted);font-family:var(--font-mono);margin-bottom:12px;padding-bottom:8px;border-bottom:1px solid var(--border)}
+.pr-prov-row{display:flex;align-items:center;gap:8px;margin-bottom:7px}
+.pr-prov-row:last-child{margin-bottom:0}
+.pr-prov-dot{width:7px;height:7px;border-radius:50%;flex-shrink:0}
+.pr-prov-name{font-size:11px;font-weight:600;flex:1;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;color:var(--text)}
+.pr-prov-track{width:70px;height:5px;background:rgba(122,144,176,.08);border-radius:2px;overflow:hidden;flex-shrink:0}
+.pr-prov-fill{height:100%;border-radius:2px}
+.pr-prov-pct{font-family:var(--font-mono);font-size:9px;color:var(--muted);min-width:36px;text-align:right;flex-shrink:0}
+
+/* "all parties" small table */
+.pr-all-table{background:var(--card);border:1px solid var(--border);border-radius:10px;overflow:hidden;margin-bottom:24px}
+.pr-all-head{display:grid;grid-template-columns:32px 1fr 80px 70px 60px;gap:0;padding:8px 14px;background:rgba(122,144,176,.04);border-bottom:1px solid var(--border);font-size:8px;font-weight:700;letter-spacing:1.5px;text-transform:uppercase;color:var(--muted);font-family:var(--font-mono)}
+.pr-all-row{display:grid;grid-template-columns:32px 1fr 80px 70px 60px;gap:0;padding:9px 14px;border-bottom:1px solid rgba(122,144,176,.04);align-items:center;transition:background .12s}
+.pr-all-row:last-child{border-bottom:none}
+.pr-all-row:hover{background:rgba(61,142,240,.04)}
+.pr-all-rk{font-size:10px;font-weight:700;font-family:var(--font-mono);color:var(--muted)}
+.pr-all-name{font-size:11px;font-weight:600;color:var(--text);white-space:nowrap;overflow:hidden;text-overflow:ellipsis;display:flex;align-items:center;gap:6px}
+.pr-all-votes{font-family:var(--font-mono);font-size:11px;text-align:right;color:var(--text)}
+.pr-all-pct{font-family:var(--font-mono);font-size:10px;color:var(--muted);text-align:right}
+.pr-all-bar-wrap{padding-right:6px}
+.pr-all-bar-track{height:4px;background:rgba(122,144,176,.1);border-radius:2px;overflow:hidden}
+.pr-all-bar-fill{height:100%;border-radius:2px}
+
+.pr-note{font-size:10px;color:var(--muted);font-family:var(--font-mono);text-align:center;padding:10px 0;border-top:1px solid var(--border);letter-spacing:.3px}
+
+@media(max-width:700px){
+  .pr-main-grid{grid-template-columns:1fr}
+  .pr-bar-name{flex:0 0 120px;font-size:10.5px}
+  .pr-banner-grid{grid-template-columns:1fr}
+  .pr-banner-stats{display:none}
+  .pr-banner-left h2{font-size:34px}
+  .pr-all-head,.pr-all-row{grid-template-columns:24px 1fr 70px 50px}
+  .pr-all-head>:last-child,.pr-all-row>:last-child{display:none}
+}
+
 /* ── mobile sidebar button ── */
 .mob-sb-btn{display:none;position:fixed;bottom:80px;left:16px;z-index:400;width:52px;height:52px;border-radius:50%;background:var(--blue);color:#fff;border:none;font-size:22px;cursor:pointer;box-shadow:0 4px 18px rgba(61,142,240,.5);-webkit-tap-highlight-color:transparent;touch-action:manipulation;align-items:center;justify-content:center;flex-direction:column;line-height:1;}
 .mob-sb-btn-label{font-size:7px;font-weight:700;color:#fff;letter-spacing:.3px;margin-top:2px;font-family:var(--font-mono)}
@@ -421,7 +514,11 @@ html.light .tag{background:rgba(201,148,10,.08);border-color:rgba(201,148,10,.2)
 const PCOLORS    = {"Nepali Congress": "#ef4444", "CPN-UML": "#3b82f6", "CPN (Maoist Centre)": "#c0392b", "CPN (Unified Socialist)": "#f97316", "Rastriya Swatantra Party": "#22d472", "Rastriya Prajatantra Party": "#8b5cf6", "Janmat Party": "#f59e0b", "Independent": "#6b7280", "राष्ट्रिय स्वतन्त्र पार्टी": "#22d472", "नेपाल कम्युनिष्ट पार्टी (एकीकृत मार्क्सवादी लेनिनवादी)": "#3d8ef0", "नेपाली काँग्रेस": "#ef4444", "नेपाली कम्युनिष्ट पार्टी": "#f5c842", "श्रम संस्कृति पार्टी": "#f97316", "राष्ट्रिय प्रजातन्त्र पार्टी": "#8b5cf6", "स्वतन्त्र": "#6b7280", "प्रगतिशील लोकतान्त्रिक पार्टी": "#06b6d4", "नेकपा-एमाले": "#3b82f6", "नेकपा (माओवादी केन्द्र)": "#c0392b", "नेकपा (एकीकृत समाजवादी)": "#f97316", "जनमत पार्टी": "#f59e0b", "नेपाल कम्युनिस्ट पार्टी (माओवादी)": "#c0392b", "जनता समाजवादी पार्टी, नेपाल": "#f59e0b", "नागरिक उन्मुक्ति पार्टी, नेपाल(एकल चुनाव चिन्ह)": "#06b6d4"};
 const PROVCOLORS = {"Koshi": "#ef4444", "कोशी": "#ef4444", "प्रदेश नं. १": "#ef4444", "Madhesh": "#f97316", "मधेश": "#f97316", "Bagmati": "#3b82f6", "बागमती": "#3b82f6", "Gandaki": "#8b5cf6", "गण्डकी": "#8b5cf6", "Lumbini": "#10b981", "लुम्बिनी": "#10b981", "Karnali": "#f59e0b", "कर्णाली": "#f59e0b", "Sudurpashchim": "#06b6d4", "सुदूरपश्चिम": "#06b6d4"};
 const CSV_URL    = 'nepal_election_results.csv';
+const PR_CSV_URL = 'nepal_pr_votes.csv';
 const REFRESH_MS = 10 * 60 * 1000; // 10 minutes
+
+let prData = [];       // parsed PR rows
+let activeTab = 'fptp'; // 'fptp' | 'pr'
 
 const pc  = p => PCOLORS[p]    || '#94a3b8';
 const pvc = p => PROVCOLORS[p] || '#5a7494';
@@ -894,7 +991,7 @@ function renderHome(){
         <div class="total-bar-legend">${legend}</div>
       </div>
 
-      <div class="home-hint">← SELECT A PROVINCE OR DISTRICT TO EXPLORE DETAILED RESULTS</div>
+      <div class="home-hint">★ DATA FROM Election Commission, Nepal · TOP 5 PARTIES PER PROVINCE PER ELECTION COMMISSION OFFICIAL RESULTS</div>
     </div>
   `;
 
@@ -1068,6 +1165,350 @@ function showConst(constKey, cname, rows){
       }).join('')}
     </div>`;
 }
+
+/* ── Load PR CSV ── */
+async function loadPRData() {
+  if (location.protocol === 'file:') {
+    // file:// — user may pick PR CSV separately; try anyway, silently ignore failure
+    return;
+  }
+  try {
+    const res = await fetch(PR_CSV_URL + '?_=' + Date.now());
+    if (!res.ok) return;
+    const text = await res.text();
+    const raw = parseCSV(text);
+    prData = raw.map(r => {
+      const votes = parseInt(String(r['Votes Received']||'').replace(/,/g,'')) || 0;
+      return {
+        level:   (r['Level']          || '').trim(),
+        province:(r['Province']        || '').trim(),
+        party:   (r['Political Party'] || '').trim(),
+        symbolId:(r['Symbol ID']       || '').trim(),
+        votes,
+        pct:     parseFloat(r['Vote Share %']) || 0,
+        rank:    parseInt(r['Rank']) || 0,
+      };
+    }).filter(r => r.party && r.votes > 0);
+  } catch(e) {
+    console.warn('[PR] Could not load PR CSV:', e.message);
+  }
+}
+
+/* ── PR party color — reuse PCOLORS or generate from a palette ── */
+const PR_PALETTE = [
+  '#22d472','#ef4444','#3d8ef0','#8b5cf6','#f5c842',
+  '#f97316','#06b6d4','#ec4899','#10b981','#a78bfa',
+  '#fb923c','#38bdf8','#e879f9','#4ade80','#fbbf24',
+];
+const _prColorCache = {};
+function prColor(party) {
+  if (PCOLORS[party]) return PCOLORS[party];
+  if (_prColorCache[party]) return _prColorCache[party];
+  const idx = Object.keys(_prColorCache).length % PR_PALETTE.length;
+  _prColorCache[party] = PR_PALETTE[idx];
+  return _prColorCache[party];
+}
+
+function fmtBig(n) {
+  if (n >= 1_000_000) return (n/1_000_000).toFixed(2)+'M';
+  if (n >= 1000)      return (n/1000).toFixed(1)+'K';
+  return n.toLocaleString();
+}
+
+/* ── Build SVG donut ── */
+function buildDonut(parties, size=180, stroke=28) {
+  const r = (size - stroke) / 2;
+  const cx = size / 2, cy = size / 2;
+  const circ = 2 * Math.PI * r;
+  const total = parties.reduce((s,p) => s + p.votes, 0);
+  let offset = 0;
+  const segs = parties.map((p, i) => {
+    const frac = p.votes / total;
+    const dash = frac * circ;
+    const gap  = circ - dash;
+    const seg  = `<circle cx="${cx}" cy="${cy}" r="${r}"
+      fill="none" stroke="${prColor(p.party)}" stroke-width="${stroke}"
+      stroke-dasharray="${dash.toFixed(2)} ${gap.toFixed(2)}"
+      stroke-dashoffset="${(-offset * circ).toFixed(2)}"
+      style="transition:stroke-dasharray 1.2s cubic-bezier(.4,0,.2,1)">
+      <title>${p.party}: ${p.votes.toLocaleString()} (${(frac*100).toFixed(1)}%)</title>
+    </circle>`;
+    offset += frac;
+    return seg;
+  });
+  return `<svg viewBox="0 0 ${size} ${size}" width="${size}" height="${size}" style="transform:rotate(-90deg)">
+    <circle cx="${cx}" cy="${cy}" r="${r}" fill="none" stroke="rgba(122,144,176,.08)" stroke-width="${stroke}"/>
+    ${segs.join('')}
+  </svg>`;
+}
+
+/* ── Render the full PR tab ── */
+function renderPR() {
+  const main = document.getElementById('main');
+
+  if (!prData.length) {
+    // File-picker fallback for file:// protocol
+    if (location.protocol === 'file:') {
+      main.innerHTML = `
+        <div class="empty" style="padding:60px 20px">
+          <div class="ico">📊</div>
+          <p style="font-size:15px;font-weight:600;margin-bottom:8px;color:var(--text)">Select PR votes CSV</p>
+          <p style="font-size:11px;color:var(--muted);margin-bottom:22px;line-height:1.6">
+            Pick <code>nepal_pr_votes.csv</code> to load proportional representation data.
+          </p>
+          <label style="display:inline-flex;align-items:center;gap:9px;padding:10px 24px;
+            background:var(--blue);color:#fff;border-radius:8px;cursor:pointer;
+            font-size:13px;font-weight:600;box-shadow:0 4px 16px rgba(61,142,240,.35)">
+            📄 Choose PR CSV File
+            <input type="file" accept=".csv,text/csv" id="_prCsvPicker" style="display:none">
+          </label>
+        </div>`;
+      document.getElementById('_prCsvPicker').addEventListener('change', function() {
+        const file = this.files[0]; if (!file) return;
+        const reader = new FileReader();
+        reader.onload = e => {
+          const raw = parseCSV(e.target.result);
+          prData = raw.map(r => {
+            const votes = parseInt(String(r['Votes Received']||'').replace(/,/g,'')) || 0;
+            return { level:(r['Level']||'').trim(), province:(r['Province']||'').trim(),
+              party:(r['Political Party']||'').trim(), symbolId:(r['Symbol ID']||'').trim(),
+              votes, pct:parseFloat(r['Vote Share %'])||0, rank:parseInt(r['Rank'])||0 };
+          }).filter(r => r.party && r.votes > 0);
+          renderPR();
+        };
+        reader.readAsText(file, 'utf-8');
+      });
+      return;
+    }
+    main.innerHTML = `<div class="empty"><div class="ico">⚠️</div>
+      <p style="color:#ff6b6b;font-weight:600">Could not load nepal_pr_votes.csv</p>
+      <p style="font-size:11px;color:var(--muted);margin-top:8px">Run <code>python scrape_pr.py</code> first, then restart the server.</p></div>`;
+    return;
+  }
+
+  const national = prData.filter(r => r.level === 'National').sort((a,b) => b.votes - a.votes);
+  const totalVotes = national.reduce((s,p) => s + p.votes, 0);
+  const maxVotes   = national[0]?.votes || 1;
+  const parties    = national.length;
+
+  // Province data
+  const provNames  = [...new Set(prData.filter(r=>r.level==='Province').map(r=>r.province))];
+
+  // Banner stats
+  main.innerHTML = `
+    <div class="home-wrap">
+
+      <div class="pr-banner">
+        <div class="pr-flag-decor">🇳🇵</div>
+        <div class="pr-banner-grid">
+          <div class="pr-banner-left">
+            <h2>PROPORTIONAL<br><em>REPRESENTATION</em></h2>
+            <p>PARTY-LIST PR VOTE · 2082 BS · HOUSE OF REPRESENTATIVES</p>
+          </div>
+          <div class="pr-banner-stats">
+            <div class="hbs-item">
+              <div class="hbs-num" style="color:#3d8ef0">${parties}</div>
+              <div class="hbs-lbl">PARTIES</div>
+            </div>
+            <div class="hbs-item">
+              <div class="hbs-num" style="color:#3d8ef0">${fmtBig(totalVotes)}</div>
+              <div class="hbs-lbl">TOTAL VOTES</div>
+            </div>
+            <div class="hbs-item">
+              <div class="hbs-num" style="color:#3d8ef0">${provNames.length}</div>
+              <div class="hbs-lbl">PROVINCES</div>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <div class="section-label">
+        <span>VOTE SHARE</span>
+        <div class="section-label-line"></div>
+        <span class="section-sublabel">NATIONAL PR RESULTS</span>
+      </div>
+
+      <div class="pr-main-grid">
+        <!-- Donut -->
+        <div class="pr-donut-card">
+          <div class="pr-donut-wrap">
+            ${buildDonut(national.slice(0,8))}
+            <div class="pr-donut-center">
+              <div class="pr-donut-total">${fmtBig(totalVotes)}</div>
+              <div class="pr-donut-lbl">TOTAL VOTES</div>
+            </div>
+          </div>
+          <div class="pr-legend">
+            ${national.slice(0,8).map(p => `
+              <div class="pr-leg-item">
+                <div class="pr-leg-dot" style="background:${prColor(p.party)}"></div>
+                <span class="pr-leg-name" title="${p.party}">${p.party}</span>
+                <span class="pr-leg-pct">${((p.votes/totalVotes)*100).toFixed(1)}%</span>
+              </div>`).join('')}
+            ${national.length > 8 ? `<div class="pr-leg-item" style="opacity:.5">+ ${national.length-8} more parties</div>` : ''}
+          </div>
+        </div>
+
+        <!-- Horizontal bars -->
+        <div class="pr-bars-card">
+          <div class="ctitle" style="margin-bottom:16px">VOTES RECEIVED BY PARTY — TOP ${Math.min(national.length,12)}</div>
+          ${national.slice(0,12).map((p,i) => {
+            const w = ((p.votes / maxVotes) * 100).toFixed(1);
+            const share = ((p.votes / totalVotes) * 100).toFixed(2);
+            return `<div class="pr-bar-row">
+              <div class="pr-bar-rank">${i+1}</div>
+              <div class="pr-bar-name" title="${p.party}">${p.party}</div>
+              <div class="pr-bar-track">
+                <div class="pr-bar-fill" data-pr-w="${w}" style="width:0%;background:${prColor(p.party)}">
+                  <span>${p.votes.toLocaleString()}</span>
+                </div>
+              </div>
+              <div class="pr-bar-pct">${share}%</div>
+            </div>`;
+          }).join('')}
+        </div>
+      </div>
+
+      ${provNames.length ? `
+      <div class="section-label">
+        <span>PROVINCE BREAKDOWN</span>
+        <div class="section-label-line"></div>
+        <span class="section-sublabel">TOP PARTIES PER PROVINCE</span>
+      </div>
+      <div class="pr-prov-grid">
+        ${provNames.map(prov => {
+          const rows = prData.filter(r=>r.level==='Province'&&r.province===prov).sort((a,b)=>b.votes-a.votes).slice(0,5);
+          const provTotal = rows.reduce((s,r)=>s+r.votes,0);
+          const provMax   = rows[0]?.votes || 1;
+          return `<div class="pr-prov-card">
+            <div class="pr-prov-title">${prov}</div>
+            ${rows.map(r => `
+              <div class="pr-prov-row">
+                <div class="pr-prov-dot" style="background:${prColor(r.party)}"></div>
+                <div class="pr-prov-name" title="${r.party}">${r.party}</div>
+                <div class="pr-prov-track">
+                  <div class="pr-prov-fill" data-pr-prov-w="${((r.votes/provMax)*100).toFixed(1)}"
+                    style="width:0%;background:${prColor(r.party)}"></div>
+                </div>
+                <div class="pr-prov-pct">${((r.votes/provTotal)*100).toFixed(1)}%</div>
+              </div>`).join('')}
+          </div>`;
+        }).join('')}
+      </div>` : ''}
+
+      ${national.length > 5 ? `
+      <div class="section-label">
+        <span>ALL PARTIES</span>
+        <div class="section-label-line"></div>
+        <span class="section-sublabel">${national.length} PARTIES — FULL RESULTS</span>
+      </div>
+      <div class="pr-all-table">
+        <div class="pr-all-head">
+          <div>#</div><div>Party</div><div style="text-align:right">Votes</div>
+          <div style="text-align:right">Share</div><div></div>
+        </div>
+        ${national.map((p,i) => `
+          <div class="pr-all-row">
+            <div class="pr-all-rk">${i+1}</div>
+            <div class="pr-all-name">
+              <span style="width:7px;height:7px;border-radius:50%;background:${prColor(p.party)};flex-shrink:0;display:inline-block"></span>
+              ${p.party}
+            </div>
+            <div class="pr-all-votes">${p.votes.toLocaleString()}</div>
+            <div class="pr-all-pct">${((p.votes/totalVotes)*100).toFixed(2)}%</div>
+            <div class="pr-all-bar-wrap">
+              <div class="pr-all-bar-track">
+                <div class="pr-all-bar-fill" data-pr-all-w="${((p.votes/maxVotes)*100).toFixed(1)}"
+                  style="width:0%;background:${prColor(p.party)}"></div>
+              </div>
+            </div>
+          </div>`).join('')}
+      </div>` : ''}
+
+      <div class="pr-note">★ DATA FROM Election Commission, Nepal · TOP 5 PARTIES PER PROVINCE PER ELECTION COMMISSION OFFICIAL RESULTS</div>
+    </div>
+  `;
+
+  // Animate bars
+  requestAnimationFrame(() => setTimeout(() => {
+    main.querySelectorAll('[data-pr-w]').forEach(el => {
+      el.style.width = el.dataset.prW + '%';
+    });
+    main.querySelectorAll('[data-pr-prov-w]').forEach(el => {
+      el.style.transition = 'width 1s cubic-bezier(.4,0,.2,1)';
+      el.style.width = el.dataset.prProvW + '%';
+    });
+    main.querySelectorAll('[data-pr-all-w]').forEach((el, i) => {
+      setTimeout(() => {
+        el.style.transition = 'width .8s cubic-bezier(.4,0,.2,1)';
+        el.style.width = el.dataset.prAllW + '%';
+      }, i * 15);
+    });
+  }, 60));
+}
+
+/* ── Tab switcher injected into renderHome ── */
+const _origRenderHome = renderHome;
+renderHome = function() {
+  _origRenderHome();
+  // Inject tabs at the top of main
+  const main = document.getElementById('main');
+  const wrap = main.querySelector('.home-wrap');
+  if (!wrap) return;
+  const tabBar = document.createElement('div');
+  tabBar.className = 'view-tabs';
+  tabBar.id = 'viewTabs';
+  tabBar.innerHTML = `
+    <button class="view-tab ${activeTab==='fptp'?'active':''}" data-tab="fptp">🏛 FPTP Results</button>
+    <button class="view-tab ${activeTab==='pr'?'active':''}" data-tab="pr">📊 Proportional (PR)</button>
+  `;
+  main.insertBefore(tabBar, wrap);
+  tabBar.querySelectorAll('.view-tab').forEach(btn => {
+    btn.addEventListener('click', () => {
+      activeTab = btn.dataset.tab;
+      if (activeTab === 'pr') {
+        selProv = null; selDist = null;
+        buildSidebar();
+        renderPRWithTabs();
+      } else {
+        renderHome();
+      }
+    });
+  });
+  if (activeTab === 'pr') {
+    // Should not reach here normally, but guard
+    wrap.style.display = 'none';
+  }
+};
+
+function renderPRWithTabs() {
+  const main = document.getElementById('main');
+  // Render PR first, then prepend the tab bar
+  renderPR();
+  const wrap = main.querySelector('.home-wrap');
+  if (!wrap) return;
+  const tabBar = document.createElement('div');
+  tabBar.className = 'view-tabs';
+  tabBar.id = 'viewTabs';
+  tabBar.innerHTML = `
+    <button class="view-tab ${activeTab==='fptp'?'active':''}" data-tab="fptp">🏛 FPTP Results</button>
+    <button class="view-tab ${activeTab==='pr'?'active':''}" data-tab="pr">📊 Proportional (PR)</button>
+  `;
+  main.insertBefore(tabBar, wrap);
+  tabBar.querySelectorAll('.view-tab').forEach(btn => {
+    btn.addEventListener('click', () => {
+      activeTab = btn.dataset.tab;
+      if (activeTab === 'fptp') {
+        renderHome();
+      } else {
+        renderPRWithTabs();
+      }
+    });
+  });
+}
+
+/* ── Also load PR data on startup ── */
+loadPRData();
 
 /* ── end of static JS ── */
 
