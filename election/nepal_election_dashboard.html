@@ -1021,7 +1021,7 @@ function renderHome(){
         <div class="total-bar-legend">${legend}</div>
       </div>
 
-      <div class="home-hint">← SELECT A PROVINCE OR DISTRICT TO EXPLORE DETAILED RESULTS</div>
+      <div class="home-hint">★ DATA FROM ELECTION COMMISSION, NEPAL</div>
     </div>
   `;
 
@@ -1321,8 +1321,7 @@ function renderPR() {
   const maxVotes   = national[0]?.votes || 1;
   const parties    = national.length;
 
-  // Province data
-  const provNames  = [...new Set(prData.filter(r=>r.level==='Province').map(r=>r.province))];
+
 
   // Banner stats
   main.innerHTML = `
@@ -1343,10 +1342,6 @@ function renderPR() {
             <div class="hbs-item">
               <div class="hbs-num" style="color:#3d8ef0">${fmtBig(totalVotes)}</div>
               <div class="hbs-lbl">TOTAL VOTES</div>
-            </div>
-            <div class="hbs-item">
-              <div class="hbs-num" style="color:#3d8ef0">${provNames.length}</div>
-              <div class="hbs-lbl">PROVINCES</div>
             </div>
           </div>
         </div>
@@ -1399,32 +1394,7 @@ function renderPR() {
         </div>
       </div>
 
-      ${provNames.length ? `
-      <div class="section-label">
-        <span>PROVINCE BREAKDOWN</span>
-        <div class="section-label-line"></div>
-        <span class="section-sublabel">TOP PARTIES PER PROVINCE</span>
-      </div>
-      <div class="pr-prov-grid">
-        ${provNames.map(prov => {
-          const rows = prData.filter(r=>r.level==='Province'&&r.province===prov).sort((a,b)=>b.votes-a.votes).slice(0,5);
-          const provTotal = rows.reduce((s,r)=>s+r.votes,0);
-          const provMax   = rows[0]?.votes || 1;
-          return `<div class="pr-prov-card">
-            <div class="pr-prov-title">${prov}</div>
-            ${rows.map(r => `
-              <div class="pr-prov-row">
-                <div class="pr-prov-dot" style="background:${prColor(r.party)}"></div>
-                <div class="pr-prov-name" title="${r.party}">${r.party}</div>
-                <div class="pr-prov-track">
-                  <div class="pr-prov-fill" data-pr-prov-w="${((r.votes/provMax)*100).toFixed(1)}"
-                    style="width:0%;background:${prColor(r.party)}"></div>
-                </div>
-                <div class="pr-prov-pct">${((r.votes/provTotal)*100).toFixed(1)}%</div>
-              </div>`).join('')}
-          </div>`;
-        }).join('')}
-      </div>` : ''}
+
 
       ${national.length > 5 ? `
       <div class="section-label">
@@ -1455,7 +1425,7 @@ function renderPR() {
           </div>`).join('')}
       </div>` : ''}
 
-      <div class="pr-note">★ DATA FROM nepal_pr_votes.csv · TOP 5 PARTIES PER PROVINCE PER ELECTION COMMISSION OFFICIAL RESULTS</div>
+      <div class="pr-note">★ DATA FROM ELECTION COMMISSION, NEPAL</div>
     </div>
   `;
 
@@ -1463,10 +1433,6 @@ function renderPR() {
   requestAnimationFrame(() => setTimeout(() => {
     main.querySelectorAll('[data-pr-w]').forEach(el => {
       el.style.width = el.dataset.prW + '%';
-    });
-    main.querySelectorAll('[data-pr-prov-w]').forEach(el => {
-      el.style.transition = 'width 1s cubic-bezier(.4,0,.2,1)';
-      el.style.width = el.dataset.prProvW + '%';
     });
     main.querySelectorAll('[data-pr-all-w]').forEach((el, i) => {
       setTimeout(() => {
