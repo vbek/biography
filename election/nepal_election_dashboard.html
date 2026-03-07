@@ -829,13 +829,15 @@ togBtn.addEventListener('click', function(){
 /* ── home button ── */
 const homeBtn = document.getElementById('homeBtn');
 homeBtn.addEventListener('click', ()=>{
+  activeTab = 'fptp';
   selProv=null; selDist=null; openProvs.clear();
-  buildSidebar(); renderHome();
+  routeHome();
 });
 homeBtn.addEventListener('touchstart', function(e){
   e.preventDefault();
+  activeTab = 'fptp';
   selProv=null; selDist=null; openProvs.clear();
-  buildSidebar(); renderHome();
+  routeHome();
 }, {passive:false});
 const sidebarEl = document.getElementById('sidebar');
 const mobBtn    = document.getElementById('mobSbBtn');
@@ -1055,6 +1057,8 @@ function renderHome(){
       });
     }, 60);
   });
+  // Inject tab bar
+  renderTabBar(main);
 }
 
 
@@ -1441,16 +1445,12 @@ function renderPR() {
       }, i * 15);
     });
   }, 60));
+  // Inject tab bar
+  renderTabBar(main);
 }
 
-/* ── Tab switcher injected into renderHome ── */
-const _origRenderHome = renderHome;
-renderHome = function() {
-  _origRenderHome();
-  // Inject tabs at the top of main
-  const main = document.getElementById('main');
-  const wrap = main.querySelector('.home-wrap');
-  if (!wrap) return;
+/* ── Tab switcher — clean approach ── */
+function renderTabBar(container) {
   const tabBar = document.createElement('div');
   tabBar.className = 'view-tabs';
   tabBar.id = 'viewTabs';
@@ -1458,50 +1458,32 @@ renderHome = function() {
     <button class="view-tab ${activeTab==='fptp'?'active':''}" data-tab="fptp">🏛 FPTP Results</button>
     <button class="view-tab ${activeTab==='pr'?'active':''}" data-tab="pr">📊 Proportional (PR)</button>
   `;
-  main.insertBefore(tabBar, wrap);
+  container.insertBefore(tabBar, container.firstChild);
   tabBar.querySelectorAll('.view-tab').forEach(btn => {
     btn.addEventListener('click', () => {
       activeTab = btn.dataset.tab;
-      if (activeTab === 'pr') {
-        selProv = null; selDist = null;
-        buildSidebar();
-        renderPRWithTabs();
-      } else {
-        renderHome();
-      }
+      routeHome();
     });
   });
+}
+
+function routeHome() {
+  selProv = null; selDist = null;
+  buildSidebar();
   if (activeTab === 'pr') {
-    // Should not reach here normally, but guard
-    wrap.style.display = 'none';
+    renderPR();
+  } else {
+    renderFPTPHome();
   }
-};
-
-function renderPRWithTabs() {
-  const main = document.getElementById('main');
-  // Render PR first, then prepend the tab bar
-  renderPR();
-  const wrap = main.querySelector('.home-wrap');
-  if (!wrap) return;
-  const tabBar = document.createElement('div');
-  tabBar.className = 'view-tabs';
-  tabBar.id = 'viewTabs';
-  tabBar.innerHTML = `
-    <button class="view-tab ${activeTab==='fptp'?'active':''}" data-tab="fptp">🏛 FPTP Results</button>
-    <button class="view-tab ${activeTab==='pr'?'active':''}" data-tab="pr">📊 Proportional (PR)</button>
-  `;
-  main.insertBefore(tabBar, wrap);
-  tabBar.querySelectorAll('.view-tab').forEach(btn => {
-    btn.addEventListener('click', () => {
-      activeTab = btn.dataset.tab;
-      if (activeTab === 'fptp') {
-        renderHome();
-      } else {
-        renderPRWithTabs();
-      }
-    });
-  });
 }
+
+// Rename original renderHome → renderFPTPHome
+const renderFPTPHome = renderHome;
+
+// Override renderHome so all internal calls (refresh, homeBtn) go through router
+renderHome = function() {
+  routeHome();
+};
 
 /* ── Also load PR data on startup ── */
 loadPRData();
