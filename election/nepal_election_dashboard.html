@@ -484,6 +484,8 @@ html.light .tag{background:rgba(201,148,10,.08);border-color:rgba(201,148,10,.2)
 .pr-all-row{display:grid;grid-template-columns:32px 1fr 80px 70px 60px;gap:0;padding:9px 14px;border-bottom:1px solid rgba(122,144,176,.04);align-items:center;transition:background .12s}
 .pr-all-row:last-child{border-bottom:none}
 .pr-all-row:hover{background:rgba(61,142,240,.04)}
+.pr-all-row.forfeited{opacity:.5}
+.pr-all-pct.red{color:#ff6b6b}
 .pr-all-rk{font-size:10px;font-weight:700;font-family:var(--font-mono);color:var(--muted)}
 .pr-all-name{font-size:11px;font-weight:600;color:var(--text);white-space:nowrap;overflow:hidden;text-overflow:ellipsis;display:flex;align-items:center;gap:6px}
 .pr-all-votes{font-family:var(--font-mono);font-size:11px;text-align:right;color:var(--text)}
@@ -492,6 +494,27 @@ html.light .tag{background:rgba(201,148,10,.08);border-color:rgba(201,148,10,.2)
 .pr-all-bar-track{height:4px;background:rgba(122,144,176,.1);border-radius:2px;overflow:hidden}
 .pr-all-bar-fill{height:100%;border-radius:2px}
 
+/* ── ESTIMATED SEATS BOXES ── */
+.eb-grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(180px,1fr));gap:12px;margin-bottom:24px}
+.eb-card{background:var(--card);border:1px solid var(--border);border-radius:12px;overflow:hidden;display:flex;flex-direction:column;position:relative;transition:transform .15s,box-shadow .15s}
+.eb-card:hover{transform:translateY(-2px);box-shadow:0 8px 24px rgba(0,0,0,.25)}
+.eb-top{display:flex;align-items:center;gap:8px;padding:12px 12px 8px}
+.eb-color-bar{width:3px;height:32px;border-radius:2px;flex-shrink:0}
+.eb-rank{font-size:10px;font-weight:700;font-family:var(--font-mono);color:var(--muted);flex-shrink:0}
+.eb-name{font-size:10.5px;font-weight:700;color:var(--text);line-height:1.3;overflow:hidden;display:-webkit-box;-webkit-line-clamp:2;-webkit-box-orient:vertical}
+.eb-total{font-family:var(--font-display);font-size:38px;line-height:1;letter-spacing:-2px;font-weight:700;padding:2px 12px 0;text-align:center}
+.eb-label{font-size:7px;font-weight:700;letter-spacing:2px;color:var(--muted);font-family:var(--font-mono);text-align:center;margin-bottom:8px}
+.eb-chips{display:flex;flex-wrap:wrap;gap:4px;padding:0 10px 8px;justify-content:center;min-height:22px}
+.eb-chip{font-size:9px;font-weight:700;font-family:var(--font-mono);padding:2px 6px;border-radius:3px;letter-spacing:.3px}
+.eb-chip-won{background:rgba(34,212,114,.12);color:#22d472;border:1px solid rgba(34,212,114,.2)}
+.eb-chip-lead{background:rgba(245,200,66,.12);color:var(--gold);border:1px solid rgba(245,200,66,.2)}
+.eb-chip-pr{background:rgba(61,142,240,.12);color:#3d8ef0;border:1px solid rgba(61,142,240,.18)}
+.eb-bar-track{height:4px;background:rgba(122,144,176,.1);margin:0;border-radius:0 0 12px 12px;overflow:hidden;position:relative}
+.eb-bar-fill{height:100%;border-radius:0 0 12px 12px}
+@media(max-width:700px){
+  .eb-grid{grid-template-columns:repeat(auto-fill,minmax(140px,1fr));gap:8px}
+  .eb-total{font-size:30px}
+}
 .pr-note{font-size:10px;color:var(--muted);font-family:var(--font-mono);text-align:center;padding:10px 0;border-top:1px solid var(--border);letter-spacing:.3px}
 
 @media(max-width:900px){
@@ -1120,7 +1143,7 @@ function renderHome(){
         ${tableHTML}
       </div>
 
-      <div class="home-hint">★ DATA FROM ELECTION COMMISSION, NEPAL</div>
+      <div class="home-hint">← SELECT A PROVINCE OR DISTRICT TO EXPLORE DETAILED RESULTS</div>
     </div>
   `;
 
@@ -1378,7 +1401,6 @@ function renderPR() {
   const main = document.getElementById('main');
 
   if (!prData.length) {
-    // File-picker fallback for file:// protocol
     if (location.protocol === 'file:') {
       main.innerHTML = `
         <div class="empty" style="padding:60px 20px">
@@ -1411,118 +1433,171 @@ function renderPR() {
       });
       return;
     }
-    main.innerHTML = `<div class="empty"><div class="ico">⚠️</div>
-      <p style="color:#ff6b6b;font-weight:600">Could not load nepal_pr_votes.csv</p>
-      <p style="font-size:11px;color:var(--muted);margin-top:8px">Run <code>python scrape_pr.py</code> first, then restart the server.</p></div>`;
+    main.innerHTML = '<div class="empty"><div class="ico">⚠️</div>'
+      + '<p style="color:#ff6b6b;font-weight:600">Could not load nepal_pr_votes.csv</p>'
+      + '<p style="font-size:11px;color:var(--muted);margin-top:8px">Run <code>python scrape_pr.py</code> first.</p></div>';
+    renderTabBar(main);
     return;
   }
 
-  const national = prData.filter(r => r.level === 'National').sort((a,b) => b.votes - a.votes);
+  const national   = prData.filter(r => r.level === 'National').sort((a,b) => b.votes - a.votes);
   const totalVotes = national.reduce((s,p) => s + p.votes, 0);
   const maxVotes   = national[0]?.votes || 1;
-  const parties    = national.length;
 
+  const PR_THRESH = 0.03;
+  const PR_SEATS  = 110;
+  const qualified = national.filter(p => p.votes / totalVotes >= PR_THRESH);
+  const forfeited = national.filter(p => p.votes / totalVotes <  PR_THRESH);
+  const qualTotal = qualified.reduce((s,p) => s + p.votes, 0);
 
+  const estPR = {};
+  qualified.forEach(p => { estPR[p.party] = (p.votes / qualTotal) * PR_SEATS; });
 
-  // Banner stats
-  main.innerHTML = `
-    <div class="home-wrap">
+  const {won: fWon, leading: fLead} = wonLeadingCount(data);
 
-      <div class="pr-banner">
-        <div class="pr-flag-decor">🇳🇵</div>
-        <div class="pr-banner-grid">
-          <div class="pr-banner-left">
-            <h2>PROPORTIONAL<br><em>REPRESENTATION</em></h2>
-            <p>PARTY-LIST PR VOTE · 2082 BS · HOUSE OF REPRESENTATIVES</p>
-          </div>
-          <div class="pr-banner-stats">
-            <div class="hbs-item">
-              <div class="hbs-num" style="color:#3d8ef0">${parties}</div>
-              <div class="hbs-lbl">PARTIES</div>
-            </div>
-            <div class="hbs-item">
-              <div class="hbs-num" style="color:#3d8ef0">${fmtBig(totalVotes)}</div>
-              <div class="hbs-lbl">TOTAL VOTES</div>
-            </div>
-          </div>
-        </div>
-      </div>
+  const allP = new Set([...qualified.map(p=>p.party), ...Object.keys(fWon), ...Object.keys(fLead)]);
+  const est = [...allP].map(p => {
+    const row     = national.find(x => x.party === p);
+    const prVotes = row ? row.votes : 0;
+    const prPct   = totalVotes ? prVotes / totalVotes * 100 : 0;
+    const prSeats = estPR[p] || 0;
+    const fptpW   = fWon[p]  || 0;
+    const fptpL   = fLead[p] || 0;
+    const totalEst = fptpW + fptpL + prSeats;
+    const isForf  = prVotes > 0 && prPct < PR_THRESH * 100;
+    return { p, prVotes, prPct, prSeats, fptpW, fptpL, fptpTotal: fptpW+fptpL, totalEst, isForf };
+  }).filter(x => x.prVotes > 0 || x.fptpTotal > 0)
+    .sort((a,b) => b.totalEst - a.totalEst);
 
-      <div class="section-label">
-        <span>VOTE SHARE</span>
-        <div class="section-label-line"></div>
-        <span class="section-sublabel">NATIONAL PR RESULTS</span>
-      </div>
+  const estQualified = est.filter(x => !x.isForf && x.prSeats > 0);
+  const maxEst = estQualified[0]?.totalEst || 1;
+  const donut8 = national.slice(0, 8);
 
-      <div class="pr-main-grid">
-        <!-- Donut -->
-        <div class="pr-donut-card">
-          <div class="pr-donut-wrap">
-            ${buildDonut(national.slice(0,8))}
-            <div class="pr-donut-center">
-              <div class="pr-donut-total">${fmtBig(totalVotes)}</div>
-              <div class="pr-donut-lbl">TOTAL VOTES</div>
-            </div>
-          </div>
-          <div class="pr-legend">
-            ${national.slice(0,8).map(p => `
-              <div class="pr-leg-item">
-                <div class="pr-leg-dot" style="background:${prColor(p.party)}"></div>
-                <span class="pr-leg-name" title="${p.party}">${p.party}</span>
-                <span class="pr-leg-pct">${((p.votes/totalVotes)*100).toFixed(1)}%</span>
-              </div>`).join('')}
-            ${national.length > 8 ? `<div class="pr-leg-item" style="opacity:.5">+ ${national.length-8} more parties</div>` : ''}
-          </div>
-        </div>
+  /* ── estimation boxes ── */
+  const estBoxes = estQualified.map((x, i) => {
+    const c        = prColor(x.p);
+    const totalRnd = Math.round(x.totalEst * 10) / 10;
+    const barPct   = ((x.totalEst / maxEst) * 100).toFixed(1);
+    const wonBit   = x.fptpW > 0
+      ? '<div class="eb-chip eb-chip-won">\u2713\u00A0' + x.fptpW + ' won</div>' : '';
+    const leadBit  = x.fptpL > 0
+      ? '<div class="eb-chip eb-chip-lead">~\u00A0' + x.fptpL + ' leading</div>' : '';
+    const prBit    = '<div class="eb-chip eb-chip-pr">+\u00A0' + x.prSeats.toFixed(1) + ' PR</div>';
+    return '<div class="eb-card" style="--ec:' + c + '">'
+      + '<div class="eb-top">'
+        + '<div class="eb-color-bar" style="background:' + c + '"></div>'
+        + '<div class="eb-rank">' + (i+1) + '</div>'
+        + '<div class="eb-name" title="' + x.p + '">' + x.p + '</div>'
+      + '</div>'
+      + '<div class="eb-total" style="color:' + c + '" data-ebt="' + totalRnd + '">0</div>'
+      + '<div class="eb-label">EST. SEATS</div>'
+      + '<div class="eb-chips">' + wonBit + leadBit + prBit + '</div>'
+      + '<div class="eb-bar-track">'
+        + '<div class="eb-bar-fill" data-ebw="' + barPct + '" style="width:0%;background:' + c + '"></div>'
+      + '</div>'
+    + '</div>';
+  }).join('');
 
+  /* ── legend ── */
+  const legendHTML = donut8.map(p =>
+    '<div class="pr-leg-item">'
+    + '<div class="pr-leg-dot" style="background:' + prColor(p.party) + '"></div>'
+    + '<span class="pr-leg-name" title="' + p.party + '">' + p.party + '</span>'
+    + '<span class="pr-leg-pct">' + ((p.votes/totalVotes)*100).toFixed(1) + '%</span>'
+    + '</div>'
+  ).join('') + (national.length > 8
+    ? '<div class="pr-leg-item" style="opacity:.5">+ ' + (national.length-8) + ' more</div>' : '');
 
-      </div>
+  /* ── all-parties rows ── */
+  const allRows = national.map((p,i) => {
+    const isForf = p.votes / totalVotes < PR_THRESH;
+    const c = prColor(p.party);
+    const barW = ((p.votes / maxVotes) * 100).toFixed(1);
+    return '<div class="pr-all-row' + (isForf ? ' forfeited' : '') + '">'
+      + '<div class="pr-all-rk">' + (i+1) + '</div>'
+      + '<div class="pr-all-name">'
+          + '<span style="width:7px;height:7px;border-radius:50%;background:' + c + ';flex-shrink:0;display:inline-block"></span>'
+          + p.party
+          + (isForf ? '<span class="pr-forf-tag">&lt;3%</span>' : '')
+      + '</div>'
+      + '<div class="pr-all-votes">' + p.votes.toLocaleString() + '</div>'
+      + '<div class="pr-all-pct' + (isForf ? ' red' : '') + '">' + ((p.votes/totalVotes)*100).toFixed(2) + '%</div>'
+      + '<div class="pr-all-bar-wrap"><div class="pr-all-bar-track">'
+          + '<div class="pr-all-bar-fill" data-pr-all-w="' + barW + '" style="width:0%;background:' + c + ';' + (isForf?'opacity:.35;':'') + '"></div>'
+      + '</div></div>'
+    + '</div>';
+  }).join('');
 
+  /* ── render ── */
+  main.innerHTML =
+    '<div class="home-wrap">'
 
+    /* banner */
+    + '<div class="pr-banner">'
+        + '<div class="pr-flag-decor">\uD83C\uDDF3\uD83C\uDDF5</div>'
+        + '<div class="pr-banner-grid">'
+          + '<div class="pr-banner-left">'
+            + '<h2>PROPORTIONAL<br><em>REPRESENTATION</em></h2>'
+            + '<p>PARTY-LIST PR VOTE \u00B7 2082 BS \u00B7 HOUSE OF REPRESENTATIVES</p>'
+          + '</div>'
+          + '<div class="pr-banner-stats">'
+            + '<div class="hbs-item"><div class="hbs-num" style="color:#3d8ef0">' + qualified.length + '</div><div class="hbs-lbl">QUALIFIED (\u22653%)</div></div>'
+            + '<div class="hbs-item"><div class="hbs-num" style="color:#ff6b6b">' + forfeited.length + '</div><div class="hbs-lbl">FORFEITED (&lt;3%)</div></div>'
+            + '<div class="hbs-item"><div class="hbs-num" style="color:#3d8ef0">' + fmtBig(totalVotes) + '</div><div class="hbs-lbl">TOTAL PR VOTES</div></div>'
+          + '</div>'
+        + '</div>'
+    + '</div>'
 
-      ${national.length > 5 ? `
-      <div class="section-label">
-        <span>ALL PARTIES</span>
-        <div class="section-label-line"></div>
-        <span class="section-sublabel">${national.length} PARTIES — FULL RESULTS</span>
-      </div>
-      <div class="pr-all-table">
-        <div class="pr-all-head">
-          <div>#</div><div>Party</div><div style="text-align:right">Votes</div>
-          <div style="text-align:right">Share</div><div></div>
-        </div>
-        ${national.map((p,i) => `
-          <div class="pr-all-row">
-            <div class="pr-all-rk">${i+1}</div>
-            <div class="pr-all-name">
-              <span style="width:7px;height:7px;border-radius:50%;background:${prColor(p.party)};flex-shrink:0;display:inline-block"></span>
-              ${p.party}
-            </div>
-            <div class="pr-all-votes">${p.votes.toLocaleString()}</div>
-            <div class="pr-all-pct">${((p.votes/totalVotes)*100).toFixed(2)}%</div>
-            <div class="pr-all-bar-wrap">
-              <div class="pr-all-bar-track">
-                <div class="pr-all-bar-fill" data-pr-all-w="${((p.votes/maxVotes)*100).toFixed(1)}"
-                  style="width:0%;background:${prColor(p.party)}"></div>
-              </div>
-            </div>
-          </div>`).join('')}
-      </div>` : ''}
+    /* ── ESTIMATED SEATS BOXES ── */
+    + '<div class="section-label">'
+      + '<span>ESTIMATED SEATS</span><div class="section-label-line"></div>'
+      + '<span class="section-sublabel">FPTP + PR ESTIMATED SEATS</span>'
+    + '</div>'
+    + '<div class="eb-grid">' + estBoxes + '</div>'
 
-      <div class="pr-note">★ DATA FROM ELECTION COMMISSION, NEPAL</div>
-    </div>
-  `;
+    /* ── PR VOTE SHARE ── */
+    + '<div class="section-label" style="margin-top:8px"><span>PR VOTE SHARE</span><div class="section-label-line"></div>'
+      + '<span class="section-sublabel">' + national.length + ' PARTIES \u00B7 NATIONAL RESULTS</span></div>'
+    + '<div class="pr-main-grid">'
+      + '<div class="pr-donut-card">'
+        + '<div class="pr-donut-wrap">' + buildDonut(donut8)
+          + '<div class="pr-donut-center"><div class="pr-donut-total">' + fmtBig(totalVotes) + '</div><div class="pr-donut-lbl">TOTAL VOTES</div></div>'
+        + '</div>'
+        + '<div class="pr-legend">' + legendHTML + '</div>'
+      + '</div>'
+    + '</div>'
 
-  // Animate bars
+    /* ── ALL PARTIES VOTE TABLE ── */
+    + (national.length > 5
+      ? '<div class="section-label" style="margin-top:4px"><span>ALL PARTIES</span><div class="section-label-line"></div>'
+          + '<span class="section-sublabel">' + national.length + ' PARTIES \u00B7 FULL PR VOTE RESULTS</span></div>'
+        + '<div class="pr-all-table">'
+          + '<div class="pr-all-head"><div>#</div><div>Party</div><div style="text-align:right">Votes</div>'
+            + '<div style="text-align:right">Share</div><div></div></div>'
+          + allRows
+        + '</div>'
+      : '')
+
+    + '<div class="pr-note">\u2605 ' + qualified.length + ' QUALIFIED PARTIES SHARE ' + PR_SEATS + ' PR SEATS \u00B7 PARTIES BELOW 3% ARE FORFEITED</div>'
+    + '</div>';
+
   requestAnimationFrame(() => setTimeout(() => {
-    main.querySelectorAll('[data-pr-all-w]').forEach((el, i) => {
+    /* estimated seat counters */
+    main.querySelectorAll('[data-ebt]').forEach((el,i) => {
+      setTimeout(() => animateCount(el, parseFloat(el.dataset.ebt)||0, 1200), i*60);
+    });
+    /* estimation bars */
+    main.querySelectorAll('[data-ebw]').forEach((el,i) => {
       setTimeout(() => {
-        el.style.transition = 'width .8s cubic-bezier(.4,0,.2,1)';
-        el.style.width = el.dataset.prAllW + '%';
-      }, i * 15);
+        el.style.transition = 'width 1.1s cubic-bezier(.4,0,.2,1)';
+        el.style.width = el.dataset.ebw + '%';
+      }, i*60 + 200);
+    });
+    /* vote share bars */
+    main.querySelectorAll('[data-pr-all-w]').forEach((el,i) => {
+      setTimeout(() => { el.style.transition='width .8s cubic-bezier(.4,0,.2,1)'; el.style.width=el.dataset.prAllW+'%'; }, i*15);
     });
   }, 60));
-  // Inject tab bar
   renderTabBar(main);
 }
 
