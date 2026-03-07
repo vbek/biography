@@ -393,12 +393,12 @@ html.light .tag{background:rgba(201,148,10,.08);border-color:rgba(201,148,10,.2)
 .pr-leg-pct{font-family:var(--font-mono);font-size:9px;color:var(--muted);flex-shrink:0}
 
 /* horizontal bar list */
-.pr-bars-card{background:var(--card);border:1px solid var(--border);border-radius:12px;padding:18px 20px;overflow:hidden}
-.pr-bar-row{display:flex;align-items:center;gap:10px;margin-bottom:10px}
+.pr-bars-card{background:var(--card);border:1px solid var(--border);border-radius:12px;padding:18px 20px;overflow:hidden;min-width:0}
+.pr-bar-row{display:flex;align-items:center;gap:10px;margin-bottom:10px;min-width:0}
 .pr-bar-row:last-child{margin-bottom:0}
 .pr-bar-rank{width:20px;font-size:9px;font-weight:700;font-family:var(--font-mono);color:var(--muted);text-align:right;flex-shrink:0}
 .pr-bar-name{font-size:11.5px;font-weight:600;color:var(--text);min-width:0;flex:0 0 200px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
-.pr-bar-track{flex:1;height:20px;background:rgba(122,144,176,.07);border-radius:3px;overflow:hidden;position:relative}
+.pr-bar-track{flex:1;min-width:0;height:20px;background:rgba(122,144,176,.07);border-radius:3px;overflow:hidden;position:relative}
 .pr-bar-fill{height:100%;border-radius:3px;display:flex;align-items:center;padding-left:8px;min-width:3px;transition:width 1.2s cubic-bezier(.4,0,.2,1)}
 .pr-bar-fill span{font-size:9px;font-family:var(--font-mono);font-weight:600;color:rgba(255,255,255,.9);white-space:nowrap}
 .pr-bar-pct{font-family:var(--font-mono);font-size:10px;color:var(--muted);min-width:42px;text-align:right;flex-shrink:0}
@@ -433,14 +433,44 @@ html.light .tag{background:rgba(201,148,10,.08);border-color:rgba(201,148,10,.2)
 
 .pr-note{font-size:10px;color:var(--muted);font-family:var(--font-mono);text-align:center;padding:10px 0;border-top:1px solid var(--border);letter-spacing:.3px}
 
-@media(max-width:700px){
+@media(max-width:900px){
   .pr-main-grid{grid-template-columns:1fr}
-  .pr-bar-name{flex:0 0 120px;font-size:10.5px}
+  .pr-donut-card{flex-direction:row;align-items:flex-start;gap:16px;flex-wrap:wrap}
+  .pr-donut-wrap{margin-bottom:0;flex-shrink:0}
+  .pr-legend{flex:1;min-width:140px}
+}
+@media(max-width:700px){
+  /* Banner */
+  .pr-banner{padding:20px 16px}
   .pr-banner-grid{grid-template-columns:1fr}
   .pr-banner-stats{display:none}
-  .pr-banner-left h2{font-size:34px}
-  .pr-all-head,.pr-all-row{grid-template-columns:24px 1fr 70px 50px}
+  .pr-banner-left h2{font-size:28px;letter-spacing:1.5px}
+  .pr-banner-left p{font-size:10px}
+  /* Main grid: stack donut above bars */
+  .pr-main-grid{grid-template-columns:1fr;gap:12px}
+  /* Donut: shrink and go horizontal */
+  .pr-donut-card{flex-direction:row;align-items:center;gap:14px;padding:14px}
+  .pr-donut-wrap{width:120px;height:120px;flex-shrink:0;margin-bottom:0}
+  .pr-donut-wrap svg{width:120px;height:120px}
+  .pr-donut-total{font-size:18px}
+  .pr-legend{flex:1;min-width:0}
+  .pr-leg-item{font-size:9.5px}
+  /* Bar rows: party name takes remaining space, hide vote count */
+  .pr-bar-row{gap:6px}
+  .pr-bar-name{flex:0 0 auto;width:110px;font-size:10px}
+  .pr-bar-votes{display:none}
+  .pr-bar-pct{min-width:34px;font-size:9px}
+  .pr-bar-fill span{font-size:8px}
+  /* Province grid: single column */
+  .pr-prov-grid{grid-template-columns:1fr}
+  .pr-prov-name{font-size:10.5px}
+  /* All-parties table: hide bar column, tighten */
+  .pr-all-head,.pr-all-row{grid-template-columns:24px 1fr 72px 48px}
   .pr-all-head>:last-child,.pr-all-row>:last-child{display:none}
+  .pr-all-name{font-size:10px}
+  .pr-all-votes{font-size:10px}
+  /* Tabs */
+  .view-tab{font-size:10.5px;padding:9px 0}
 }
 
 /* ── mobile sidebar button ── */
@@ -991,7 +1021,7 @@ function renderHome(){
         <div class="total-bar-legend">${legend}</div>
       </div>
 
-      <div class="home-hint">★ DATA FROM Election Commission, Nepal · TOP 5 PARTIES PER PROVINCE PER ELECTION COMMISSION OFFICIAL RESULTS</div>
+      <div class="home-hint">← SELECT A PROVINCE OR DISTRICT TO EXPLORE DETAILED RESULTS</div>
     </div>
   `;
 
@@ -1425,7 +1455,7 @@ function renderPR() {
           </div>`).join('')}
       </div>` : ''}
 
-      <div class="pr-note">★ DATA FROM Election Commission, Nepal · TOP 5 PARTIES PER PROVINCE PER ELECTION COMMISSION OFFICIAL RESULTS</div>
+      <div class="pr-note">★ DATA FROM nepal_pr_votes.csv · TOP 5 PARTIES PER PROVINCE PER ELECTION COMMISSION OFFICIAL RESULTS</div>
     </div>
   `;
 
