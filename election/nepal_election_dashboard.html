@@ -611,7 +611,7 @@ html.light .tag{background:rgba(201,148,10,.08);border-color:rgba(201,148,10,.2)
       <span class="tog-label" id="tlbl">🌙 Dark</span>
       <button class="tog" id="tog" title="Toggle theme"></button>
     </div>
-    <div class="live-pill"><div class="dot"></div>LIVE&nbsp;<span id="last-updated" style="opacity:.6;font-size:8px"></span></div>
+    <div class="live-pill"><div class="dot"></div>LIVE</div>
   </div>
 </header>
 
@@ -791,10 +791,6 @@ function _ingestCSV(text, isRefresh) {
     const nc = Object.keys(constsByDist).reduce((s,d) => s + constsByDist[d].length, 0);
     document.getElementById('hd-sub').textContent =
       `🏛 ${np} PROVINCES · ${nd} DISTRICTS · ${nc} CONSTITUENCIES · ${data.length} CANDIDATES`;
-
-    const now = new Date();
-    document.getElementById('last-updated').textContent =
-      now.toLocaleTimeString([], {hour:'2-digit',minute:'2-digit'});
 
     if (isRefresh) {
       buildSidebar();
