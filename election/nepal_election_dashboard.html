@@ -1519,6 +1519,7 @@ function renderPR() {
           + '</div>'
           + '<div class="pr-banner-stats">'
             + '<div class="hbs-item"><div class="hbs-num" style="color:#3d8ef0">' + qualified.length + '</div><div class="hbs-lbl">QUALIFIED (\u22653%)</div></div>'
+            
             + '<div class="hbs-item"><div class="hbs-num" style="color:#3d8ef0">' + fmtBig(totalVotes) + '</div><div class="hbs-lbl">TOTAL PR VOTES</div></div>'
           + '</div>'
         + '</div>'
@@ -1533,7 +1534,7 @@ function renderPR() {
 
     /* ── PR VOTE SHARE ── */
     + '<div class="section-label" style="margin-top:8px"><span>PR VOTE SHARE</span><div class="section-label-line"></div>'
-      + '<span class="section-sublabel">' + national.length + ' PARTIES \u00B7 NATIONAL RESULTS</span></div>'
+      + '<span class="section-sublabel"></span></div>'
     + '<div class="pr-main-grid">'
       + '<div class="pr-donut-card">'
         + '<div class="pr-donut-wrap">' + buildDonut(donut8)
@@ -1546,7 +1547,7 @@ function renderPR() {
     /* ── ALL PARTIES VOTE TABLE ── */
     + (national.length > 5
       ? '<div class="section-label" style="margin-top:4px"><span>ALL PARTIES</span><div class="section-label-line"></div>'
-          + '<span class="section-sublabel">' + national.length + ' PARTIES \u00B7 FULL PR VOTE RESULTS</span></div>'
+          + '<span class="section-sublabel">PR VOTE RESULTS</span></div>'
         + '<div class="pr-all-table">'
           + '<div class="pr-all-head"><div>#</div><div>Party</div><div style="text-align:right">Votes</div>'
             + '<div style="text-align:right">Share</div><div></div></div>'
