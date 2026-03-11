@@ -56,6 +56,16 @@ header{
 html.light .tog{background:rgba(255,255,255,.2)}
 html.light .tog::after{transform:translateX(17px);background:var(--gold)}
 
+/* ── language toggle ── */
+.lang-tog{display:flex;align-items:center;gap:0;background:rgba(255,255,255,.07);border:1px solid rgba(255,255,255,.12);border-radius:6px;padding:0;cursor:pointer;overflow:hidden;flex-shrink:0;touch-action:manipulation;-webkit-tap-highlight-color:transparent;}
+.lang-opt{font-family:var(--font-mono);font-size:10px;font-weight:700;letter-spacing:1px;padding:5px 9px;color:rgba(255,255,255,.35);transition:all .18s;line-height:1}
+.lang-opt.active{background:var(--gold);color:#0a0c10;border-radius:4px}
+.lang-sep{font-size:9px;color:rgba(255,255,255,.15);font-family:var(--font-mono);padding:0 1px}
+html.light .lang-tog{background:rgba(255,255,255,.12);border-color:rgba(255,255,255,.2)}
+html.light .lang-opt{color:rgba(255,255,255,.75)}
+html.light .lang-opt.active{background:var(--gold);color:#0f1728}
+html.light .lang-sep{color:rgba(255,255,255,.2)}
+
 /* ── layout ── */
 .layout{display:flex;min-height:calc(100vh - 58px)}
 
@@ -618,6 +628,11 @@ html.light .tag{background:rgba(201,148,10,.08);border-color:rgba(201,148,10,.2)
     </div>
   </div>
   <div class="hd-right">
+    <button class="lang-tog" id="langTog" title="Switch language / भाषा बदल्नुहोस्">
+      <span class="lang-opt" id="langEN">EN</span>
+      <span class="lang-sep">|</span>
+      <span class="lang-opt" id="langNP">NP</span>
+    </button>
     <div class="tog-row">
       <span class="tog-label" id="tlbl">🌙 Dark</span>
       <button class="tog" id="tog" title="Toggle theme"></button>
@@ -638,9 +653,13 @@ html.light .tag{background:rgba(201,148,10,.08);border-color:rgba(201,148,10,.2)
 /* ── static config (baked in at build time) ── */
 const PCOLORS    = {"Nepali Congress": "#22d472", "CPN-UML": "#f97316", "CPN (Maoist Centre)": "#c0392b", "CPN (Unified Socialist)": "#f97316", "Rastriya Swatantra Party": "#3d8ef0", "Rastriya Prajatantra Party": "#8b5cf6", "Janmat Party": "#f59e0b", "Independent": "#6b7280", "राष्ट्रिय स्वतन्त्र पार्टी": "#3d8ef0", "नेपाल कम्युनिष्ट पार्टी (एकीकृत मार्क्सवादी लेनिनवादी)": "#f97316", "नेपाली काँग्रेस": "#22d472", "नेपाली कम्युनिष्ट पार्टी": "#f5c842", "श्रम संस्कृति पार्टी": "#f97316", "राष्ट्रिय प्रजातन्त्र पार्टी": "#8b5cf6", "स्वतन्त्र": "#6b7280", "प्रगतिशील लोकतान्त्रिक पार्टी": "#06b6d4", "नेकपा-एमाले": "#f97316", "नेकपा (माओवादी केन्द्र)": "#c0392b", "नेकपा (एकीकृत समाजवादी)": "#f97316", "जनमत पार्टी": "#f59e0b", "नेपाल कम्युनिस्ट पार्टी (माओवादी)": "#c0392b", "जनता समाजवादी पार्टी, नेपाल": "#f59e0b", "नागरिक उन्मुक्ति पार्टी, नेपाल(एकल चुनाव चिन्ह)": "#06b6d4"};
 const PROVCOLORS = {"Koshi": "#ef4444", "कोशी": "#ef4444", "प्रदेश नं. १": "#ef4444", "Madhesh": "#f97316", "मधेश": "#f97316", "Bagmati": "#3b82f6", "बागमती": "#3b82f6", "Gandaki": "#8b5cf6", "गण्डकी": "#8b5cf6", "Lumbini": "#10b981", "लुम्बिनी": "#10b981", "Karnali": "#f59e0b", "कर्णाली": "#f59e0b", "Sudurpashchim": "#06b6d4", "सुदूरपश्चिम": "#06b6d4"};
-const CSV_URL    = 'nepal_election_results.csv';
-const PR_CSV_URL = 'nepal_pr_votes.csv';
+const CSV_URLS    = { en: 'nepal_election_results_english.csv', np: 'nepal_election_results_nepali.csv' };
+const PR_CSV_URLS = { en: 'nepal_pr_votes_english.csv',         np: 'nepal_pr_votes_nepali.csv' };
 const REFRESH_MS = 10 * 60 * 1000; // 10 minutes
+
+let currentLang = 'en'; // 'en' | 'np'
+let CSV_URL    = CSV_URLS[currentLang];
+let PR_CSV_URL = PR_CSV_URLS[currentLang];
 
 let prData = [];       // parsed PR rows
 let activeTab = 'fptp'; // 'fptp' | 'pr'
@@ -742,7 +761,7 @@ async function loadData(isRefresh) {
         <p style="font-size:15px;font-weight:600;margin-bottom:8px;color:var(--text)">Select your CSV file</p>
         <p style="font-size:11px;color:var(--muted);margin-bottom:22px;line-height:1.6">
           Browsers block automatic file access when opening HTML directly.<br>
-          Pick <code>nepal_election_results.csv</code> to continue.
+          Pick <code>nepal_election_results_english.csv</code> or <code>nepal_election_results_nepali.csv</code> to continue.
         </p>
         <label style="display:inline-flex;align-items:center;gap:9px;padding:10px 24px;
           background:var(--blue);color:#fff;border-radius:8px;cursor:pointer;
@@ -823,7 +842,7 @@ function _showLoadError(msg, mainEl) {
       <div class="ico">⚠️</div>
       <p style="color:#ff6b6b;font-weight:600;margin-bottom:12px">${msg}</p>
       <p style="font-size:11px;color:var(--muted);margin-bottom:16px">
-        Make sure <code>nepal_election_results.csv</code> is in the same folder,<br>
+        Make sure <code>nepal_election_results_english.csv</code> (or <code>_nepali.csv</code>) is in the same folder,<br>
         and open the page via <strong>python run.py</strong> (not file://).
       </p>
       <button onclick="loadData(false)" style="
@@ -937,6 +956,42 @@ togBtn.addEventListener('touchstart', function(e){
 togBtn.addEventListener('click', function(){
   if(togTouched){ togTouched=false; return; }
   handleToggle();
+});
+
+/* ── language toggle (EN | NP) ── */
+const langTogBtn = document.getElementById('langTog');
+const langENEl   = document.getElementById('langEN');
+const langNPEl   = document.getElementById('langNP');
+
+function updateLangUI() {
+  langENEl.classList.toggle('active', currentLang === 'en');
+  langNPEl.classList.toggle('active', currentLang === 'np');
+}
+updateLangUI();
+
+function switchLang(lang) {
+  if (lang === currentLang) return;
+  currentLang = lang;
+  CSV_URL    = CSV_URLS[currentLang];
+  PR_CSV_URL = PR_CSV_URLS[currentLang];
+  updateLangUI();
+  // Reset navigation state and reload
+  selProv = null; selDist = null;
+  data = []; provinces = []; distsByProv = {}; constsByDist = {};
+  prData = [];
+  loadData(false);
+  loadPRData();
+}
+
+let langTouched = false;
+langTogBtn.addEventListener('touchstart', function(e){
+  e.preventDefault();
+  langTouched = true;
+  switchLang(currentLang === 'en' ? 'np' : 'en');
+}, {passive:false});
+langTogBtn.addEventListener('click', function(){
+  if(langTouched){ langTouched=false; return; }
+  switchLang(currentLang === 'en' ? 'np' : 'en');
 });
 
 /* ── home button ── */
@@ -1386,7 +1441,7 @@ function renderPR() {
           <div class="ico">📊</div>
           <p style="font-size:15px;font-weight:600;margin-bottom:8px;color:var(--text)">Select PR votes CSV</p>
           <p style="font-size:11px;color:var(--muted);margin-bottom:22px;line-height:1.6">
-            Pick <code>nepal_pr_votes.csv</code> to load proportional representation data.
+            Pick <code>${PR_CSV_URL}</code> to load proportional representation data.
           </p>
           <label style="display:inline-flex;align-items:center;gap:9px;padding:10px 24px;
             background:var(--blue);color:#fff;border-radius:8px;cursor:pointer;
@@ -1413,7 +1468,7 @@ function renderPR() {
       return;
     }
     main.innerHTML = '<div class="empty"><div class="ico">⚠️</div>'
-      + '<p style="color:#ff6b6b;font-weight:600">Could not load nepal_pr_votes.csv</p>'
+      + '<p style="color:#ff6b6b;font-weight:600">Could not load ' + PR_CSV_URL + '</p>'
       + '<p style="font-size:11px;color:var(--muted);margin-top:8px">Run <code>python scrape_pr.py</code> first.</p></div>';
     renderTabBar(main);
     return;
