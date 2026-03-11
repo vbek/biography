@@ -47,6 +47,7 @@ header{
 .hd-title p{font-size:10px;color:rgba(255,255,255,.38);margin-top:3px;font-family:var(--font-mono);letter-spacing:.4px;white-space:nowrap}
 .hd-right{display:flex;align-items:center;gap:9px;flex-shrink:0}
 .live-pill{display:flex;align-items:center;gap:6px;background:rgba(245,200,66,.08);border:1px solid rgba(245,200,66,.25);border-radius:4px;padding:5px 12px;font-size:9px;font-weight:700;color:#f5c842;letter-spacing:1.5px;font-family:var(--font-mono)}
+@keyframes spin{from{transform:rotate(0deg)}to{transform:rotate(360deg)}}
 
 .tog-row{display:flex;align-items:center;gap:6px}
 .tog-label{font-size:10px;color:rgba(255,255,255,.4);white-space:nowrap}
@@ -650,7 +651,7 @@ html.light .tag{background:rgba(201,148,10,.08);border-color:rgba(201,148,10,.2)
 <script>
 
 /* ── static config (baked in at build time) ── */
-const PCOLORS    = {"Nepali Congress": "#22d472", "CPN-UML": "#f97316", "CPN (Maoist Centre)": "#c0392b", "CPN (Unified Socialist)": "#f97316", "Rastriya Swatantra Party": "#3d8ef0", "Rastriya Prajatantra Party": "#8b5cf6", "Janmat Party": "#f59e0b", "Independent": "#6b7280", "राष्ट्रिय स्वतन्त्र पार्टी": "#3d8ef0", "नेपाल कम्युनिष्ट पार्टी (एकीकृत मार्क्सवादी लेनिनवादी)": "#f97316", "नेपाली काँग्रेस": "#22d472", "नेपाली कम्युनिष्ट पार्टी": "#f5c842", "श्रम संस्कृति पार्टी": "#f97316", "राष्ट्रिय प्रजातन्त्र पार्टी": "#8b5cf6", "स्वतन्त्र": "#6b7280", "प्रगतिशील लोकतान्त्रिक पार्टी": "#06b6d4", "नेकपा-एमाले": "#f97316", "नेकपा (माओवादी केन्द्र)": "#c0392b", "नेकपा (एकीकृत समाजवादी)": "#f97316", "जनमत पार्टी": "#f59e0b", "नेपाल कम्युनिस्ट पार्टी (माओवादी)": "#c0392b", "जनता समाजवादी पार्टी, नेपाल": "#f59e0b", "नागरिक उन्मुक्ति पार्टी, नेपाल(एकल चुनाव चिन्ह)": "#06b6d4"};
+const PCOLORS    = {"Nepali Congress": "#22d472", "CPN-UML": "#f97316", "CPN (Maoist Centre)": "#c0392b", "CPN (Unified Socialist)": "#f97316", "Rastriya Swatantra Party": "#3d8ef0", "Rastriya Prajatantra Party": "#8b5cf6", "Janmat Party": "#f59e0b", "Independent": "#6b7280","Nepali Communist Party": "#e11d48","Shram Sanskriti Party": "#14b8a6", "राष्ट्रिय स्वतन्त्र पार्टी": "#3d8ef0", "नेपाल कम्युनिष्ट पार्टी (एकीकृत मार्क्सवादी लेनिनवादी)": "#f97316", "नेपाली काँग्रेस": "#22d472", "नेपाली कम्युनिष्ट पार्टी": "#f5c842", "श्रम संस्कृति पार्टी": "#f97316", "राष्ट्रिय प्रजातन्त्र पार्टी": "#8b5cf6", "स्वतन्त्र": "#6b7280", "प्रगतिशील लोकतान्त्रिक पार्टी": "#06b6d4", "नेकपा-एमाले": "#f97316", "नेकपा (माओवादी केन्द्र)": "#c0392b", "नेकपा (एकीकृत समाजवादी)": "#f97316", "जनमत पार्टी": "#f59e0b", "नेपाल कम्युनिस्ट पार्टी (माओवादी)": "#c0392b", "जनता समाजवादी पार्टी, नेपाल": "#f59e0b", "नागरिक उन्मुक्ति पार्टी, नेपाल(एकल चुनाव चिन्ह)": "#06b6d4"};
 const PROVCOLORS = {"Koshi": "#ef4444", "कोशी": "#ef4444", "प्रदेश नं. १": "#ef4444", "Madhesh": "#f97316", "मधेश": "#f97316", "Bagmati": "#3b82f6", "बागमती": "#3b82f6", "Gandaki": "#8b5cf6", "गण्डकी": "#8b5cf6", "Lumbini": "#10b981", "लुम्बिनी": "#10b981", "Karnali": "#f59e0b", "कर्णाली": "#f59e0b", "Sudurpashchim": "#06b6d4", "सुदूरपश्चिम": "#06b6d4"};
 const CSV_URLS    = { en: 'nepal_election_results_english.csv', np: 'nepal_election_results_nepali.csv' };
 const PR_CSV_URLS = { en: 'nepal_pr_votes_english.csv',         np: 'nepal_pr_votes_nepali.csv' };
@@ -660,7 +661,7 @@ let currentLang = 'en'; // 'en' | 'np'
 let CSV_URL    = CSV_URLS[currentLang];
 let PR_CSV_URL = PR_CSV_URLS[currentLang];
 
-let prData = [];       // parsed PR rows
+let prData = null;     // null = loading, [] = failed/empty, array = ready
 let activeTab = 'fptp'; // 'fptp' | 'pr'
 
 const pc  = p => PCOLORS[p]    || '#94a3b8';
@@ -977,7 +978,7 @@ function switchLang(lang) {
   // Reset navigation state and reload
   selProv = null; selDist = null;
   data = []; provinces = []; distsByProv = {}; constsByDist = {};
-  prData = [];
+  prData = null;  // null = loading in progress
   loadData(false);
   loadPRData();
 }
@@ -1356,29 +1357,36 @@ function showConst(constKey, cname, rows){
 /* ── Load PR CSV ── */
 async function loadPRData() {
   if (location.protocol === 'file:') {
-    // file:// — user may pick PR CSV separately; try anyway, silently ignore failure
+    prData = [];  // will prompt file picker in renderPR
+    if (activeTab === 'pr') renderPR();
     return;
   }
+  prData = null;  // mark as loading
+  if (activeTab === 'pr') renderPR();  // show spinner immediately
   try {
     const res = await fetch(PR_CSV_URL + '?_=' + Date.now());
-    if (!res.ok) return;
+    if (!res.ok) throw new Error('HTTP ' + res.status);
     const text = await res.text();
     const raw = parseCSV(text);
-    prData = raw.map(r => {
+    const parsed = raw.map(r => {
       const votes = parseInt(String(r['Votes Received']||'').replace(/,/g,'')) || 0;
+      const party = (r['Political Party'] || r['Party Name (English)'] || r['Party Name'] || '').trim();
       return {
-        level:   (r['Level']          || '').trim(),
-        province:(r['Province']        || '').trim(),
-        party:   (r['Political Party'] || '').trim(),
-        symbolId:(r['Symbol ID']       || '').trim(),
+        level:   (r['Level']    || '').trim(),
+        province:(r['Province'] || '').trim(),
+        party,
+        symbolId:(r['Symbol ID'] || '').trim(),
         votes,
         pct:     parseFloat(r['Vote Share %']) || 0,
         rank:    parseInt(r['Rank']) || 0,
       };
     }).filter(r => r.party && r.votes > 0);
+    prData = parsed.length ? parsed : [];
   } catch(e) {
     console.warn('[PR] Could not load PR CSV:', e.message);
+    prData = [];  // mark as failed
   }
+  if (activeTab === 'pr') renderPR();  // re-render with real data or error
 }
 
 /* ── PR party color — reuse PCOLORS or generate from a palette ── */
@@ -1432,6 +1440,13 @@ function buildDonut(parties, size=180, stroke=28) {
 /* ── Render the full PR tab ── */
 function renderPR() {
   const main = document.getElementById('main');
+
+  if (prData === null) {
+    main.innerHTML = '<div class="empty"><div class="ico" style="font-size:36px;animation:spin 1s linear infinite;display:inline-block">⏳</div>'
+      + '<p style="margin-top:14px;color:var(--muted);font-size:13px">Loading PR data…</p></div>';
+    renderTabBar(main);
+    return;
+  }
 
   if (!prData.length) {
     if (location.protocol === 'file:') {
