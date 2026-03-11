@@ -1653,7 +1653,7 @@ function renderTabBar(container) {
   tabBar.className = 'view-tabs';
   tabBar.id = 'viewTabs';
   tabBar.innerHTML = `
-    <button class="view-tab ${activeTab==='fptp'?'active':''}" data-tab="fptp">🏛 FPTP Results</button>
+    <button class="view-tab ${activeTab==='fptp'?'active':''}" data-tab="fptp">🏛 FPTP</button>
     <button class="view-tab ${activeTab==='pr'?'active':''}" data-tab="pr">📊 Proportional (PR)</button>
   `;
   container.insertBefore(tabBar, container.firstChild);
