@@ -46,9 +46,8 @@ header{
 .hd-title h1 em{color:var(--gold);font-style:normal}
 .hd-title p{font-size:10px;color:rgba(255,255,255,.38);margin-top:3px;font-family:var(--font-mono);letter-spacing:.4px;white-space:nowrap}
 .hd-right{display:flex;align-items:center;gap:9px;flex-shrink:0}
-.live-pill{display:flex;align-items:center;gap:6px;background:rgba(34,212,114,.08);border:1px solid rgba(34,212,114,.25);border-radius:4px;padding:5px 12px;font-size:9px;font-weight:700;color:#22d472;letter-spacing:1.5px;font-family:var(--font-mono)}
-.dot{width:5px;height:5px;border-radius:50%;background:#22d472;animation:blink 1.4s infinite}
-@keyframes blink{0%,100%{opacity:1;transform:scale(1)}50%{opacity:.2;transform:scale(1.8)}}
+.live-pill{display:flex;align-items:center;gap:6px;background:rgba(245,200,66,.08);border:1px solid rgba(245,200,66,.25);border-radius:4px;padding:5px 12px;font-size:9px;font-weight:700;color:#f5c842;letter-spacing:1.5px;font-family:var(--font-mono)}
+
 .tog-row{display:flex;align-items:center;gap:6px}
 .tog-label{font-size:10px;color:rgba(255,255,255,.4);white-space:nowrap}
 .tog{width:42px;height:24px;border-radius:12px;border:none;cursor:pointer;background:rgba(255,255,255,.1);position:relative;transition:background .25s;flex-shrink:0;touch-action:manipulation;-webkit-tap-highlight-color:transparent;}
@@ -637,7 +636,7 @@ html.light .tag{background:rgba(201,148,10,.08);border-color:rgba(201,148,10,.2)
       <span class="tog-label" id="tlbl">🌙 Dark</span>
       <button class="tog" id="tog" title="Toggle theme"></button>
     </div>
-    <div class="live-pill"><div class="dot"></div>LIVE</div>
+    <div class="live-pill">✓ FINAL</div>
   </div>
 </header>
 
@@ -1510,11 +1509,11 @@ function renderPR() {
   /* ── estimation boxes ── */
   const estBoxes = estQualified.map((x, i) => {
     const c        = prColor(x.p);
-    const totalRnd = Math.round(x.totalEst * 10) / 10;
+    const totalRnd = Math.round(x.totalEst);
     const barPct   = ((x.totalEst / maxEst) * 100).toFixed(1);
     const wonBit   = x.fptpW > 0
       ? '<div class="eb-chip eb-chip-won">\u2713\u00A0' + x.fptpW + ' won</div>' : '';
-    const prBit    = '<div class="eb-chip eb-chip-pr">+\u00A0' + x.prSeats.toFixed(1) + ' PR</div>';
+    const prBit = '<div class="eb-chip eb-chip-pr">+\u00A0' + Math.round(x.prSeats) + ' PR</div>';
     return '<div class="eb-card" style="--ec:' + c + '">'
       + '<div class="eb-top">'
         + '<div class="eb-color-bar" style="background:' + c + '"></div>'
