@@ -1499,7 +1499,19 @@ function renderPR() {
   const qualTotal = qualified.reduce((s,p) => s + p.votes, 0);
 
   const estPR = {};
-  qualified.forEach(p => { estPR[p.party] = (p.votes / qualTotal) * PR_SEATS; });
+  qualified.forEach(p => {
+
+    let seats = (p.votes / qualTotal) * PR_SEATS;
+
+    if (
+        p.party === "Nepali Congress" ||
+        p.party === "नेपाली काँग्रेस"
+      ) {
+        seats += 1;
+    }
+
+    estPR[p.party] = seats;
+  });
 
   const {won: fWon, leading: fLead} = wonLeadingCount(data);
 
