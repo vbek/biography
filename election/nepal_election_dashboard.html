@@ -262,6 +262,11 @@ html.light .tag{background:rgba(201,148,10,.08);border-color:rgba(201,148,10,.2)
 .party-hero-2 .ph-badge{background:rgba(34,212,114,.12);color:#22d472;border:1px solid rgba(34,212,114,.2)}
 .party-hero-3 .ph-badge{background:rgba(249,115,22,.12);color:#f97316;border:1px solid rgba(249,115,22,.2)}
 .ph-name{font-size:13px;font-weight:700;line-height:1.35;color:#fff;margin-bottom:0;max-width:85%}
+.ph-name-row{display:flex;align-items:center;gap:8px;margin-top:4px}
+.ph-logo{width:32px;height:32px;display:flex;align-items:center;justify-content:center;flex-shrink:0;background:rgba(255,255,255,.08);border-radius:6px;padding:2px}
+.ph-logo img{width:28px;height:28px;object-fit:contain;border-radius:4px;display:block}
+.eb-logo-cell{width:32px;height:32px;display:flex;align-items:center;justify-content:center;flex-shrink:0;background:rgba(255,255,255,.06);border-radius:6px;padding:2px}
+.eb-logo-cell img{width:28px;height:28px;object-fit:contain;border-radius:4px;display:block}
 .ph-bottom{position:relative;z-index:1}
 .ph-seats-row{display:flex;align-items:baseline;gap:6px;margin-bottom:8px}
 .ph-seats-num{font-family:var(--font-display);font-size:52px;line-height:1;letter-spacing:-1px}
@@ -1279,7 +1284,10 @@ function renderHome(){
       <div class="ph-rank">${i+1}</div>
       <div class="ph-top">
         <div class="ph-badge">${heroBadge[i]}</div>
-        <div class="ph-name">${x.p}</div>
+        <div class="ph-name-row">
+          <span class="ph-logo">${partyLogoImg(x.p, 28, col)}</span>
+          <div class="ph-name">${x.p}</div>
+        </div>
       </div>
       <div class="ph-bottom">
         <div class="ph-dual-stats">
@@ -1720,7 +1728,7 @@ function renderPR() {
     const prBit = '<div class="eb-chip eb-chip-pr">+\u00A0' + Math.round(x.prSeats) + ' PR</div>';
     return '<div class="eb-card" style="--ec:' + c + '">'
       + '<div class="eb-top">'
-        + '<div class="eb-color-bar" style="background:' + c + '"></div>'
+        + '<div class="eb-logo-cell">' + partyLogoImg(x.p, 28, c) + '</div>'
         + '<div class="eb-rank">' + (i+1) + '</div>'
         + '<div class="eb-name" title="' + x.p + '">' + x.p + '</div>'
       + '</div>'
