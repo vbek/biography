@@ -107,9 +107,13 @@ html.light .tag{background:rgba(201,148,10,.08);border-color:rgba(201,148,10,.2)
 
 /* ── party summary (district/province view) ── */
 .psumm{background:var(--card);border:1px solid var(--border);border-radius:10px;padding:14px 17px;margin-bottom:20px;transition:background .3s,border-color .3s}
-.prow{display:flex;align-items:center;gap:10px;padding:5px 0;border-bottom:1px solid rgba(122,144,176,.05)}
+.prow{display:flex;align-items:center;gap:8px;padding:5px 0;border-bottom:1px solid rgba(122,144,176,.05)}
 .prow:last-child{border-bottom:none}
 .pdot{width:7px;height:7px;border-radius:50%;flex-shrink:0}
+.plogo-cell{width:22px;height:22px;display:flex;align-items:center;justify-content:center;flex-shrink:0}
+.plogo-cell img{width:20px;height:20px;object-fit:contain;border-radius:3px;display:block}
+.party-logo-cell-sm{width:16px;height:16px;display:inline-flex;align-items:center;justify-content:center;flex-shrink:0;vertical-align:middle}
+.party-logo-cell-sm img{width:14px;height:14px;object-fit:contain;border-radius:2px;display:block}
 .pname{font-size:11.5px;font-weight:500;min-width:185px;color:var(--text);white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
 .pbw{flex:1;background:rgba(122,144,176,.08);border-radius:2px;height:5px;overflow:hidden}
 .pb{height:100%;border-radius:2px;transition:width 1s cubic-bezier(.4,0,.2,1)}
@@ -148,7 +152,7 @@ html.light .tag{background:rgba(201,148,10,.08);border-color:rgba(201,148,10,.2)
 .rn{background:rgba(148,163,184,.03);color:var(--muted);border:1px solid var(--border)}
 .ci{flex:1;min-width:0}
 .cname{font-weight:600;font-size:12.5px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
-.cpty{font-size:10px;color:var(--muted);margin-top:2px;display:flex;align-items:center;gap:4px}
+.cpty{font-size:10px;color:var(--muted);margin-top:2px;display:flex;align-items:center;gap:5px}
 .ptdot{width:5px;height:5px;border-radius:50%;flex-shrink:0}
 .cmeta{font-size:9.5px;color:var(--muted);margin-top:2px}
 .cvr{text-align:right}
@@ -401,10 +405,11 @@ html.light .tag{background:rgba(201,148,10,.08);border-color:rgba(201,148,10,.2)
 
 /* ── PARTY TABLE ── */
 .pt-table{background:var(--card);border:1px solid var(--border);border-radius:12px;overflow:hidden;margin-bottom:24px}
-.pt-head{display:grid;grid-template-columns:28px 10px 1fr 120px 52px;gap:0 8px;padding:9px 14px;background:rgba(122,144,176,.04);border-bottom:1px solid var(--border);font-size:8px;font-weight:700;letter-spacing:1.5px;text-transform:uppercase;color:var(--muted);font-family:var(--font-mono);align-items:center}
-.pt-row{display:grid;grid-template-columns:28px 10px 1fr 120px 52px;gap:0 8px;padding:10px 14px;border-bottom:1px solid rgba(122,144,176,.04);align-items:center;transition:background .12s}
+.pt-head{display:grid;grid-template-columns:28px 24px 1fr 120px 52px;gap:0 8px;padding:9px 14px;background:rgba(122,144,176,.04);border-bottom:1px solid var(--border);font-size:8px;font-weight:700;letter-spacing:1.5px;text-transform:uppercase;color:var(--muted);font-family:var(--font-mono);align-items:center}
+.pt-row{display:grid;grid-template-columns:28px 24px 1fr 120px 52px;gap:0 8px;padding:10px 14px;border-bottom:1px solid rgba(122,144,176,.04);align-items:center;transition:background .12s}
 .pt-row:last-child{border-bottom:none}
 .pt-row:hover{background:rgba(61,142,240,.04)}
+.pt-logo-cell{width:24px;height:24px;display:flex;align-items:center;justify-content:center;flex-shrink:0}
 .pt-rank{font-size:10px;font-weight:700;font-family:var(--font-mono);color:var(--muted);text-align:right}
 .pt-dot{width:10px;height:10px;border-radius:50%;flex-shrink:0}
 .pt-name{font-size:11.5px;font-weight:600;color:var(--text);white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
@@ -417,15 +422,15 @@ html.light .tag{background:rgba(201,148,10,.08);border-color:rgba(201,148,10,.2)
 .pt-total{font-family:var(--font-mono);font-size:10px;color:var(--muted);text-align:right}
 
 @media(max-width:900px){
-  .pt-head{grid-template-columns:24px 10px 1fr 80px 44px}
-  .pt-row{grid-template-columns:24px 10px 1fr 80px 44px}
+  .pt-head{grid-template-columns:24px 22px 1fr 80px 44px}
+  .pt-row{grid-template-columns:24px 22px 1fr 80px 44px}
 }
 @media(max-width:700px){
   .ph-dual-stats{flex-direction:row}
   .ph-won-num{font-size:32px}
   .ph-lead-num{font-size:22px}
-  .pt-head{grid-template-columns:20px 8px 1fr 60px 40px}
-  .pt-row{grid-template-columns:20px 8px 1fr 60px 40px}
+  .pt-head{grid-template-columns:20px 20px 1fr 60px 40px}
+  .pt-row{grid-template-columns:20px 20px 1fr 60px 40px}
   .pt-head>:last-child,.pt-row>.pt-total{display:none}
   .pt-name{font-size:10px}
   .pt-won-num{font-size:11px}
@@ -501,8 +506,9 @@ html.light .tag{background:rgba(201,148,10,.08);border-color:rgba(201,148,10,.2)
 
 /* "all parties" small table */
 .pr-all-table{background:var(--card);border:1px solid var(--border);border-radius:10px;overflow:hidden;margin-bottom:24px}
-.pr-all-head{display:grid;grid-template-columns:32px 1fr 80px 70px 60px;gap:0;padding:8px 14px;background:rgba(122,144,176,.04);border-bottom:1px solid var(--border);font-size:8px;font-weight:700;letter-spacing:1.5px;text-transform:uppercase;color:var(--muted);font-family:var(--font-mono)}
-.pr-all-row{display:grid;grid-template-columns:32px 1fr 80px 70px 60px;gap:0;padding:9px 14px;border-bottom:1px solid rgba(122,144,176,.04);align-items:center;transition:background .12s}
+.pr-all-head{display:grid;grid-template-columns:32px 24px 1fr 90px 70px 60px;gap:0;padding:8px 14px;background:rgba(122,144,176,.04);border-bottom:1px solid var(--border);font-size:8px;font-weight:700;letter-spacing:1.5px;text-transform:uppercase;color:var(--muted);font-family:var(--font-mono)}
+.pr-all-row{display:grid;grid-template-columns:32px 24px 1fr 90px 70px 60px;gap:0;padding:9px 14px;border-bottom:1px solid rgba(122,144,176,.04);align-items:center;transition:background .12s}
+.pr-all-logo{width:24px;height:24px;display:flex;align-items:center;justify-content:center;flex-shrink:0}
 .pr-all-row:last-child{border-bottom:none}
 .pr-all-row:hover{background:rgba(61,142,240,.04)}
 .pr-all-row.forfeited{opacity:.5}
@@ -570,10 +576,11 @@ html.light .tag{background:rgba(201,148,10,.08);border-color:rgba(201,148,10,.2)
   .pr-prov-grid{grid-template-columns:1fr}
   .pr-prov-name{font-size:10.5px}
   /* All-parties table: hide bar column, tighten */
-  .pr-all-head,.pr-all-row{grid-template-columns:24px 1fr 72px 48px}
+  .pr-all-head,.pr-all-row{grid-template-columns:24px 20px 1fr 80px 48px}
   .pr-all-head>:last-child,.pr-all-row>:last-child{display:none}
   .pr-all-name{font-size:10px}
   .pr-all-votes{font-size:10px}
+  .pr-all-logo img{width:16px!important;height:16px!important}
   /* Tabs */
   .view-tab{font-size:10.5px;padding:9px 0}
 }
@@ -656,6 +663,175 @@ const PROVCOLORS = {"Koshi": "#ef4444", "कोशी": "#ef4444", "प्रद
 const CSV_URLS    = { en: 'nepal_election_results_english.csv', np: 'nepal_election_results_nepali.csv' };
 const PR_CSV_URLS = { en: 'nepal_pr_votes_english.csv',         np: 'nepal_pr_votes_nepali.csv' };
 const REFRESH_MS = 10 * 60 * 1000; // 10 minutes
+
+/* ── party logo mapping (from parties.csv) ── */
+const PARTY_LOGOS = {
+  "Rastriya Swatantra Party": "Rastriya Swatantra Party.png",
+  "राष्ट्रिय स्वतन्त्र पार्टी": "Rastriya Swatantra Party.png",
+  "Nepali Congress": "Nepali Congress.png",
+  "नेपाली काँग्रेस": "Nepali Congress.png",
+  "CPN-UML": "CPN-UML.png",
+  "नेकपा (एमाले)": "CPN-UML.png",
+  "नेकपा-एमाले": "CPN-UML.png",
+  "Nepali Communist Party": "Nepali Communist Party.png",
+  "नेपाली कम्युनिष्ट पार्टी": "Nepali Communist Party.png",
+  "Shram Sanskriti Party": "Shram Sanskriti Party.png",
+  "श्रम संस्कृति पार्टी": "Shram Sanskriti Party.png",
+  "Independent": "Independent.png",
+  "स्वतन्त्र": "Independent.png",
+  "Rastriya Prajatantra Party": "Rastriya Prajatantra Party.png",
+  "राष्ट्रिय प्रजातन्त्र पार्टी": "Rastriya Prajatantra Party.png",
+  "Janadesh Party Nepal (Ekal Chunab Chinha)": "Janadesh Party Nepal (Ekal Chunab Chinha).png",
+  "जनादेश पार्टी नेपाल(एकल चुनाव चिन्ह)": "Janadesh Party Nepal (Ekal Chunab Chinha).png",
+  "Nepal Janata Party": "Nepal Janata Party.png",
+  "नेपाल जनता पार्टी": "Nepal Janata Party.png",
+  "Samabeshi Samajbadi Party Nepal": "Samabeshi Samajbadi Party Nepal.png",
+  "समावेशी समाजवादी पार्टी नेपाल": "Samabeshi Samajbadi Party Nepal.png",
+  "Rastriya Janamorcha": "Rastriya Janamorcha.png",
+  "राष्ट्रिय जनमोर्चा": "Rastriya Janamorcha.png",
+  "Nepali Janata Dal": "Nepali Janata Dal.png",
+  "नेपाली जनता दल": "Nepali Janata Dal.png",
+  "Nagarik Sarwochata Party Nepal (Ekal Chunab Chinha)": "Nagarik Sarwochata Party Nepal (Ekal Chunab Chinha).png",
+  "नागरिक सर्वोच्चता पार्टी नेपाल(एकल चुनाव चिन्ह)": "Nagarik Sarwochata Party Nepal (Ekal Chunab Chinha).png",
+  "Nepal Janata Samrakchhyan Party": "Nepal Janata Samrakchhyan Party.png",
+  "नेपाल जनता संरक्षण पार्टी": "Nepal Janata Samrakchhyan Party.png",
+  "Rastriya Ekata Dal": "Rastriya Ekata Dal.png",
+  "राष्ट्रिय एकता दल": "Rastriya Ekata Dal.png",
+  "Swabhiman Party": "Swabhiman Party.png",
+  "स्वाभिमान पार्टी": "Swabhiman Party.png",
+  "Nepal Sangyhia Samajbadi Party (Ekal Chunab Chinha)": "Nepal Sangyhia Samajbadi Party (Ekal Chunab Chinha).png",
+  "नेपाल संघीय समाजवादी पार्टी(एकल चुनाव चिन्ह)": "Nepal Sangyhia Samajbadi Party (Ekal Chunab Chinha).png",
+  "Nepalka Lagi Nepali Party": "Nepalka Lagi Nepali Party.png",
+  "नेपालका लागि नेपाली पार्टी": "Nepalka Lagi Nepali Party.png",
+  "Jana Adhikar Party": "Jana Adhikar Party.png",
+  "जन अधिकार पार्टी": "Jana Adhikar Party.png",
+  "Janata Loktantrik Party, Nepal": "Janata Loktantrik Party, Nepal.png",
+  "जनता लोकतान्त्रिक पार्टी, नेपाल": "Janata Loktantrik Party, Nepal.png",
+  "Bahujan Ekata Party Nepal (Ekal Chunab Chinha)": "Bahujan Ekata Party Nepal (Ekal Chunab Chinha).png",
+  "बहुजन एकता पार्टी नेपाल(एकल चुनाव चिन्ह)": "Bahujan Ekata Party Nepal (Ekal Chunab Chinha).png",
+  "Bahujan Shakti Party": "Bahujan Shakti Party.png",
+  "बहुजन शक्ति पार्टी": "Bahujan Shakti Party.png",
+  "Itihasik Janata Party": "Itihasik Janata Party.png",
+  "इतिहासिक जनता पार्टी": "Itihasik Janata Party.png",
+  "Nepal Matribhoomi Party": "Nepal Matribhoomi Party.png",
+  "नेपाल मातृभूमि पार्टी": "Nepal Matribhoomi Party.png",
+  "Rastriya Janata Party Nepal": "Rastriya Janata Party Nepal.png",
+  "राष्ट्रिय जनता पार्टी नेपाल": "Rastriya Janata Party Nepal.png",
+  "Rastriya Mukti Aandolan, Nepal": "Rastriya Mukti Aandolan, Nepal.png",
+  "राष्ट्रिय मुक्ति आन्दोलन, नेपाल": "Rastriya Mukti Aandolan, Nepal.png",
+  "Rastriya Janamat Party": "Rastriya Janamat Party.png",
+  "राष्ट्रिय जनमत पार्टी": "Rastriya Janamat Party.png",
+  "Gatishil Loktantrik Party": "Gatishil Loktantrik Party.png",
+  "गतिशील लोकतान्त्रिक पार्टी": "Gatishil Loktantrik Party.png",
+  "United Nepal Democratic Party": "United Nepal Democratic Party.png",
+  "युनाईटेड नेपाल डिमोक्रयाटीक पार्टी": "United Nepal Democratic Party.png",
+  "Prajatantrik Party Nepal": "Prajatantrik Party Nepal.png",
+  "प्रजातान्त्रिक पार्टी नेपाल": "Prajatantrik Party Nepal.png",
+  "Nepal Janasewa Party": "Nepal Janasewa Party.png",
+  "नेपाल जनसेवा पार्टी": "Nepal Janasewa Party.png",
+  "Triumul Nepal": "Triumul Nepal.png",
+  "त्रिमूल नेपाल": "Triumul Nepal.png",
+  "Nepal Communist Party (Marxist) (Ekal Chunab Chinha)": "Nepal Communist Party (Marxist) (Ekal Chunab Chinha).png",
+  "नेपाल कम्युनिष्ट पार्टी (माक्र्सवादी)(एकल चुनाव चिन्ह)": "Nepal Communist Party (Marxist) (Ekal Chunab Chinha).png",
+  "Nagarik Unmukti Party": "Nagarik Unmukti Party.png",
+  "नागरिक उन्मुक्ति पार्टी": "Nagarik Unmukti Party.png",
+  "नागरिक उन्मुक्ति पार्टी, नेपाल(एकल चुनाव चिन्ह)": "Nagarik Unmukti Party, Nepal (Ekal Chunab Chinha).png",
+  "Rastriya Nagarik Party": "Rastriya Nagarik Party.png",
+  "राष्ट्रिय नागरिक पार्टी": "Rastriya Nagarik Party.png",
+  "Gandhibadi Party Nepal": "Gandhibadi Party Nepal.png",
+  "गान्धीवादी पार्टी नेपाल": "Gandhibadi Party Nepal.png",
+  "Nepal Manabta Party": "Nepal Manabta Party.png",
+  "नेपाल मानवतावादी पार्टी": "Nepal Manabta Party.png",
+  "National Republic Nepal": "National Republic Nepal.png",
+  "नेशनल रिपब्लिक नेपाल": "National Republic Nepal.png",
+  "Mongol National Organization": "Mongol National Organization.png",
+  "मंगोल नेशनल अर्गनाइजेसन": "Mongol National Organization.png",
+  "Sanghiya Loktantrik Rastriya Manch": "Sanghiya Loktantrik Rastriya Manch.png",
+  "संघीय लोकतान्त्रिक राष्ट्रिय मञ्च": "Sanghiya Loktantrik Rastriya Manch.png",
+  "Janata Samjbadi Party-Nepal": "Janata Samjbadi Party-Nepal.png",
+  "जनता समाजवादी पार्टी, नेपाल": "Janata Samjbadi Party-Nepal.png",
+  "Janata Samajbadi Party (Ekal Chunab Chinha)": "Janata Samajbadi Party (Ekal Chunab Chinha).png",
+  "जनता समाजवादी पार्टी(एकल चुनाव चिन्ह)": "Janata Samajbadi Party (Ekal Chunab Chinha).png",
+  "Nepal Janamukti Party": "Nepal Janamukti Party.png",
+  "नेपाल जनमुक्ति पार्टी": "Nepal Janamukti Party.png",
+  "Nepal Communist Party (Maoist)": "Nepal Communist Party (Maoist).png",
+  "नेपाल कम्युनिस्ट पार्टी (माओवादी)": "Nepal Communist Party (Maoist).png",
+  "Ujaylo Nepal Party": "Ujaylo Nepal Party.png",
+  "उज्यालो नेपाल पार्टी": "Ujaylo Nepal Party.png",
+  "Nepal Majdoor Kisan Party": "Nepal Majdoor Kisan Party.png",
+  "नेपाल मजदुर किसान पार्टी": "Nepal Majdoor Kisan Party.png",
+  "Pragatishil Loktantrik Party": "Pragatishil Loktantrik Party.png",
+  "प्रगतिशील लोकतान्त्रिक पार्टी": "Pragatishil Loktantrik Party.png",
+  "Rastriya Pariwartan Party": "Rastriya Pariwartan Party.png",
+  "राष्ट्रिय परिवर्तन पार्टी": "Rastriya Pariwartan Party.png",
+  "Rastriya Mukti Party Nepal (Ekal Chunab Chinha)": "Rastriya Mukti Party Nepal (Ekal Chunab Chinha).png",
+  "राष्ट्रिय मुक्ति पार्टी नेपाल(एकल चुनाव चिन्ह)": "Rastriya Mukti Party Nepal (Ekal Chunab Chinha).png",
+  "Rastriya Janamukti Party": "Rastriya Janamukti Party.png",
+  "राष्ट्रिय जनमुक्ति पार्टी": "Rastriya Janamukti Party.png",
+  "Nepal Communist Party (Sainyukta)": "Nepal Communist Party (Sainyukta).png",
+  "नेपाल कम्युनिष्ट पार्टी (संयुक्त)": "Nepal Communist Party (Sainyukta).png",
+  "Janamat Party": "Janamat Party.png",
+  "जनमत पार्टी": "Janamat Party.png",
+  "Nepal Loktantrik Party": "Nepal Loktantrik Party.png",
+  "नेपाल लोकतान्त्रिक पार्टी": "Nepal Loktantrik Party.png",
+  "Nepal Communist Party Marxist (Pushpalal)": "Nepal Communist Party Marxist (Pushpalal).png",
+  "नेपाल कम्युनिष्ट पार्टी मार्क्सवादी (पुष्पलाल)": "Nepal Communist Party Marxist (Pushpalal).png",
+  "People First Party": "People First Party.png",
+  "पिपुल फर्ष्ट पार्टी": "People First Party.png",
+  "Nepal Sadbhavana Party": "Nepal Sadbhavana Party.png",
+  "नेपाल सद्भावना पार्टी": "Nepal Sadbhavana Party.png",
+  "Aam Janata Party (Ekal Chunab Chinha)": "Aam Janata Party (Ekal Chunab Chinha).png",
+  "आम जनता पार्टी(एकल चुनाव चिन्ह)": "Aam Janata Party (Ekal Chunab Chinha).png",
+  "Miteri Party Nepal": "Miteri Party Nepal.png",
+  "मितेरी पार्टी नेपाल": "Miteri Party Nepal.png",
+  "Rastriya Urjashil Party, Nepal": "Rastriya Urjashil Party, Nepal.png",
+  "राष्ट्रिय उर्जाशील पार्टी, नेपाल": "Rastriya Urjashil Party, Nepal.png",
+  "Sainyukta Nagarik Party": "Sainyukta Nagarik Party.png",
+  "संयुक्त नागरिक पार्टी": "Sainyukta Nagarik Party.png",
+  "Jaya Matribhumi Party": "Jaya Matribhumi Party.png",
+  "जय मातृभूमि पार्टी": "Jaya Matribhumi Party.png",
+  "Rastra Nirman Dal Nepal": "Rastra Nirman Dal Nepal.png",
+  "राष्ट्र निर्माण दल नेपाल": "Rastra Nirman Dal Nepal.png",
+  "Samabeshi Samajbadi Party": "Samabeshi Samajbadi Party.png",
+  "समावेशी समाजवादी पार्टी": "Samabeshi Samajbadi Party.png",
+  "Sarbhobham Nagarik Party": "Sarbhobham Nagarik Party.png",
+  "सार्वभौम नागरिक पार्टी": "Sarbhobham Nagarik Party.png",
+  "Nepali Janashramdan Sanskriti Party": "Nepali Janashramdan Sanskriti Party.png",
+  "नेपाली जनश्रमदान संस्कृति पार्टी": "Nepali Janashramdan Sanskriti Party.png",
+  "Rastriya Sajha Party": "Rastriya Sajha Party.png",
+  "राष्ट्रिय साझा पार्टी": "Rastriya Sajha Party.png",
+  "CPN (Maoist Centre)": "Nepal Communist Party (Maoist).png",
+  "नेकपा (माओवादी केन्द्र)": "Nepal Communist Party (Maoist).png",
+  "CPN (Unified Socialist)": "CPN-UML.png",
+  "नेकपा (एकीकृत समाजवादी)": "CPN-UML.png",
+};
+
+function getPartyLogo(partyName) {
+  const file = PARTY_LOGOS[partyName];
+  if (!file) return null;
+  return 'logo/' + file;
+}
+
+function partyLogoImg(partyName, size, fallbackColor) {
+  const src = getPartyLogo(partyName);
+  const fc = fallbackColor || '#94a3b8';
+  if (!src) {
+    return '<span style="width:' + size + 'px;height:' + size + 'px;border-radius:50%;background:' + fc + ';display:inline-block;flex-shrink:0;"></span>';
+  }
+  return '<img src="' + src + '" alt="" class="party-logo-img" data-fbcolor="' + fc + '" style="width:' + size + 'px;height:' + size + 'px;object-fit:contain;border-radius:3px;flex-shrink:0;display:block;">';
+}
+
+// Global fallback for party logo images that fail to load
+document.addEventListener('error', function(e) {
+  if (e.target.classList && e.target.classList.contains('party-logo-img')) {
+    const img = e.target;
+    const fc = img.dataset.fbcolor || '#94a3b8';
+    const size = img.style.width || '20px';
+    const dot = document.createElement('span');
+    dot.style.cssText = 'width:' + size + ';height:' + size + ';border-radius:50%;background:' + fc + ';display:inline-block;flex-shrink:0;';
+    img.parentNode.replaceChild(dot, img);
+  }
+}, true);
 
 let currentLang = 'en'; // 'en' | 'np'
 let CSV_URL    = CSV_URLS[currentLang];
@@ -1125,10 +1301,11 @@ function renderHome(){
     const col = pc(x.p);
     const wonW  = ((x.won /maxTotal)*100).toFixed(1);
     const leadW = ((x.lead/maxTotal)*100).toFixed(1);
+    const logoCell = `<div class="pt-logo-cell">${partyLogoImg(x.p, 20, col)}</div>`;
     return `
     <div class="pt-row">
       <div class="pt-rank">${i+1}</div>
-      <div class="pt-dot" style="background:${col}"></div>
+      ${logoCell}
       <div class="pt-name" title="${x.p}">${x.p}</div>
       <div class="pt-bar-col">
         <div class="pt-bar-track">
@@ -1292,7 +1469,7 @@ function renderMain(){
       ${pts.map(([p,v])=>{
         const pct=((v/maxV)*100).toFixed(1),s=seats[p]||0;
         return `<div class="prow">
-          <span class="pdot" style="background:${pc(p)}"></span>
+          <span class="plogo-cell">${partyLogoImg(p, 20, pc(p))}</span>
           <span class="pname">${p}</span>
           <div class="pbw"><div class="pb" style="width:${pct}%;background:${pc(p)}"></div></div>
           <span class="pvot">${fmtV(v)}</span>
@@ -1343,7 +1520,7 @@ function showConst(constKey, cname, rows){
           <div class="rnk ${rc}">#${rk}</div>
           <div class="ci">
             <div class="cname">${c['Candidate Name']}</div>
-            <div class="cpty"><span class="ptdot" style="background:${pc(c['Political Party'])}"></span>${c['Political Party']}</div>
+            <div class="cpty"><span class="party-logo-cell-sm">${partyLogoImg(c['Political Party'], 14, pc(c['Political Party']))}</span>${c['Political Party']}</div>
             ${c.Age||c.Gender?`<div class="cmeta">${[c.Age?'Age: '+c.Age:'',c.Gender].filter(Boolean).join(' · ')}</div>`:''}</div>
           <div class="cvr">
             <div class="vnum" style="color:${pc(c['Political Party'])}">${c._v.toLocaleString()}</div>
@@ -1571,10 +1748,11 @@ function renderPR() {
     const isForf = p.votes / totalVotes < PR_THRESH;
     const c = prColor(p.party);
     const barW = ((p.votes / maxVotes) * 100).toFixed(1);
+    const logoCell = '<div class="pr-all-logo">' + partyLogoImg(p.party, 20, c) + '</div>';
     return '<div class="pr-all-row' + (isForf ? ' forfeited' : '') + '">'
       + '<div class="pr-all-rk">' + (i+1) + '</div>'
+      + logoCell
       + '<div class="pr-all-name">'
-          + '<span style="width:7px;height:7px;border-radius:50%;background:' + c + ';flex-shrink:0;display:inline-block"></span>'
           + p.party
           + (isForf ? '<span class="pr-forf-tag">&lt;3%</span>' : '')
       + '</div>'
@@ -1630,7 +1808,7 @@ function renderPR() {
       ? '<div class="section-label" style="margin-top:4px"><span>ALL PARTIES</span><div class="section-label-line"></div>'
           + '<span class="section-sublabel">PR VOTE RESULTS</span></div>'
         + '<div class="pr-all-table">'
-          + '<div class="pr-all-head"><div>#</div><div>Party</div><div style="text-align:right">Votes</div>'
+          + '<div class="pr-all-head"><div>#</div><div></div><div>Party</div><div style="text-align:right">Votes</div>'
             + '<div style="text-align:right">Share</div><div></div></div>'
           + allRows
         + '</div>'
