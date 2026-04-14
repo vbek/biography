@@ -227,6 +227,86 @@ class ImageSlider {
 }
 
 // ============================================
+// NEWS SLIDER (3 cards visible, prev/next/touch)
+// ============================================
+class NewsSlider {
+    constructor() {
+        this.track    = document.querySelector('.news-slider-track');
+        this.viewport = document.querySelector('.news-slider-viewport');
+        this.prevBtn  = document.querySelector('.news-prev-btn');
+        this.nextBtn  = document.querySelector('.news-next-btn');
+        this.dotsEl   = document.querySelector('.news-dots');
+
+        if (!this.track || !this.viewport || !this.prevBtn || !this.nextBtn || !this.dotsEl) return;
+
+        this.cards      = Array.from(this.track.querySelectorAll('.news-card'));
+        this.total      = this.cards.length;
+        this.currentIdx = 0;
+
+        this.buildDots();
+        this.update();
+
+        this.prevBtn.addEventListener('click', () => this.go(this.currentIdx - 1));
+        this.nextBtn.addEventListener('click', () => this.go(this.currentIdx + 1));
+
+        // Touch swipe
+        let startX = 0;
+        this.viewport.addEventListener('touchstart', (e) => {
+            startX = e.changedTouches[0].screenX;
+        }, { passive: true });
+        this.viewport.addEventListener('touchend', (e) => {
+            const dx = startX - e.changedTouches[0].screenX;
+            if (Math.abs(dx) > 50) {
+                if (dx > 0) this.go(this.currentIdx + 1);
+                else        this.go(this.currentIdx - 1);
+            }
+        }, { passive: true });
+
+        window.addEventListener('resize', () => { this.buildDots(); this.update(); });
+    }
+
+    visibleCount() {
+        const w = this.viewport.offsetWidth;
+        if (w <= 600) return 1;
+        if (w <= 900) return 2;
+        return 3;
+    }
+
+    maxIdx() { return Math.max(0, this.total - this.visibleCount()); }
+
+    go(idx) {
+        this.currentIdx = Math.max(0, Math.min(idx, this.maxIdx()));
+        this.update();
+    }
+
+    update() {
+        const card = this.cards[0];
+        if (!card) return;
+        const gap    = parseFloat(getComputedStyle(this.track).gap) || 30;
+        const cardW  = card.getBoundingClientRect().width;
+        const offset = this.currentIdx * (cardW + gap);
+        this.track.style.transform = `translateX(-${offset}px)`;
+
+        this.prevBtn.disabled = this.currentIdx === 0;
+        this.nextBtn.disabled = this.currentIdx >= this.maxIdx();
+
+        this.dotsEl.querySelectorAll('.news-dot').forEach((d, i) => {
+            d.classList.toggle('active', i === this.currentIdx);
+        });
+    }
+
+    buildDots() {
+        this.dotsEl.innerHTML = '';
+        for (let i = 0; i <= this.maxIdx(); i++) {
+            const dot = document.createElement('button');
+            dot.className = 'news-dot' + (i === 0 ? ' active' : '');
+            dot.addEventListener('click', () => this.go(i));
+            this.dotsEl.appendChild(dot);
+        }
+    }
+}
+
+// ============================================
 // INITIALIZATION
 // ============================================
 document.addEventListener('DOMContentLoaded', () => {
@@ -237,6 +317,9 @@ document.addEventListener('DOMContentLoaded', () => {
     document.querySelectorAll('.project-image-slider').forEach(slider => {
         new ImageSlider(slider);
     });
+
+    // 2b. Initialize News Slider
+    new NewsSlider();
 
     // 3. FIXED MOBILE MENU LOGIC
     const hamburger = document.querySelector('.hamburger');

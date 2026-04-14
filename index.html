@@ -372,52 +372,88 @@
     <section id="news" class="news-section">
         <div class="container">
             <h2 class="section-title">Current Research and News</h2>
-                <div class="news-grid">
-                    <div class="news-card bg-news-research">
-                        <div class="news-overlay"></div>
-                        <div class="news-content">
-                            <span class="news-tag">Publication</span>
-                            <h3>Instance-Level Bacteria Segmentation Under Varying Growth Conditions</h3>
-                            <p>Published a Conference Paper at IEEE ICMLA 2025, exploring Deep Learning Feature Pyramid-based architectures for microscopy image analysis.</p>
-                            <div class="news-actions">
-                                <a href="raw/bacteria_seg.pdf" target="_blank" class="btn btn-primary btn-sm">
-                                    <i class="fas fa-book-open"></i> Read Paper
-                                </a>
-    
-                            </div>
-                        </div>
-                    </div>
 
-                    <div class="news-card bg-news-conference">
-                        <div class="news-overlay"></div>
-                        <div class="news-content">
-                            <span class="news-tag">Conference</span>
-                            <h3>Oral Presentation: Advanced Vision Models in Medical Imaging</h3>
-                            <p>Delivered insights on combining Deep Learning and Machine Learning architectures for segmentation tasks at international conference.</p>
-                            <div class="news-actions">
-                                <a href="https://drive.google.com/file/d/1DGtdYxJ98MXne5Vb0OSfBnTOaA3YuaHP/view" target="_blank" class="btn btn-primary btn-sm">
-                                    <i class="fas fa-external-link-alt"></i> View Presentation
-                                </a>
-                                
-                            </div>
-                        </div>
-                    </div>
+            <div class="news-slider-wrapper">
+                <button class="news-nav-btn news-prev-btn" aria-label="Previous">
+                    <i class="fas fa-angle-left"></i>
+                </button>
 
-                    <div class="news-card bg-news-update">
-                        <div class="news-overlay"></div>
-                        <div class="news-content">
-                            <span class="news-tag">Research Update</span>
-                            <h3>Leadership in AI Research</h3>
-                            <p>SIU Researchers Use AI and Microscopy to Rapidly Detect Salmonella in Onions</p>
-                            <div class="news-actions">
-                                <a href="https://soc.siu.edu/news/articles/enhancing-food-safety-salmonella.php" target="_blank" class="btn btn-primary btn-sm">
-                                    <i class="fas fa-external-link-alt"></i> Read Story
-                                </a>
-                                
+                <div class="news-slider-viewport">
+                    <div class="news-slider-track">
+
+                        <!-- Card 1: CARP Forum (newest) -->
+                        <div class="news-card bg-news-carp">
+                            <div class="news-overlay"></div>
+                            <div class="news-content">
+                                <span class="news-tag">Poster Presentation</span>
+                                <span class="news-date"><i class="fas fa-calendar-alt"></i> March 2025</span>
+                                <h3>CARP Forum: Rapid Bacteria Detection for Food Safety</h3>
+                                <p>Presented USDA NIFA-funded research on rapid bacteria detection, receiving high appreciation and industry implementation insights from visiting guests.</p>
+                                <div class="news-actions">
+                                    <a href="https://www.linkedin.com/feed/update/urn:li:activity:7448179427743621120/" target="_blank" class="btn btn-primary btn-sm">
+                                        <i class="fab fa-linkedin"></i> View Post
+                                    </a>
+                                </div>
                             </div>
                         </div>
-                    </div>
-                </div>
+
+                        <!-- Card 2: Publication -->
+                        <div class="news-card bg-news-research">
+                            <div class="news-overlay"></div>
+                            <div class="news-content">
+                                <span class="news-tag">Publication</span>
+                                <span class="news-date"><i class="fas fa-calendar-alt"></i> Dec 2024</span>
+                                <h3>Instance-Level Bacteria Segmentation Under Varying Growth Conditions</h3>
+                                <p>Published at IEEE ICMLA 2025, exploring Deep Learning Feature Pyramid-based architectures for microscopy image analysis.</p>
+                                <div class="news-actions">
+                                    <a href="raw/bacteria_seg.pdf" target="_blank" class="btn btn-primary btn-sm">
+                                        <i class="fas fa-book-open"></i> Read Paper
+                                    </a>
+                                </div>
+                            </div>
+                        </div>
+
+                        <!-- Card 3: Conference -->
+                        <div class="news-card bg-news-conference">
+                            <div class="news-overlay"></div>
+                            <div class="news-content">
+                                <span class="news-tag">Conference</span>
+                                <span class="news-date"><i class="fas fa-calendar-alt"></i> Dec 2024</span>
+                                <h3>Oral Presentation: Advanced Vision Models in Medical Imaging</h3>
+                                <p>Delivered insights on combining Deep Learning and Machine Learning architectures for segmentation tasks at international conference.</p>
+                                <div class="news-actions">
+                                    <a href="https://drive.google.com/file/d/1DGtdYxJ98MXne5Vb0OSfBnTOaA3YuaHP/view" target="_blank" class="btn btn-primary btn-sm">
+                                        <i class="fas fa-external-link-alt"></i> View Presentation
+                                    </a>
+                                </div>
+                            </div>
+                        </div>
+
+                        <!-- Card 4: Research Update -->
+                        <div class="news-card bg-news-update">
+                            <div class="news-overlay"></div>
+                            <div class="news-content">
+                                <span class="news-tag">Research Update</span>
+                                <span class="news-date"><i class="fas fa-calendar-alt"></i> Nov 2024</span>
+                                <h3>Leadership in AI Research</h3>
+                                <p>SIU Researchers Use AI and Microscopy to Rapidly Detect Salmonella in Onions — featured in university news.</p>
+                                <div class="news-actions">
+                                    <a href="https://soc.siu.edu/news/articles/enhancing-food-safety-salmonella.php" target="_blank" class="btn btn-primary btn-sm">
+                                        <i class="fas fa-external-link-alt"></i> Read Story
+                                    </a>
+                                </div>
+                            </div>
+                        </div>
+
+                    </div><!-- end .news-slider-track -->
+                </div><!-- end .news-slider-viewport -->
+
+                <button class="news-nav-btn news-next-btn" aria-label="Next">
+                    <i class="fas fa-angle-right"></i>
+                </button>
+            </div><!-- end .news-slider-wrapper -->
+
+            <div class="news-dots"></div>
         </div>
     </section>
 
@@ -445,8 +481,9 @@
             <div class="contact-content">
                 <div class="contact-info">
                     <div class="contact-item">
-                        <i class="fas fa-envelope"></i><a href="mailto:bibek.koirala@siu.edu">bibek.koirala@siu.edu</a>
-                        
+                        <a href="mailto:bibekkoirala2009@gmail.com" aria-label="Email">
+                            <i class="fas fa-envelope"></i>
+                        </a>
                     </div>
                     <div class="social-links">
                         <a href="https://www.linkedin.com/in/bibek-koirala-2658a0189/" target="_blank" aria-label="LinkedIn">
@@ -481,7 +518,7 @@
     <!-- Nepal Election 2082 Floating Button -->
     <a href="election/nepal_election_dashboard.html" target="_blank" class="election-fab" title="Nepal Election 2082 Results">
         <span class="election-fab-icon">🗳️</span>
-        <span class="election-fab-label">Election<br>2082</span>
+        <span class="election-fab-label">ELECTION<br>2082</span>
     </a>
 
     <script src="script.js"></script>
