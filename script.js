@@ -242,9 +242,14 @@ class NewsSlider {
         this.cards      = Array.from(this.track.querySelectorAll('.news-card'));
         this.total      = this.cards.length;
         this.currentIdx = 0;
+        this.GAP        = 24; // px gap between cards
 
-        this.buildDots();
-        this.update();
+        // Wait for full layout before measuring
+        requestAnimationFrame(() => {
+            this.setCardWidths();
+            this.buildDots();
+            this.update();
+        });
 
         this.prevBtn.addEventListener('click', () => this.go(this.currentIdx - 1));
         this.nextBtn.addEventListener('click', () => this.go(this.currentIdx + 1));
@@ -262,7 +267,13 @@ class NewsSlider {
             }
         }, { passive: true });
 
-        window.addEventListener('resize', () => { this.buildDots(); this.update(); });
+        // Recalc on resize
+        window.addEventListener('resize', () => {
+            this.currentIdx = 0;
+            this.setCardWidths();
+            this.buildDots();
+            this.update();
+        });
     }
 
     visibleCount() {
@@ -270,6 +281,22 @@ class NewsSlider {
         if (w <= 600) return 1;
         if (w <= 900) return 2;
         return 3;
+    }
+
+    setCardWidths() {
+        const vpW     = this.viewport.offsetWidth;
+        const visible = this.visibleCount();
+        const totalGap = this.GAP * (visible - 1);
+        const cardW   = Math.floor((vpW - totalGap) / visible);
+
+        this.cardW = cardW;
+        this.track.style.gap = this.GAP + 'px';
+
+        this.cards.forEach(card => {
+            card.style.flex    = '0 0 ' + cardW + 'px';
+            card.style.width   = cardW + 'px';
+            card.style.minWidth = cardW + 'px';
+        });
     }
 
     maxIdx() { return Math.max(0, this.total - this.visibleCount()); }
@@ -280,11 +307,7 @@ class NewsSlider {
     }
 
     update() {
-        const card = this.cards[0];
-        if (!card) return;
-        const gap    = parseFloat(getComputedStyle(this.track).gap) || 30;
-        const cardW  = card.getBoundingClientRect().width;
-        const offset = this.currentIdx * (cardW + gap);
+        const offset = this.currentIdx * (this.cardW + this.GAP);
         this.track.style.transform = `translateX(-${offset}px)`;
 
         this.prevBtn.disabled = this.currentIdx === 0;
