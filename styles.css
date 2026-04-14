@@ -931,7 +931,7 @@ a:focus-visible {
 .bg-news-research { background-image: url('images/publication.png'); }
 .bg-news-conference { background-image: url('images/conference.png'); }
 .bg-news-update { background-image: url('images/news.png'); }
-.bg-news-carp { background-image: url('images/CARP.png'); }
+.bg-news-carp { background-image: url('images/carp.png'); }
 
 /* ── News Slider ── */
 .news-slider-wrapper {
