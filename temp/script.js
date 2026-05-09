@@ -332,13 +332,7 @@ class NewsSlider {
 // ============================================
 // INITIALIZATION
 // ============================================
-document.addEventListener('DOMContentLoaded', async () => {
-    // 0. Wait for dynamic-loader.js to finish injecting cards from data.json
-    //    so sliders capture both static AND dynamic cards.
-    if (window.dynamicContentReady) {
-        try { await window.dynamicContentReady; } catch (e) { /* non-fatal */ }
-    }
-
+document.addEventListener('DOMContentLoaded', () => {
     // 1. Initialize Master Slider
     new MasterProjectSlider();
 
