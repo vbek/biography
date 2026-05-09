@@ -1,0 +1,933 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Dashboard · Bibek Koirala</title>
+    <meta name="robots" content="noindex, nofollow">
+    <link rel="stylesheet" href="styles.css">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/css/all.min.css">
+    <style>
+        /* ============================================
+           DASHBOARD-SPECIFIC STYLES
+           Reuses --primary-color, --secondary-color, etc.
+           ============================================ */
+        body {
+            background: linear-gradient(135deg, #f5f7fa 0%, #e8eef5 100%);
+            min-height: 100vh;
+            padding: 40px 20px;
+        }
+
+        .dashboard-container {
+            max-width: 1200px;
+            margin: 0 auto;
+        }
+
+        /* ---- LOGIN GATE ---- */
+        .login-gate {
+            max-width: 420px;
+            margin: 80px auto;
+            background: var(--bg-white);
+            border-radius: 16px;
+            padding: 48px 36px;
+            box-shadow: 0 20px 60px rgba(44, 62, 80, 0.12);
+            text-align: center;
+        }
+        .login-gate i.fa-lock {
+            font-size: 2.5rem;
+            color: var(--primary-color);
+            margin-bottom: 16px;
+        }
+        .login-gate h1 {
+            font-size: 1.6rem;
+            color: var(--secondary-color);
+            margin-bottom: 8px;
+        }
+        .login-gate p {
+            color: var(--text-light);
+            margin-bottom: 24px;
+            font-size: 0.95rem;
+        }
+        .login-gate input {
+            width: 100%;
+            padding: 14px 16px;
+            border: 2px solid var(--border-color);
+            border-radius: 10px;
+            font-size: 1rem;
+            margin-bottom: 16px;
+            transition: var(--transition);
+        }
+        .login-gate input:focus {
+            outline: none;
+            border-color: var(--primary-color);
+        }
+        .login-error {
+            color: var(--accent-color);
+            font-size: 0.9rem;
+            min-height: 20px;
+            margin-bottom: 12px;
+        }
+
+        /* ---- DASHBOARD HEADER ---- */
+        .dashboard-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 32px;
+            flex-wrap: wrap;
+            gap: 16px;
+        }
+        .dashboard-header h1 {
+            font-size: 2rem;
+            color: var(--secondary-color);
+        }
+        .dashboard-header h1 span {
+            color: var(--primary-color);
+        }
+        .header-actions {
+            display: flex;
+            gap: 10px;
+            flex-wrap: wrap;
+        }
+
+        /* ---- TABS ---- */
+        .dashboard-tabs {
+            display: flex;
+            gap: 4px;
+            background: var(--bg-white);
+            padding: 6px;
+            border-radius: 12px;
+            margin-bottom: 24px;
+            box-shadow: 0 2px 12px rgba(44, 62, 80, 0.06);
+            width: fit-content;
+        }
+        .tab-btn {
+            padding: 10px 22px;
+            border: none;
+            background: transparent;
+            color: var(--text-light);
+            font-weight: 600;
+            font-size: 0.95rem;
+            border-radius: 8px;
+            cursor: pointer;
+            transition: var(--transition);
+        }
+        .tab-btn.active {
+            background: var(--primary-color);
+            color: white;
+            box-shadow: 0 4px 12px rgba(74, 144, 226, 0.3);
+        }
+        .tab-btn:not(.active):hover {
+            color: var(--secondary-color);
+        }
+
+        /* ---- DASHBOARD GRID ---- */
+        .dashboard-grid {
+            display: grid;
+            grid-template-columns: 420px 1fr;
+            gap: 24px;
+        }
+        @media (max-width: 900px) {
+            .dashboard-grid { grid-template-columns: 1fr; }
+        }
+
+        /* ---- FORM PANEL ---- */
+        .form-panel {
+            background: var(--bg-white);
+            border-radius: 14px;
+            padding: 28px;
+            box-shadow: 0 4px 20px rgba(44, 62, 80, 0.08);
+            position: sticky;
+            top: 20px;
+            height: fit-content;
+        }
+        .form-panel h2 {
+            font-size: 1.25rem;
+            color: var(--secondary-color);
+            margin-bottom: 4px;
+        }
+        .form-panel .form-subtitle {
+            color: var(--text-light);
+            font-size: 0.9rem;
+            margin-bottom: 22px;
+        }
+        .form-group {
+            margin-bottom: 16px;
+        }
+        .form-group label {
+            display: block;
+            font-size: 0.85rem;
+            font-weight: 600;
+            color: var(--secondary-color);
+            margin-bottom: 6px;
+            text-transform: uppercase;
+            letter-spacing: 0.4px;
+        }
+        .form-group input,
+        .form-group textarea,
+        .form-group select {
+            width: 100%;
+            padding: 11px 14px;
+            border: 1.5px solid var(--border-color);
+            border-radius: 8px;
+            font-size: 0.95rem;
+            font-family: inherit;
+            transition: var(--transition);
+            background: #fafbfc;
+        }
+        .form-group input:focus,
+        .form-group textarea:focus,
+        .form-group select:focus {
+            outline: none;
+            border-color: var(--primary-color);
+            background: white;
+        }
+        .form-group textarea {
+            resize: vertical;
+            min-height: 90px;
+        }
+
+        /* Image upload zone */
+        .image-drop {
+            border: 2px dashed var(--border-color);
+            border-radius: 10px;
+            padding: 24px 16px;
+            text-align: center;
+            cursor: pointer;
+            transition: var(--transition);
+            background: #fafbfc;
+        }
+        .image-drop:hover, .image-drop.dragover {
+            border-color: var(--primary-color);
+            background: rgba(74, 144, 226, 0.05);
+        }
+        .image-drop i {
+            font-size: 1.8rem;
+            color: var(--primary-color);
+            margin-bottom: 8px;
+        }
+        .image-drop p {
+            color: var(--text-light);
+            font-size: 0.85rem;
+            margin: 0;
+        }
+        .image-drop input { display: none; }
+        .image-thumbs {
+            display: flex;
+            gap: 8px;
+            flex-wrap: wrap;
+            margin-top: 12px;
+        }
+        .image-thumb {
+            position: relative;
+            width: 70px;
+            height: 70px;
+            border-radius: 6px;
+            overflow: hidden;
+            border: 1.5px solid var(--border-color);
+        }
+        .image-thumb img {
+            width: 100%;
+            height: 100%;
+            object-fit: cover;
+        }
+        .image-thumb .remove-thumb {
+            position: absolute;
+            top: 2px;
+            right: 2px;
+            width: 20px;
+            height: 20px;
+            background: var(--accent-color);
+            color: white;
+            border: none;
+            border-radius: 50%;
+            font-size: 0.7rem;
+            cursor: pointer;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            line-height: 1;
+        }
+
+        .form-actions {
+            display: flex;
+            gap: 10px;
+            margin-top: 8px;
+        }
+        .form-actions button {
+            flex: 1;
+            padding: 12px;
+            border: none;
+            border-radius: 8px;
+            font-weight: 600;
+            cursor: pointer;
+            font-size: 0.95rem;
+            transition: var(--transition);
+        }
+        .btn-add {
+            background: var(--primary-color);
+            color: white;
+        }
+        .btn-add:hover {
+            background: #357abd;
+            transform: translateY(-1px);
+            box-shadow: 0 4px 12px rgba(74, 144, 226, 0.3);
+        }
+        .btn-clear {
+            background: #f1f3f5;
+            color: var(--text-dark);
+        }
+        .btn-clear:hover { background: #e9ecef; }
+
+        /* ---- LIST PANEL ---- */
+        .list-panel {
+            background: var(--bg-white);
+            border-radius: 14px;
+            padding: 28px;
+            box-shadow: 0 4px 20px rgba(44, 62, 80, 0.08);
+        }
+        .list-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 18px;
+            flex-wrap: wrap;
+            gap: 10px;
+        }
+        .list-header h2 {
+            font-size: 1.25rem;
+            color: var(--secondary-color);
+        }
+        .item-count {
+            background: var(--bg-light);
+            color: var(--text-light);
+            padding: 4px 12px;
+            border-radius: 20px;
+            font-size: 0.85rem;
+            font-weight: 600;
+        }
+
+        .empty-state {
+            text-align: center;
+            padding: 48px 20px;
+            color: var(--text-light);
+        }
+        .empty-state i {
+            font-size: 2.5rem;
+            margin-bottom: 12px;
+            opacity: 0.4;
+        }
+
+        /* ---- ITEM CARDS (preview, mimics site style) ---- */
+        .item-list {
+            display: flex;
+            flex-direction: column;
+            gap: 14px;
+        }
+        .item-card {
+            display: grid;
+            grid-template-columns: 110px 1fr auto;
+            gap: 16px;
+            padding: 14px;
+            background: #fafbfc;
+            border: 1.5px solid var(--border-color);
+            border-radius: 10px;
+            align-items: center;
+            transition: var(--transition);
+        }
+        .item-card:hover {
+            border-color: var(--primary-color);
+            box-shadow: 0 4px 12px rgba(74, 144, 226, 0.1);
+        }
+        .item-card .item-thumb {
+            width: 110px;
+            height: 80px;
+            background: var(--bg-light);
+            border-radius: 6px;
+            overflow: hidden;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            color: var(--text-light);
+        }
+        .item-card .item-thumb img {
+            width: 100%;
+            height: 100%;
+            object-fit: cover;
+        }
+        .item-info h3 {
+            font-size: 1rem;
+            color: var(--secondary-color);
+            margin-bottom: 4px;
+            line-height: 1.3;
+        }
+        .item-info p {
+            color: var(--text-light);
+            font-size: 0.85rem;
+            display: -webkit-box;
+            -webkit-line-clamp: 2;
+            -webkit-box-orient: vertical;
+            overflow: hidden;
+        }
+        .item-meta {
+            display: flex;
+            gap: 8px;
+            margin-top: 6px;
+            align-items: center;
+            flex-wrap: wrap;
+        }
+        .item-tag {
+            background: var(--primary-color);
+            color: white;
+            padding: 2px 10px;
+            border-radius: 12px;
+            font-size: 0.7rem;
+            font-weight: 600;
+            text-transform: uppercase;
+            letter-spacing: 0.4px;
+        }
+        .item-tag.research { background: #16a085; }
+        .item-tag.publication { background: #8e44ad; }
+        .item-tag.conference { background: #e67e22; }
+        .item-tag.update { background: #3498db; }
+        .item-date {
+            font-size: 0.75rem;
+            color: var(--text-light);
+        }
+        .item-actions {
+            display: flex;
+            flex-direction: column;
+            gap: 6px;
+        }
+        .icon-btn {
+            width: 32px;
+            height: 32px;
+            border: none;
+            background: transparent;
+            color: var(--text-light);
+            border-radius: 6px;
+            cursor: pointer;
+            transition: var(--transition);
+        }
+        .icon-btn:hover {
+            background: var(--bg-light);
+            color: var(--secondary-color);
+        }
+        .icon-btn.danger:hover {
+            background: rgba(231, 76, 60, 0.1);
+            color: var(--accent-color);
+        }
+
+        /* ---- TOAST ---- */
+        .toast {
+            position: fixed;
+            bottom: 30px;
+            right: 30px;
+            background: var(--secondary-color);
+            color: white;
+            padding: 14px 24px;
+            border-radius: 10px;
+            box-shadow: 0 8px 24px rgba(0,0,0,0.2);
+            font-weight: 500;
+            transform: translateY(100px);
+            opacity: 0;
+            transition: all 0.3s ease;
+            z-index: 9999;
+        }
+        .toast.show {
+            transform: translateY(0);
+            opacity: 1;
+        }
+        .toast.success { background: #27ae60; }
+        .toast.error { background: var(--accent-color); }
+
+        /* ---- DASHBOARD BUTTONS ---- */
+        .btn-export, .btn-import, .btn-logout {
+            padding: 10px 18px;
+            border: none;
+            border-radius: 8px;
+            font-weight: 600;
+            cursor: pointer;
+            font-size: 0.9rem;
+            transition: var(--transition);
+            display: inline-flex;
+            align-items: center;
+            gap: 8px;
+        }
+        .btn-export {
+            background: var(--primary-color);
+            color: white;
+        }
+        .btn-export:hover {
+            background: #357abd;
+            transform: translateY(-1px);
+        }
+        .btn-import {
+            background: white;
+            color: var(--secondary-color);
+            border: 1.5px solid var(--border-color);
+        }
+        .btn-import:hover { border-color: var(--primary-color); color: var(--primary-color); }
+        .btn-logout {
+            background: transparent;
+            color: var(--text-light);
+        }
+        .btn-logout:hover { color: var(--accent-color); }
+
+        /* Sub-tag selector for image style theme on news */
+        .form-hint {
+            font-size: 0.78rem;
+            color: var(--text-light);
+            margin-top: 4px;
+        }
+
+        @media (max-width: 600px) {
+            .item-card { grid-template-columns: 80px 1fr; }
+            .item-card .item-thumb { width: 80px; height: 60px; }
+            .item-actions { grid-column: 1 / -1; flex-direction: row; justify-content: flex-end; }
+        }
+    </style>
+</head>
+<body>
+
+<!-- ============= LOGIN GATE ============= -->
+<div id="loginGate" class="login-gate">
+    <i class="fas fa-lock"></i>
+    <h1>Dashboard Access</h1>
+    <p>Enter the admin password to continue.</p>
+    <input type="password" id="passwordInput" placeholder="Password" autofocus>
+    <div class="login-error" id="loginError"></div>
+    <button class="btn-add" style="width:100%; padding:12px; border:none; border-radius:8px; cursor:pointer; font-weight:600;" onclick="tryLogin()">
+        <i class="fas fa-sign-in-alt"></i> Unlock
+    </button>
+</div>
+
+<!-- ============= DASHBOARD ============= -->
+<div id="dashboard" class="dashboard-container" style="display:none;">
+
+    <div class="dashboard-header">
+        <h1>Portfolio <span>Dashboard</span></h1>
+        <div class="header-actions">
+            <button class="btn-import" onclick="document.getElementById('importFile').click()">
+                <i class="fas fa-file-import"></i> Import
+            </button>
+            <input type="file" id="importFile" accept=".json" style="display:none;" onchange="importData(event)">
+            <button class="btn-export" onclick="exportData()">
+                <i class="fas fa-download"></i> Export data.json
+            </button>
+            <button class="btn-logout" onclick="logout()">
+                <i class="fas fa-sign-out-alt"></i> Logout
+            </button>
+        </div>
+    </div>
+
+    <div class="dashboard-tabs">
+        <button class="tab-btn active" data-tab="research" onclick="switchTab('research')">
+            <i class="fas fa-flask"></i> Research
+        </button>
+        <button class="tab-btn" data-tab="news" onclick="switchTab('news')">
+            <i class="fas fa-newspaper"></i> News
+        </button>
+    </div>
+
+    <div class="dashboard-grid">
+        <!-- ===== ADD FORM ===== -->
+        <div class="form-panel">
+            <h2 id="formTitle">Add Research Project</h2>
+            <p class="form-subtitle" id="formSubtitle">Newest entries appear first on your site.</p>
+
+            <form id="itemForm" onsubmit="event.preventDefault(); addItem();">
+
+                <div class="form-group">
+                    <label for="itemTitle">Title</label>
+                    <input type="text" id="itemTitle" required placeholder="e.g., SeekBot - Precision Retrieval AI">
+                </div>
+
+                <div class="form-group">
+                    <label for="itemDescription">Description</label>
+                    <textarea id="itemDescription" required placeholder="Describe the research / news in detail..."></textarea>
+                </div>
+
+                <!-- News-only: tag + date -->
+                <div class="form-group news-only" style="display:none;">
+                    <label for="itemTag">Tag</label>
+                    <select id="itemTag">
+                        <option value="Research Update">Research Update</option>
+                        <option value="Publication">Publication</option>
+                        <option value="Conference">Conference</option>
+                        <option value="Poster Presentation">Poster Presentation</option>
+                        <option value="Award">Award</option>
+                        <option value="Talk">Talk</option>
+                    </select>
+                </div>
+
+                <div class="form-group news-only" style="display:none;">
+                    <label for="itemDate">Date Label</label>
+                    <input type="text" id="itemDate" placeholder="e.g., May 2026">
+                </div>
+
+                <div class="form-group">
+                    <label for="itemLink">Link (optional)</label>
+                    <input type="url" id="itemLink" placeholder="https://github.com/... or paper URL">
+                </div>
+
+                <div class="form-group">
+                    <label for="itemLinkLabel">Link Button Label</label>
+                    <input type="text" id="itemLinkLabel" placeholder="View on GitHub / Read Paper / View Post">
+                </div>
+
+                <div class="form-group">
+                    <label>Images <span class="research-only">(multiple — slider)</span><span class="news-only" style="display:none;">(one — card background)</span></label>
+                    <label class="image-drop" id="imageDrop">
+                        <i class="fas fa-cloud-upload-alt"></i>
+                        <p><strong>Click to upload</strong> or drag & drop</p>
+                        <p class="form-hint">PNG, JPG, WEBP — stored as base64</p>
+                        <input type="file" id="imageInput" accept="image/*" multiple>
+                    </label>
+                    <div class="image-thumbs" id="imageThumbs"></div>
+                </div>
+
+                <div class="form-actions">
+                    <button type="button" class="btn-clear" onclick="clearForm()">Clear</button>
+                    <button type="submit" class="btn-add">
+                        <i class="fas fa-plus"></i> Add Item
+                    </button>
+                </div>
+            </form>
+        </div>
+
+        <!-- ===== ITEMS LIST ===== -->
+        <div class="list-panel">
+            <div class="list-header">
+                <h2 id="listTitle">Research Items</h2>
+                <span class="item-count" id="itemCount">0</span>
+            </div>
+            <div id="itemList" class="item-list"></div>
+        </div>
+    </div>
+</div>
+
+<div class="toast" id="toast"></div>
+
+<script>
+// ============================================
+// SIMPLE PASSWORD GATE (client-side hash)
+// Default password: bibek2026  (change PASSWORD_HASH below)
+// ============================================
+// SHA-256 hash of the password "bibek2026"
+const PASSWORD_HASH = '016dedbf456ab8e0064198e0303c07d8d30baa210272b8df02d1512ec88e86c0';
+// NOTE: regenerate this with the helper at the bottom of the page (open DevTools console)
+
+async function sha256(str) {
+    const buf = await crypto.subtle.digest('SHA-256', new TextEncoder().encode(str));
+    return Array.from(new Uint8Array(buf)).map(b => b.toString(16).padStart(2,'0')).join('');
+}
+
+async function tryLogin() {
+    const pw = document.getElementById('passwordInput').value;
+    const err = document.getElementById('loginError');
+    if (!pw) { err.textContent = 'Enter a password'; return; }
+
+    const hash = await sha256(pw);
+    if (hash === PASSWORD_HASH) {
+        sessionStorage.setItem('dash_auth', '1');
+        showDashboard();
+    } else {
+        err.textContent = 'Incorrect password';
+    }
+}
+
+function logout() {
+    sessionStorage.removeItem('dash_auth');
+    location.reload();
+}
+
+document.getElementById('passwordInput')?.addEventListener('keydown', (e) => {
+    if (e.key === 'Enter') tryLogin();
+});
+
+function showDashboard() {
+    document.getElementById('loginGate').style.display = 'none';
+    document.getElementById('dashboard').style.display = 'block';
+    loadData();
+    renderList();
+}
+
+if (sessionStorage.getItem('dash_auth') === '1') {
+    document.addEventListener('DOMContentLoaded', showDashboard);
+}
+
+// Helper for generating a new password hash — paste in console:
+// sha256('your_new_password').then(h => console.log(h))
+window.sha256 = sha256;
+
+// ============================================
+// DATA STATE
+// ============================================
+let currentTab = 'research';
+let data = { research: [], news: [] };
+let pendingImages = []; // base64 strings
+
+const STORAGE_KEY = 'portfolio_dashboard_data';
+
+function loadData() {
+    const raw = localStorage.getItem(STORAGE_KEY);
+    if (raw) {
+        try { data = JSON.parse(raw); }
+        catch { data = { research: [], news: [] }; }
+    }
+    if (!data.research) data.research = [];
+    if (!data.news) data.news = [];
+}
+
+function saveData() {
+    localStorage.setItem(STORAGE_KEY, JSON.stringify(data));
+}
+
+// ============================================
+// TABS
+// ============================================
+function switchTab(tab) {
+    currentTab = tab;
+    document.querySelectorAll('.tab-btn').forEach(b => b.classList.toggle('active', b.dataset.tab === tab));
+
+    document.getElementById('formTitle').textContent =
+        tab === 'research' ? 'Add Research Project' : 'Add News Item';
+    document.getElementById('listTitle').textContent =
+        tab === 'research' ? 'Research Items' : 'News Items';
+
+    const showNews = tab === 'news';
+    document.querySelectorAll('.news-only').forEach(el => el.style.display = showNews ? '' : 'none');
+    document.querySelectorAll('.research-only').forEach(el => el.style.display = showNews ? 'none' : '');
+
+    clearForm();
+    renderList();
+}
+
+// ============================================
+// IMAGE UPLOAD
+// ============================================
+const imageDrop = document.getElementById('imageDrop');
+const imageInput = document.getElementById('imageInput');
+const imageThumbs = document.getElementById('imageThumbs');
+
+imageInput.addEventListener('change', (e) => handleFiles(e.target.files));
+
+['dragenter','dragover'].forEach(evt => {
+    imageDrop.addEventListener(evt, (e) => {
+        e.preventDefault(); e.stopPropagation();
+        imageDrop.classList.add('dragover');
+    });
+});
+['dragleave','drop'].forEach(evt => {
+    imageDrop.addEventListener(evt, (e) => {
+        e.preventDefault(); e.stopPropagation();
+        imageDrop.classList.remove('dragover');
+    });
+});
+imageDrop.addEventListener('drop', (e) => {
+    handleFiles(e.dataTransfer.files);
+});
+
+function handleFiles(files) {
+    Array.from(files).forEach(file => {
+        if (!file.type.startsWith('image/')) return;
+        const reader = new FileReader();
+        reader.onload = (e) => {
+            // News only takes one image; replace
+            if (currentTab === 'news') {
+                pendingImages = [e.target.result];
+            } else {
+                pendingImages.push(e.target.result);
+            }
+            renderThumbs();
+        };
+        reader.readAsDataURL(file);
+    });
+}
+
+function renderThumbs() {
+    imageThumbs.innerHTML = pendingImages.map((src, i) => `
+        <div class="image-thumb">
+            <img src="${src}" alt="">
+            <button type="button" class="remove-thumb" onclick="removeThumb(${i})">×</button>
+        </div>
+    `).join('');
+}
+
+function removeThumb(i) {
+    pendingImages.splice(i, 1);
+    renderThumbs();
+}
+
+// ============================================
+// ADD / DELETE ITEM
+// ============================================
+function addItem() {
+    const title = document.getElementById('itemTitle').value.trim();
+    const description = document.getElementById('itemDescription').value.trim();
+    const link = document.getElementById('itemLink').value.trim();
+    const linkLabel = document.getElementById('itemLinkLabel').value.trim();
+
+    if (!title || !description) {
+        toast('Title and description are required', 'error');
+        return;
+    }
+
+    const item = {
+        id: Date.now(),
+        createdAt: new Date().toISOString(),
+        title, description, link, linkLabel,
+        images: [...pendingImages],
+    };
+
+    if (currentTab === 'news') {
+        item.tag = document.getElementById('itemTag').value;
+        item.date = document.getElementById('itemDate').value.trim() || formatDateLabel(new Date());
+    }
+
+    // NEWEST FIRST: prepend
+    data[currentTab].unshift(item);
+    saveData();
+    clearForm();
+    renderList();
+    toast(`${currentTab === 'research' ? 'Research project' : 'News item'} added!`, 'success');
+}
+
+function deleteItem(id) {
+    if (!confirm('Delete this item?')) return;
+    data[currentTab] = data[currentTab].filter(item => item.id !== id);
+    saveData();
+    renderList();
+    toast('Item deleted', 'success');
+}
+
+function moveItem(id, dir) {
+    const arr = data[currentTab];
+    const idx = arr.findIndex(i => i.id === id);
+    const newIdx = idx + dir;
+    if (newIdx < 0 || newIdx >= arr.length) return;
+    [arr[idx], arr[newIdx]] = [arr[newIdx], arr[idx]];
+    saveData();
+    renderList();
+}
+
+function clearForm() {
+    document.getElementById('itemForm').reset();
+    pendingImages = [];
+    renderThumbs();
+}
+
+function formatDateLabel(d) {
+    return d.toLocaleString('en-US', { month: 'short', year: 'numeric' });
+}
+
+// ============================================
+// RENDER LIST
+// ============================================
+function renderList() {
+    const list = document.getElementById('itemList');
+    const items = data[currentTab];
+    document.getElementById('itemCount').textContent = items.length;
+
+    if (items.length === 0) {
+        list.innerHTML = `
+            <div class="empty-state">
+                <i class="fas fa-inbox"></i>
+                <p>No ${currentTab} items yet. Add your first one!</p>
+            </div>`;
+        return;
+    }
+
+    list.innerHTML = items.map((item, idx) => {
+        const thumb = item.images && item.images[0]
+            ? `<img src="${item.images[0]}" alt="">`
+            : `<i class="fas fa-image"></i>`;
+
+        const tagClass = item.tag ? item.tag.toLowerCase().split(' ')[0] : '';
+        const meta = currentTab === 'news'
+            ? `<div class="item-meta">
+                 <span class="item-tag ${tagClass}">${escapeHtml(item.tag || '')}</span>
+                 <span class="item-date"><i class="far fa-calendar-alt"></i> ${escapeHtml(item.date || '')}</span>
+               </div>`
+            : `<div class="item-meta">
+                 <span class="item-date">${item.images.length} image${item.images.length !== 1 ? 's' : ''}</span>
+               </div>`;
+
+        return `
+        <div class="item-card">
+            <div class="item-thumb">${thumb}</div>
+            <div class="item-info">
+                <h3>${escapeHtml(item.title)}</h3>
+                <p>${escapeHtml(item.description)}</p>
+                ${meta}
+            </div>
+            <div class="item-actions">
+                <button class="icon-btn" title="Move up" ${idx === 0 ? 'disabled style="opacity:0.3"' : ''} onclick="moveItem(${item.id}, -1)">
+                    <i class="fas fa-arrow-up"></i>
+                </button>
+                <button class="icon-btn" title="Move down" ${idx === items.length - 1 ? 'disabled style="opacity:0.3"' : ''} onclick="moveItem(${item.id}, 1)">
+                    <i class="fas fa-arrow-down"></i>
+                </button>
+                <button class="icon-btn danger" title="Delete" onclick="deleteItem(${item.id})">
+                    <i class="fas fa-trash"></i>
+                </button>
+            </div>
+        </div>`;
+    }).join('');
+}
+
+function escapeHtml(str) {
+    return String(str)
+        .replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;')
+        .replace(/"/g,'&quot;').replace(/'/g,'&#39;');
+}
+
+// ============================================
+// EXPORT / IMPORT
+// ============================================
+function exportData() {
+    const blob = new Blob([JSON.stringify(data, null, 2)], { type: 'application/json' });
+    const url = URL.createObjectURL(blob);
+    const a = document.createElement('a');
+    a.href = url;
+    a.download = 'data.json';
+    a.click();
+    URL.revokeObjectURL(url);
+    toast('data.json downloaded — commit it to your repo to publish!', 'success');
+}
+
+function importData(e) {
+    const file = e.target.files[0];
+    if (!file) return;
+    const reader = new FileReader();
+    reader.onload = (ev) => {
+        try {
+            const parsed = JSON.parse(ev.target.result);
+            if (!parsed.research || !parsed.news) throw new Error('Invalid format');
+            if (!confirm('Replace current data with imported file?')) return;
+            data = parsed;
+            saveData();
+            renderList();
+            toast('Data imported successfully', 'success');
+        } catch (err) {
+            toast('Invalid JSON file', 'error');
+        }
+    };
+    reader.readAsText(file);
+    e.target.value = '';
+}
+
+// ============================================
+// TOAST
+// ============================================
+function toast(msg, type = '') {
+    const t = document.getElementById('toast');
+    t.textContent = msg;
+    t.className = 'toast show ' + type;
+    setTimeout(() => t.className = 'toast', 3000);
+}
+</script>
+
+</body>
+</html>
