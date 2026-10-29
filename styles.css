@@ -253,6 +253,49 @@ html[data-theme="light"] .bg-orb { opacity: 0.45; }
 }
 .election-nav-btn:hover { transform: scale(1.06); box-shadow: 0 4px 16px rgba(192, 57, 43, 0.55); }
 
+.tools-nav-btn {
+    position: relative;
+    display: flex;
+    align-items: center;
+    gap: 7px;
+    padding: 7px 8px 7px 14px;
+    background: var(--grad);
+    background-size: 200% 100%;
+    color: #fff !important;
+    font-weight: 700;
+    font-size: 13px;
+    border-radius: 20px;
+    text-decoration: none;
+    white-space: nowrap;
+    box-shadow: 0 2px 14px rgba(129, 140, 248, 0.45);
+    transition: var(--transition);
+    animation: tools-shift 6s ease-in-out infinite;
+    overflow: hidden;
+}
+.tools-nav-btn::after {
+    content: "";
+    position: absolute;
+    top: 0; left: -60%;
+    width: 40%; height: 100%;
+    background: linear-gradient(100deg, transparent, rgba(255, 255, 255, 0.45), transparent);
+    transform: skewX(-20deg);
+    animation: tools-shine 3.5s ease-in-out infinite;
+}
+.tools-nav-btn:hover { transform: scale(1.06); box-shadow: 0 4px 22px rgba(129, 140, 248, 0.65); }
+.tools-nav-btn .free-badge {
+    background: #fff;
+    color: #4f46e5;
+    font-size: 10px;
+    font-weight: 800;
+    letter-spacing: .06em;
+    padding: 2px 7px;
+    border-radius: 10px;
+    animation: free-pulse 2s ease-in-out infinite;
+}
+@keyframes tools-shift { 0%, 100% { background-position: 0% 50%; } 50% { background-position: 100% 50%; } }
+@keyframes tools-shine { 0% { left: -60%; } 60%, 100% { left: 130%; } }
+@keyframes free-pulse { 0%, 100% { transform: scale(1); } 50% { transform: scale(1.12); } }
+
 .hamburger {
     display: none;
     flex-direction: column;
@@ -1150,46 +1193,6 @@ html[data-theme="light"] .image-slider-btn { background: rgba(255, 255, 255, 0.8
 .footer .built-with { font-family: var(--font-mono); font-size: 0.75rem; opacity: 0.7; }
 .visitor-counter { margin-top: 12px; opacity: 0.75; }
 
-/* ---------- Election FAB ---------- */
-.election-fab {
-    position: fixed;
-    bottom: 28px;
-    right: 28px;
-    z-index: 1100;
-    display: flex;
-    flex-direction: column;
-    align-items: center;
-    justify-content: center;
-    width: 72px; height: 72px;
-    border-radius: 50%;
-    background: linear-gradient(135deg, #c0392b 0%, #e74c3c 50%, #1a3a6b 100%);
-    box-shadow: 0 4px 20px rgba(231, 76, 60, 0.45), 0 2px 8px rgba(0, 0, 0, 0.18);
-    text-decoration: none;
-    transition: transform 0.25s ease, box-shadow 0.25s ease;
-    border: 2.5px solid rgba(255, 255, 255, 0.25);
-    cursor: pointer;
-    animation: election-pulse 2.8s ease-in-out infinite;
-}
-.election-fab:hover {
-    transform: scale(1.12) translateY(-3px);
-    box-shadow: 0 8px 28px rgba(231, 76, 60, 0.55), 0 4px 12px rgba(0, 0, 0, 0.22);
-    animation: none;
-}
-.election-fab-icon { font-size: 24px; line-height: 1; margin-bottom: 1px; filter: drop-shadow(0 1px 2px rgba(0, 0, 0, 0.3)); }
-.election-fab-label {
-    font-size: 8.5px;
-    font-weight: 700;
-    color: #fff;
-    text-align: center;
-    line-height: 1.2;
-    letter-spacing: 0.3px;
-    text-shadow: 0 1px 2px rgba(0, 0, 0, 0.4);
-}
-@keyframes election-pulse {
-    0%, 100% { box-shadow: 0 4px 20px rgba(231, 76, 60, 0.45), 0 2px 8px rgba(0, 0, 0, 0.18); transform: scale(1); }
-    50% { box-shadow: 0 4px 28px rgba(231, 76, 60, 0.7), 0 0 0 8px rgba(231, 76, 60, 0.1); transform: scale(1.04); }
-}
-
 /* ---------- Misc / a11y ---------- */
 a, button, .btn { -webkit-tap-highlight-color: transparent; }
 :focus-visible,
@@ -1267,6 +1270,10 @@ a:focus-visible {
     .news-slider-track { gap: 0; }
     .news-nav-btn { width: 38px; height: 38px; font-size: 1rem; }
     .election-nav-btn { font-size: 11px; padding: 6px 10px; }
+    .tools-nav-btn { font-size: 11px; padding: 6px 6px 6px 10px; gap: 5px; }
+    .tools-nav-label { display: none; }
+    .nav-right { gap: 6px; }
+    .theme-toggle { width: 34px; height: 34px; font-size: .9rem; }
 }
 
 @media (max-width: 576px) {
@@ -1281,7 +1288,4 @@ a:focus-visible {
     .btn { width: 100%; max-width: 300px; justify-content: center; }
     .hero-stats { gap: 22px; }
     .float-chip { display: none; }
-    .election-fab { width: 62px; height: 62px; bottom: 18px; right: 16px; }
-    .election-fab-icon { font-size: 20px; }
-    .election-fab-label { font-size: 7.5px; }
 }
