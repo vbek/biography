@@ -98,3 +98,45 @@ kbd { font: 12px/1 ui-monospace, monospace; padding: 2px 6px; border: 1px solid 
   .final span { font-size: 60px; }
 }
 @media (prefers-reduced-motion: reduce) { .card, .badge, .combo.show { animation: none; } }
+
+/* customize */
+.card .btns + .keys { margin-top: 12px; }
+#startCard .btns { margin-bottom: 0; }
+.swatches { display: grid; grid-template-columns: repeat(auto-fill, minmax(84px, 1fr)); gap: 8px; }
+.swatch { display: flex; flex-direction: column; align-items: center; gap: 6px; padding: 6px; border: 2px solid transparent; border-radius: 12px; background: transparent; cursor: pointer; font-size: 12px; font-weight: 600; color: var(--fg-2); }
+.swatch:hover { background: var(--acc-soft); }
+.swatch[aria-pressed="true"] { border-color: var(--acc); color: var(--acc); }
+.sw { display: block; width: 100%; height: 46px; border-radius: 8px; box-shadow: inset 0 0 0 1px var(--line); }
+.sw-bg-auto { background: linear-gradient(135deg, #3b1d4a, #1d3b4a 50%, #1f4a2c); }
+.sw-bg-sunset { background: radial-gradient(circle at 72% 80%, rgba(255, 214, 140, .9), transparent 40%), linear-gradient(#1f1147, #a8336b, #f7a072); }
+.sw-bg-ocean { background: radial-gradient(circle at 30% 60%, transparent 3px, rgba(160, 230, 255, .6) 4px, transparent 5px), radial-gradient(circle at 70% 35%, transparent 2px, rgba(160, 230, 255, .6) 3px, transparent 4px), linear-gradient(#04152d, #0a3d62, #0b6e8a); }
+.sw-bg-forest { background: radial-gradient(ellipse 70% 40% at 30% 100%, #06140a 98%, transparent), radial-gradient(ellipse 60% 35% at 85% 100%, #0a1e0f 98%, transparent), linear-gradient(#0d2214, #1f4425, #3f6b35); }
+.sw-bg-night { background: radial-gradient(circle at 20% 30%, #fff 1px, transparent 1.5px), radial-gradient(circle at 60% 20%, #fff 1px, transparent 1.5px), radial-gradient(circle at 80% 60%, #fff 1.2px, transparent 1.8px), radial-gradient(circle at 40% 70%, #fff .8px, transparent 1.3px), linear-gradient(#02030a, #0b1030, #1b2450); }
+.sw-bg-candy { background: linear-gradient(#ffd6f5, #e8d4ff, #bde4ff); }
+.sw-bg-plain { background: var(--bg); }
+.sw[class*="sw-tile-"] { background-color: #0f1626; background-repeat: no-repeat; background-size: 70% 10px, 70% 10px, 70% 10px; background-position: 50% 8px, 50% 19px, 50% 30px; }
+.sw-tile-classic { background-image: linear-gradient(#f472b6, #f472b6), linear-gradient(#fb923c, #fb923c), linear-gradient(#facc15, #facc15); }
+.sw-tile-pastel { background-image: linear-gradient(#f9c6e4, #f9c6e4), linear-gradient(#fcd9b8, #fcd9b8), linear-gradient(#fdf0b0, #fdf0b0); }
+.sw-tile-neon { background-image: linear-gradient(#e879f9, #e879f9), linear-gradient(#22d3ee, #22d3ee), linear-gradient(#a3e635, #a3e635); background-size: 70% 2px, 70% 2px, 70% 2px; filter: drop-shadow(0 0 3px #22d3ee); }
+.sw-tile-mono { background-image: linear-gradient(#5cc8e6, #5cc8e6), linear-gradient(#2f9fc2, #2f9fc2), linear-gradient(#1c7896, #1c7896); }
+.sw-tile-wood { background-image: repeating-linear-gradient(90deg, #a0682f 0 9px, #8d5a27 9px 11px), repeating-linear-gradient(90deg, #b8773a 0 7px, #9c6430 7px 9px), repeating-linear-gradient(90deg, #a0682f 0 11px, #8d5a27 11px 12px); }
+.sw-tile-brick { background-image: repeating-linear-gradient(90deg, #b5452f 0 14px, #5a2016 14px 15px), repeating-linear-gradient(90deg, #5a2016 0 1px, #c24d35 1px 15px), repeating-linear-gradient(90deg, #b5452f 0 14px, #5a2016 14px 15px); }
+.sw-tile-glass { background-image: linear-gradient(rgba(190, 230, 255, .35), rgba(190, 230, 255, .2)), linear-gradient(rgba(220, 200, 255, .35), rgba(220, 200, 255, .2)), linear-gradient(rgba(200, 255, 220, .35), rgba(200, 255, 220, .2)); }
+#lookCard > .btn.primary { margin-top: 4px; }
+/* keep the tower visible below the picker so changes can be seen live */
+#lookCard { top: 12px; transform: translateX(-50%); width: min(620px, calc(100% - 32px)); max-height: 62%; padding: 18px 20px; animation: none; }
+#lookCard .swatches { grid-template-columns: repeat(auto-fill, minmax(70px, 1fr)); gap: 6px; }
+@media (max-width: 520px) { #lookCard { max-height: 72%; } }
+#lookCard .sw { height: 34px; }
+#lookCard h3 { margin-top: 12px; }
+
+/* your photo */
+.sw-bg-photo { display: grid !important; place-items: center; border: 1.5px dashed var(--line-2); box-shadow: none !important; color: var(--acc); font: 300 26px/1 var(--font); }
+.photo-opts { display: flex; flex-wrap: wrap; align-items: center; gap: 10px 16px; margin-top: 12px; padding: 10px 12px; border-radius: 12px; background: var(--acc-soft); font-size: 13px; font-weight: 600; color: var(--fg-2); }
+.photo-opts label { display: flex; align-items: center; gap: 8px; }
+.photo-opts select { height: 32px; padding: 0 8px; border-radius: 8px; border: 1px solid var(--line-2); background: var(--bg-2); color: var(--fg); }
+.photo-opts input[type="range"] { width: 110px; accent-color: var(--acc); }
+.photo-opts output { min-width: 34px; font-variant-numeric: tabular-nums; color: var(--mut); }
+.photo-btns { display: flex; gap: 6px; margin-left: auto; }
+.btn.sm { height: 32px; padding: 0 12px; font-size: 13px; }
+.note.warn { color: var(--gold); }
