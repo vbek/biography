@@ -1,0 +1,89 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Tools — Bibek Koirala</title>
+    <meta name="description" content="Free, private, in-browser tools by Bibek Koirala.">
+
+    <script>
+      (function () {
+        try {
+          var t = localStorage.getItem('theme');
+          if (t === 'light') document.documentElement.setAttribute('data-theme', 'light');
+        } catch (e) {}
+      })();
+    </script>
+
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Space+Grotesk:wght@500;600;700&family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="../styles.css">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/css/all.min.css">
+    <style>
+        body { min-height: 100vh; }
+        .tools-wrap { max-width: 980px; margin: 0 auto; padding: 48px 16px 64px; }
+        .tools-back { display: inline-flex; align-items: center; gap: 8px; color: var(--text-muted); text-decoration: none; font-size: 14px; }
+        .tools-back:hover { color: var(--accent); }
+        .tools-head h1 { font-family: var(--font-display); font-size: clamp(2rem, 5vw, 2.8rem); margin: 24px 0 8px; }
+        .tools-head h1 span { background: var(--grad); -webkit-background-clip: text; background-clip: text; color: transparent; }
+        .tools-head p { color: var(--text-muted); margin: 0 0 36px; }
+        .tools-grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(260px, 1fr)); gap: 20px; }
+        .tool-card { position: relative; overflow: hidden; display: flex; flex-direction: column; gap: 12px; padding: 24px; border: 1px solid var(--border); border-radius: var(--radius); background: var(--surface); color: var(--text); text-decoration: none; transition: var(--transition); }
+        .tool-card:hover { border-color: var(--border-strong); transform: translateY(-3px); box-shadow: var(--glow-cyan); }
+        .tool-card .tool-icon { width: 46px; height: 46px; display: grid; place-items: center; border-radius: 12px; background: var(--grad-soft); color: var(--accent); font-size: 20px; }
+        .tool-card h2 { font-family: var(--font-display); font-size: 1.2rem; margin: 0; }
+        .tool-card p { color: var(--text-muted); font-size: 14px; line-height: 1.55; margin: 0; flex: 1; }
+        .tool-card .tool-cta { align-self: flex-start; display: inline-flex; align-items: center; gap: 8px; padding: 10px 18px; border-radius: 999px; background: var(--grad); color: #fff; font-weight: 600; font-size: 14px; box-shadow: 0 4px 16px rgba(129, 140, 248, .35); transition: var(--transition); }
+        .tool-card:hover .tool-cta { box-shadow: 0 6px 22px rgba(129, 140, 248, .55); }
+        .tool-card:hover .tool-cta i { transform: translateX(3px); }
+        .tool-card .tool-cta i { transition: var(--transition); }
+        .ribbon { position: absolute; top: 16px; right: -34px; width: 130px; padding: 4px 0; transform: rotate(45deg); background: #22c55e; color: #fff; font-size: 11px; font-weight: 800; letter-spacing: .12em; text-align: center; box-shadow: 0 2px 8px rgba(0, 0, 0, .25); }
+        .chips { display: flex; flex-wrap: wrap; gap: 6px; }
+        .chips span { font-size: 12px; padding: 3px 10px; border-radius: 999px; border: 1px solid var(--border); color: var(--text-muted); }
+        .chips i { color: #22c55e; margin-right: 4px; }
+        .tools-perks { display: flex; flex-wrap: wrap; gap: 10px 22px; margin: -16px 0 32px; color: var(--text-muted); font-size: 14px; }
+        .tools-perks i { color: #22c55e; margin-right: 6px; }
+        .tool-card.soon { opacity: .55; pointer-events: none; border-style: dashed; }
+    </style>
+</head>
+<body>
+    <div class="bg-grid"></div>
+    <main class="tools-wrap">
+        <a href="../index.html" class="tools-back"><i class="fas fa-arrow-left"></i> Back to portfolio</a>
+        <header class="tools-head">
+            <h1>Free <span>Tools</span></h1>
+            <p>Everything runs in your browser — your files never leave your device.</p>
+            <div class="tools-perks">
+                <span><i class="fas fa-check-circle"></i>100% free</span>
+                <span><i class="fas fa-check-circle"></i>No sign-up</span>
+                <span><i class="fas fa-check-circle"></i>No uploads</span>
+                <span><i class="fas fa-check-circle"></i>No watermarks</span>
+            </div>
+        </header>
+        <section class="tools-grid">
+            <a class="tool-card" href="pdf-editor/index.html">
+                <span class="ribbon">FREE</span>
+                <div class="tool-icon"><i class="fas fa-file-pdf"></i></div>
+                <h2>PDF Editor</h2>
+                <p>Annotate, add text, sign, fill forms, redact, merge and reorder pages — then export to PDF, Word, images, HTML or Markdown.</p>
+                <div class="chips"><span><i class="fas fa-lock"></i>Private</span><span><i class="fas fa-bolt"></i>Instant</span><span><i class="fas fa-user-slash"></i>No account</span></div>
+                <span class="tool-cta">Open editor <i class="fas fa-arrow-right"></i></span>
+            </a>
+            <a class="tool-card" href="locallabel/index.html">
+                <span class="ribbon">FREE</span>
+                <div class="tool-icon"><i class="fas fa-vector-square"></i></div>
+                <h2>LocalLabel</h2>
+                <p>Annotate images and videos for ML — boxes, polygons, masks, keypoints, tracks and ONNX-powered AI assist. Export COCO, YOLO, CVAT or Pascal VOC.</p>
+                <div class="chips"><span><i class="fas fa-lock"></i>Private</span><span><i class="fas fa-bolt"></i>Instant</span><span><i class="fas fa-user-slash"></i>No account</span></div>
+                <span class="tool-cta">Open annotator <i class="fas fa-arrow-right"></i></span>
+            </a>
+            <div class="tool-card soon">
+                <div class="tool-icon"><i class="fas fa-plus"></i></div>
+                <h2>More coming soon</h2>
+                <p>New tools will be added here.</p>
+            </div>
+        </section>
+    </main>
+</body>
+</html>

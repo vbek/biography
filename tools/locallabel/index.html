@@ -1,0 +1,130 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <title>LocalLabel — Bibek Koirala</title>
+  <meta name="description" content="Free in-browser image and video annotation for ML datasets: boxes, polygons, masks, tracks and AI assist. Files never leave your device.">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <link rel="icon" href="icons/icon32.png">
+  <link rel="stylesheet" href="app.css">
+</head>
+<body>
+  <header class="topbar">
+    <a class="brand" href="../index.html" title="Back to tools"><img src="icons/icon32.png" alt=""><span>LocalLabel</span><em id="projName"></em></a>
+    <div class="tb-group">
+      <button id="btnOpen" class="primary" title="Open a folder of images/videos">Open folder</button>
+      <button id="btnOpenFiles" title="Pick a folder read-only (fallback)">Open files</button>
+      <button id="btnSaveFolder" title="Write annotations to .locallabel/project.json in the folder (Ctrl+S)">Save to folder</button>
+    </div>
+    <div class="tb-group">
+      <button id="btnImport">Import</button>
+      <button id="btnExport">Export</button>
+      <button id="btnAI" title="Automatic annotation with a local ONNX model">AI assist</button>
+      <button id="btnAIAuto" class="toggle" title="Run the AI model automatically on each image/frame you open">Auto-run</button>
+    </div>
+    <div class="tb-group">
+      <button id="btnUndo" class="icon" title="Undo (Ctrl+Z)">↶</button>
+      <button id="btnRedo" class="icon" title="Redo (Ctrl+Shift+Z)">↷</button>
+    </div>
+    <div class="spacer"></div>
+    <span id="saveState" class="muted"></span>
+    <button id="btnHelp" class="icon" title="Keyboard shortcuts (?)">?</button>
+  </header>
+
+  <main class="layout">
+    <aside class="left">
+      <div class="panel-h"><span>Media</span><span id="mediaCount" class="muted"></span></div>
+      <div class="pad"><input id="mediaFilter" type="search" placeholder="Filter files…"></div>
+      <ul id="mediaList" class="media-list"></ul>
+    </aside>
+
+    <section class="center">
+      <nav class="tools" id="tools" aria-label="Tools">
+        <button data-tool="select" title="Select / edit (V)"><svg viewBox="0 0 24 24"><path d="M5 3l14 8-6 1.5L10 19z"/></svg><kbd>V</kbd></button>
+        <button data-tool="rectangle" title="Rectangle (R) – drag; Shift = square"><svg viewBox="0 0 24 24"><rect x="4" y="6" width="16" height="12" rx="1"/></svg><kbd>R</kbd></button>
+        <button data-tool="polygon" title="Polygon (P) – click points; or hold Shift and move to trace freehand (release Shift to finish); Enter or click first point to finish"><svg viewBox="0 0 24 24"><path d="M5 18l2-11 8-3 4 9-6 6z"/></svg><kbd>P</kbd></button>
+        <button data-tool="polyline" title="Polyline (L) – click points; or hold Shift and move to trace freehand (release Shift to finish); Enter to finish"><svg viewBox="0 0 24 24"><path d="M3 18l6-9 5 6 7-11" fill="none"/></svg><kbd>L</kbd></button>
+        <button data-tool="points" title="Points (O) – click points, Enter to finish"><svg viewBox="0 0 24 24"><circle cx="6" cy="8" r="2"/><circle cx="16" cy="6" r="2"/><circle cx="12" cy="17" r="2"/></svg><kbd>O</kbd></button>
+        <button data-tool="ellipse" title="Ellipse (E) – drag"><svg viewBox="0 0 24 24"><ellipse cx="12" cy="12" rx="9" ry="6"/></svg><kbd>E</kbd></button>
+        <button data-tool="skeleton" title="Skeleton (K) – click each node in order"><svg viewBox="0 0 24 24"><path d="M12 4v7M12 11l-6 8M12 11l6 8M6 8h12" fill="none"/><circle cx="12" cy="4" r="2"/><circle cx="6" cy="19" r="2"/><circle cx="18" cy="19" r="2"/></svg><kbd>K</kbd></button>
+        <div class="tool-sep"></div>
+        <button data-tool="brush" title="Mask brush (B) – paints into the selected mask or a new one"><svg viewBox="0 0 24 24"><path d="M4 20c3 0 5-2 5-5l9-9 2 2-9 9c-3 0-5 2-7 3z"/></svg><kbd>B</kbd></button>
+        <button data-tool="eraser" title="Mask eraser (X)"><svg viewBox="0 0 24 24"><path d="M4 16l9-9 6 6-6 6H8z"/><path d="M8 19h12" fill="none"/></svg><kbd>X</kbd></button>
+        <div class="tool-sep"></div>
+        <button id="btnFit" title="Fit to screen (0)"><svg viewBox="0 0 24 24"><path d="M4 9V4h5M20 9V4h-5M4 15v5h5M20 15v5h-5" fill="none"/></svg></button>
+      </nav>
+      <div class="stage" id="stage">
+        <canvas id="canvas"></canvas>
+        <div id="welcome" class="welcome">
+          <div class="welcome-card">
+            <h1>Label images and video, entirely on your computer.</h1>
+            <p class="muted">Pick a folder. Nothing is uploaded: annotations live in this browser and, if you like, in the folder itself.</p>
+            <div class="welcome-actions">
+              <button id="wOpen" class="primary big">Open folder</button>
+              <button id="wOpenFiles" class="big">Open files (read-only)</button>
+            </div>
+            <p id="fsaNote" class="muted small" hidden>Your browser can't keep folder access between sessions; use “Open files”.</p>
+            <div id="recent" class="recent"></div>
+          </div>
+        </div>
+      </div>
+      <div class="player" id="player" hidden>
+        <button id="pPrevKf" class="icon" title="Previous keyframe">⇤</button>
+        <button id="pPrev" class="icon" title="Previous frame (D)">◁</button>
+        <button id="pPlay" class="icon" title="Play / pause (Space)">▶</button>
+        <button id="pNext" class="icon" title="Next frame (F)">▷</button>
+        <button id="pNextKf" class="icon" title="Next keyframe">⇥</button>
+        <div class="timeline" id="timeline">
+          <canvas id="tlMarks"></canvas>
+          <input type="range" id="pSlider" min="0" max="0" value="0">
+        </div>
+        <input id="pFrame" type="number" min="0" value="0" title="Frame number">
+        <span id="pTotal" class="muted">/ 0</span>
+        <label class="fps" title="Frames per second used to address video frames">fps <input id="pFps" type="number" step="0.001" min="1" max="240"></label>
+        <button id="pTrack" class="toggle" title="New shapes become interpolated tracks (T)">Track mode</button>
+        <button id="pPropagate" title="Copy selected shape to the next N frames (Ctrl+B)">Propagate</button>
+      </div>
+    </section>
+
+    <aside class="right">
+      <section class="panel">
+        <div class="panel-h"><span>Labels</span><button id="btnAddLabel" class="small">+ Label</button></div>
+        <ul id="labelList" class="label-list"></ul>
+      </section>
+      <section class="panel grow">
+        <div class="panel-h"><span>Objects</span><span id="objCount" class="muted"></span></div>
+        <ul id="objList" class="obj-list"></ul>
+      </section>
+      <section class="panel" id="detailPanel" hidden>
+        <div class="panel-h"><span id="detailTitle">Object</span></div>
+        <div id="detail" class="detail"></div>
+      </section>
+      <section class="panel" id="brushPanel" hidden>
+        <div class="panel-h"><span>Brush</span></div>
+        <div class="pad row"><label>Radius</label><input id="brushRadius" type="range" min="1" max="120" value="12"><span id="brushVal">12</span></div>
+      </section>
+      <section class="panel">
+        <div class="panel-h"><span>View</span></div>
+        <div class="pad row"><label>Fill</label><input id="fillOpacity" type="range" min="0" max="80" value="20"></div>
+        <div class="pad row"><label><input id="showLabels" type="checkbox" checked> Show label tags</label></div>
+      </section>
+    </aside>
+  </main>
+
+  <footer class="status">
+    <span id="stMedia"></span>
+    <span id="stFrame"></span>
+    <span id="stCursor"></span>
+    <span class="spacer"></span>
+    <span id="stTool"></span>
+    <span id="stZoom"></span>
+  </footer>
+
+  <dialog id="dlg"><form method="dialog" id="dlgForm"></form></dialog>
+  <div id="toast" class="toast" role="status" aria-live="polite"></div>
+  <input type="file" id="dirInput" webkitdirectory multiple hidden>
+  <script src="vendor/geotiff.js"></script>
+  <script src="vendor/UTIF.js"></script>
+  <script type="module" src="js/main.js"></script>
+</body>
+</html>

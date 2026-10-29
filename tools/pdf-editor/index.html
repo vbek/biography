@@ -1,0 +1,359 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>PDF Editor — Bibek Koirala</title>
+<meta name="description" content="Free in-browser PDF editor: annotate, sign, fill forms, merge and export. Files never leave your device.">
+<link rel="icon" href="icons/icon32.png">
+<link rel="stylesheet" href="css/editor.css">
+</head>
+<body>
+<svg xmlns="http://www.w3.org/2000/svg" style="display:none">
+  <symbol id="i-select" viewBox="0 0 24 24"><path d="M5 3l6.5 17 2.3-7.2L21 10.5z"/></symbol>
+  <symbol id="i-hand" viewBox="0 0 24 24"><path d="M8 12V5.5a1.5 1.5 0 0 1 3 0V11m0-1V4a1.5 1.5 0 0 1 3 0v7m0-5.5a1.5 1.5 0 0 1 3 0V12m0-3.5a1.5 1.5 0 0 1 3 0V15a6 6 0 0 1-6 6h-2a6 6 0 0 1-4.9-2.6L4.4 14a1.6 1.6 0 0 1 2.6-1.8L8 13.5"/></symbol>
+  <symbol id="i-text" viewBox="0 0 24 24"><path d="M5 7V4h14v3M12 4v16M9 20h6"/></symbol>
+  <symbol id="i-pen" viewBox="0 0 24 24"><path d="M4 20l1-4L16.5 4.5a2.1 2.1 0 0 1 3 3L8 19z M14.5 6.5l3 3"/></symbol>
+  <symbol id="i-highlight" viewBox="0 0 24 24"><path d="M9 14l-3 3v3h3l3-3M9 14l7.5-7.5a2.1 2.1 0 0 1 3 3L12 17zM3 21h7"/></symbol>
+  <symbol id="i-rect" viewBox="0 0 24 24"><rect x="3.5" y="5.5" width="17" height="13" rx="1.5"/></symbol>
+  <symbol id="i-ellipse" viewBox="0 0 24 24"><ellipse cx="12" cy="12" rx="9" ry="7"/></symbol>
+  <symbol id="i-line" viewBox="0 0 24 24"><path d="M5 19L19 5"/></symbol>
+  <symbol id="i-arrow" viewBox="0 0 24 24"><path d="M5 19L19 5M10 5h9v9"/></symbol>
+  <symbol id="i-whiteout" viewBox="0 0 24 24"><rect x="3.5" y="6.5" width="17" height="11" rx="1.5"/><path d="M7 14l3-5M11 14l3-5M15 14l3-5"/></symbol>
+  <symbol id="i-redact" viewBox="0 0 24 24"><rect x="3.5" y="6.5" width="17" height="11" rx="1.5" fill="currentColor"/></symbol>
+  <symbol id="i-image" viewBox="0 0 24 24"><rect x="3.5" y="4.5" width="17" height="15" rx="2"/><circle cx="9" cy="10" r="1.8"/><path d="M4 17l5-4.5 4 3.5 3-2.5 4 3.5"/></symbol>
+  <symbol id="i-sign" viewBox="0 0 24 24"><path d="M3 16c2.5 0 3.5-9 6.5-9S8 17 11 17s2.5-4 4.5-4 1.5 3 3.5 3h2M3 20.5h18"/></symbol>
+  <symbol id="i-note" viewBox="0 0 24 24"><path d="M5 4h14v10l-6 6H5z M13 20v-6h6M8.5 8.5h7M8.5 12h4"/></symbol>
+  <symbol id="i-eraser" viewBox="0 0 24 24"><path d="M8 20h12M5.5 14.5l8.8-8.8a2 2 0 0 1 2.8 0l2.2 2.2a2 2 0 0 1 0 2.8L11 19H8z M9.5 10.5l5 5"/></symbol>
+  <symbol id="i-undo" viewBox="0 0 24 24"><path d="M9 14L4 9l5-5M4 9h10.5a5.5 5.5 0 0 1 0 11H11"/></symbol>
+  <symbol id="i-redo" viewBox="0 0 24 24"><path d="M15 14l5-5-5-5M20 9H9.5a5.5 5.5 0 0 0 0 11H13"/></symbol>
+  <symbol id="i-plus" viewBox="0 0 24 24"><path d="M12 5v14M5 12h14"/></symbol>
+  <symbol id="i-minus" viewBox="0 0 24 24"><path d="M5 12h14"/></symbol>
+  <symbol id="i-open" viewBox="0 0 24 24"><path d="M3.5 6.5a1 1 0 0 1 1-1h5l2 2h8a1 1 0 0 1 1 1v10a1 1 0 0 1-1 1h-15a1 1 0 0 1-1-1z"/></symbol>
+  <symbol id="i-merge" viewBox="0 0 24 24"><path d="M7 3.5h7l4 4V14M14 3.5v4h4M5 8.5v12h10M12 14v6M9 17h6"/></symbol>
+  <symbol id="i-download" viewBox="0 0 24 24"><path d="M12 4v11M7 10.5l5 5 5-5M5 20h14"/></symbol>
+  <symbol id="i-rot-cw" viewBox="0 0 24 24"><path d="M20 12a8 8 0 1 1-2.6-5.9M20 4v5h-5"/></symbol>
+  <symbol id="i-rot-ccw" viewBox="0 0 24 24"><path d="M4 12a8 8 0 1 0 2.6-5.9M4 4v5h5"/></symbol>
+  <symbol id="i-trash" viewBox="0 0 24 24"><path d="M4 7h16M10 11v6M14 11v6M6 7l1 13h10l1-13M9 7V4h6v3"/></symbol>
+  <symbol id="i-copy" viewBox="0 0 24 24"><rect x="8.5" y="8.5" width="12" height="12" rx="1.5"/><path d="M15.5 8.5v-3a1 1 0 0 0-1-1h-9a1 1 0 0 0-1 1v9a1 1 0 0 0 1 1h3"/></symbol>
+  <symbol id="i-page-add" viewBox="0 0 24 24"><path d="M6 3.5h8l4 4v13H6z M14 3.5v4h4M12 11v6M9 14h6"/></symbol>
+  <symbol id="i-search" viewBox="0 0 24 24"><circle cx="11" cy="11" r="6.5"/><path d="M16 16l4.5 4.5"/></symbol>
+  <symbol id="i-form" viewBox="0 0 24 24"><rect x="3.5" y="4.5" width="17" height="15" rx="1.5"/><path d="M7 9h10M7 13h6M7 16.5h3"/></symbol>
+  <symbol id="i-sliders" viewBox="0 0 24 24"><path d="M4 7h10M18 7h2M4 17h4M12 17h8"/><circle cx="16" cy="7" r="2"/><circle cx="10" cy="17" r="2"/></symbol>
+  <symbol id="i-doc" viewBox="0 0 24 24"><path d="M6 3.5h8l4 4v13H6z M14 3.5v4h4M9 12h6M9 15.5h6"/></symbol>
+  <symbol id="i-close" viewBox="0 0 24 24"><path d="M6 6l12 12M18 6L6 18"/></symbol>
+  <symbol id="i-moon" viewBox="0 0 24 24"><path d="M20 14.5A8 8 0 0 1 9.5 4 8 8 0 1 0 20 14.5z"/></symbol>
+  <symbol id="i-sidebar" viewBox="0 0 24 24"><rect x="3.5" y="4.5" width="17" height="15" rx="1.5"/><path d="M9 4.5v15"/></symbol>
+  <symbol id="i-front" viewBox="0 0 24 24"><rect x="9" y="9" width="11" height="11" rx="1" fill="currentColor"/><path d="M15 6V4H4v11h2"/></symbol>
+  <symbol id="i-back" viewBox="0 0 24 24"><rect x="4" y="4" width="11" height="11" rx="1" fill="currentColor"/><path d="M18 9h2v11H9v-2"/></symbol>
+</svg>
+
+<div id="app" class="app">
+  <!-- Top bar -->
+  <header class="topbar">
+    <a class="brand" href="../index.html" title="Back to tools"><img src="icons/icon32.png" alt="" width="22" height="22"><span>Folio</span></a>
+    <div class="tb-group">
+      <button class="tb-btn" id="btnOpen" title="Open PDF or images (Ctrl+O)"><svg class="ic"><use href="#i-open"/></svg><span>Open</span></button>
+      <button class="tb-btn" id="btnAdd" title="Append PDFs or images (merge)"><svg class="ic"><use href="#i-merge"/></svg><span>Add files</span></button>
+    </div>
+    <input id="fileName" class="filename" value="document.pdf" spellcheck="false" aria-label="File name">
+    <div class="tb-group">
+      <button class="icon-btn" id="btnUndo" title="Undo (Ctrl+Z)"><svg class="ic"><use href="#i-undo"/></svg></button>
+      <button class="icon-btn" id="btnRedo" title="Redo (Ctrl+Y)"><svg class="ic"><use href="#i-redo"/></svg></button>
+    </div>
+    <div class="spacer"></div>
+    <div class="tb-group zoom">
+      <button class="icon-btn" id="btnZoomOut" title="Zoom out (Ctrl+−)"><svg class="ic"><use href="#i-minus"/></svg></button>
+      <select id="zoomSel" title="Zoom">
+        <option value="fit-width">Fit width</option>
+        <option value="fit-page">Fit page</option>
+        <option value="0.5">50%</option><option value="0.75">75%</option><option value="1">100%</option>
+        <option value="1.25">125%</option><option value="1.5">150%</option><option value="2">200%</option>
+        <option value="3">300%</option><option value="4">400%</option>
+        <option value="custom" hidden>—</option>
+      </select>
+      <button class="icon-btn" id="btnZoomIn" title="Zoom in (Ctrl++)"><svg class="ic"><use href="#i-plus"/></svg></button>
+    </div>
+    <div class="pager">
+      <input id="pageInput" type="text" inputmode="numeric" value="0" aria-label="Current page"><span>/ <b id="pageCount">0</b></span>
+    </div>
+    <div class="spacer"></div>
+    <button class="icon-btn" id="btnTheme" title="Toggle dark mode"><svg class="ic"><use href="#i-moon"/></svg></button>
+    <button class="primary-btn" id="btnExport" title="Export / Save (Ctrl+S)"><svg class="ic"><use href="#i-download"/></svg><span>Export</span></button>
+  </header>
+
+  <div class="workspace">
+    <!-- Tool rail -->
+    <nav class="rail" id="rail" aria-label="Tools">
+      <button class="tool" data-tool="select" title="Select & move (V)"><svg class="ic"><use href="#i-select"/></svg></button>
+      <button class="tool" data-tool="hand" title="Pan (H or hold Space)"><svg class="ic"><use href="#i-hand"/></svg></button>
+      <div class="rail-sep"></div>
+      <button class="tool" data-tool="text" title="Add text (T)"><svg class="ic"><use href="#i-text"/></svg></button>
+      <button class="tool" data-tool="pen" title="Freehand pen (P)"><svg class="ic"><use href="#i-pen"/></svg></button>
+      <button class="tool" data-tool="highlight" title="Highlighter (M)"><svg class="ic"><use href="#i-highlight"/></svg></button>
+      <div class="rail-sep"></div>
+      <button class="tool" data-tool="rect" title="Rectangle (R)"><svg class="ic"><use href="#i-rect"/></svg></button>
+      <button class="tool" data-tool="ellipse" title="Ellipse (O)"><svg class="ic"><use href="#i-ellipse"/></svg></button>
+      <button class="tool" data-tool="line" title="Line (L)"><svg class="ic"><use href="#i-line"/></svg></button>
+      <button class="tool" data-tool="arrow" title="Arrow (A)"><svg class="ic"><use href="#i-arrow"/></svg></button>
+      <div class="rail-sep"></div>
+      <button class="tool" data-tool="whiteout" title="White-out: cover existing content (W)"><svg class="ic"><use href="#i-whiteout"/></svg></button>
+      <button class="tool" data-tool="redact" title="Redact box (X)"><svg class="ic"><use href="#i-redact"/></svg></button>
+      <div class="rail-sep"></div>
+      <button class="tool" data-tool="image" title="Insert image (I)"><svg class="ic"><use href="#i-image"/></svg></button>
+      <button class="tool" data-tool="signature" title="Signature (S)"><svg class="ic"><use href="#i-sign"/></svg></button>
+      <button class="tool" data-tool="note" title="Sticky comment (N)"><svg class="ic"><use href="#i-note"/></svg></button>
+      <div class="rail-sep"></div>
+      <button class="tool" data-tool="eraser" title="Eraser: click an annotation to delete it (E)"><svg class="ic"><use href="#i-eraser"/></svg></button>
+    </nav>
+
+    <!-- Pages sidebar -->
+    <aside class="sidebar" id="sidebar">
+      <div class="side-head">
+        <span>Pages</span>
+        <div class="side-actions">
+          <button class="icon-btn sm" id="pgRotL" title="Rotate left"><svg class="ic"><use href="#i-rot-ccw"/></svg></button>
+          <button class="icon-btn sm" id="pgRotR" title="Rotate right"><svg class="ic"><use href="#i-rot-cw"/></svg></button>
+          <button class="icon-btn sm" id="pgDup" title="Duplicate page(s)"><svg class="ic"><use href="#i-copy"/></svg></button>
+          <button class="icon-btn sm" id="pgBlank" title="Insert blank page after"><svg class="ic"><use href="#i-page-add"/></svg></button>
+          <button class="icon-btn sm danger" id="pgDel" title="Delete page(s)"><svg class="ic"><use href="#i-trash"/></svg></button>
+        </div>
+      </div>
+      <div class="side-sub" id="selInfo">Click to select · Ctrl/Shift for many · drag to reorder</div>
+      <div class="thumbs" id="thumbs"></div>
+    </aside>
+
+    <!-- Viewer -->
+    <main class="viewer" id="viewer" tabindex="-1">
+      <div class="pages" id="pages"></div>
+      <div class="empty" id="empty">
+        <div class="drop-card">
+          <div class="drop-art" aria-hidden="true">
+            <div class="sheet s1"></div><div class="sheet s2"></div><div class="sheet s3"><i></i><i></i><i></i></div>
+          </div>
+          <h1>Drop a PDF to start editing</h1>
+          <p>Or images — they become pages. Everything stays on your computer.</p>
+          <div class="drop-actions">
+            <button class="primary-btn" id="btnOpen2"><svg class="ic"><use href="#i-open"/></svg><span>Choose files</span></button>
+            <button class="ghost-btn" id="btnNew"><svg class="ic"><use href="#i-page-add"/></svg><span>Blank document</span></button>
+          </div>
+        </div>
+      </div>
+    </main>
+
+    <!-- Inspector -->
+    <aside class="inspector" id="inspector">
+      <div class="tabs" role="tablist">
+        <button class="tab active" data-tab="props" title="Properties"><svg class="ic"><use href="#i-sliders"/></svg><span>Style</span></button>
+        <button class="tab" data-tab="search" title="Find text"><svg class="ic"><use href="#i-search"/></svg><span>Find</span></button>
+        <button class="tab" data-tab="forms" title="Fill form fields"><svg class="ic"><use href="#i-form"/></svg><span>Forms</span></button>
+        <button class="tab" data-tab="doc" title="Document settings"><svg class="ic"><use href="#i-doc"/></svg><span>Document</span></button>
+      </div>
+
+      <section class="panel active" data-panel="props">
+        <h3 id="propTitle">Select</h3>
+        <div class="field" data-f="color">
+          <label>Color</label>
+          <div class="swatches" data-target="color"></div>
+        </div>
+        <div class="field" data-f="fill">
+          <label class="row-label"><span>Fill</span><label class="chk"><input type="checkbox" id="pFillOn"> on</label></label>
+          <div class="swatches" data-target="fill"></div>
+        </div>
+        <div class="field" data-f="sw">
+          <label class="row-label"><span>Stroke width</span><output id="oSw"></output></label>
+          <input type="range" id="pSw" min="0.5" max="30" step="0.5">
+        </div>
+        <div class="field" data-f="font">
+          <label>Font</label>
+          <div class="row">
+            <select id="pFont"></select>
+            <button class="ghost-btn sm" id="btnLoadFont" title="Load a .ttf/.otf font (needed for non‑Latin text)">+ Font</button>
+          </div>
+        </div>
+        <div class="field" data-f="size">
+          <label>Size &amp; style</label>
+          <div class="row">
+            <input type="number" id="pSize" min="4" max="400" step="1">
+            <button class="toggle" id="pBold" title="Bold"><b>B</b></button>
+            <button class="toggle" id="pItalic" title="Italic"><i>I</i></button>
+          </div>
+        </div>
+        <div class="field" data-f="opacity">
+          <label class="row-label"><span>Opacity</span><output id="oOpacity"></output></label>
+          <input type="range" id="pOpacity" min="0.05" max="1" step="0.05">
+        </div>
+        <div class="field" data-f="note">
+          <label>Comment text</label>
+          <textarea id="pNote" rows="4" placeholder="Type your comment…"></textarea>
+        </div>
+        <div class="field" data-f="actions">
+          <label>Arrange</label>
+          <div class="row wrap">
+            <button class="ghost-btn sm" id="aDup"><svg class="ic"><use href="#i-copy"/></svg>Duplicate</button>
+            <button class="ghost-btn sm" id="aFront"><svg class="ic"><use href="#i-front"/></svg>Front</button>
+            <button class="ghost-btn sm" id="aBack"><svg class="ic"><use href="#i-back"/></svg>Back</button>
+            <button class="ghost-btn sm danger" id="aDel"><svg class="ic"><use href="#i-trash"/></svg>Delete</button>
+          </div>
+        </div>
+        <p class="hint" id="toolHint"></p>
+      </section>
+
+      <section class="panel" data-panel="search">
+        <h3>Find text</h3>
+        <div class="row"><input type="search" id="searchInput" placeholder="Search document…"><button class="ghost-btn sm" id="btnSearch">Find</button></div>
+        <label class="chk"><input type="checkbox" id="searchCase"> Match case</label>
+        <div class="search-meta" id="searchMeta"></div>
+        <button class="ghost-btn sm" id="btnHlAll" hidden>Highlight all matches</button>
+        <ol class="results" id="searchResults"></ol>
+      </section>
+
+      <section class="panel" data-panel="forms">
+        <h3>Form fields</h3>
+        <p class="hint" id="formsHint">No fillable fields in this document.</p>
+        <div id="formFields"></div>
+      </section>
+
+      <section class="panel" data-panel="doc">
+        <h3>Properties</h3>
+        <div class="field"><label>Title</label><input id="mTitle"></div>
+        <div class="field"><label>Author</label><input id="mAuthor"></div>
+        <div class="field"><label>Subject</label><input id="mSubject"></div>
+        <div class="field"><label>Keywords <small>(comma separated)</small></label><input id="mKeywords"></div>
+
+        <h3>Watermark</h3>
+        <label class="chk"><input type="checkbox" id="wmOn"> Add watermark to every page</label>
+        <div class="field"><label>Text</label><input id="wmText" value="CONFIDENTIAL"></div>
+        <div class="field row">
+          <label class="stack">Size<input type="number" id="wmSize" min="8" max="300" value="64"></label>
+          <label class="stack">Angle<input type="number" id="wmAngle" min="-180" max="180" value="45"></label>
+          <label class="stack">Color<input type="color" id="wmColor" value="#d9480f"></label>
+        </div>
+        <div class="field"><label class="row-label"><span>Opacity</span><output id="oWmOp"></output></label><input type="range" id="wmOpacity" min="0.05" max="1" step="0.05" value="0.18"></div>
+
+        <h3>Page numbers</h3>
+        <label class="chk"><input type="checkbox" id="pnOn"> Number every page</label>
+        <div class="field"><label>Format</label>
+          <select id="pnFormat">
+            <option value="{n}">1</option>
+            <option value="Page {n}">Page 1</option>
+            <option value="Page {n} of {total}">Page 1 of 9</option>
+            <option value="{n} / {total}">1 / 9</option>
+            <option value="- {n} -">- 1 -</option>
+          </select>
+        </div>
+        <div class="field row">
+          <label class="stack">Position
+            <select id="pnPos">
+              <option value="bc">Bottom center</option><option value="br">Bottom right</option><option value="bl">Bottom left</option>
+              <option value="tc">Top center</option><option value="tr">Top right</option><option value="tl">Top left</option>
+            </select>
+          </label>
+          <label class="stack">Size<input type="number" id="pnSize" min="6" max="48" value="10"></label>
+          <label class="stack">Start at<input type="number" id="pnStart" min="0" value="1"></label>
+        </div>
+      </section>
+    </aside>
+  </div>
+</div>
+
+<!-- Export dialog -->
+<dialog id="exportDlg" class="dlg wide">
+  <form method="dialog" class="dlg-body" id="exportForm">
+    <header class="dlg-head"><h2>Export</h2><button class="icon-btn" value="cancel" formnovalidate><svg class="ic"><use href="#i-close"/></svg></button></header>
+    <div class="formats" id="formats"></div>
+    <div class="export-opts">
+      <div class="field">
+        <label>Pages</label>
+        <div class="seg" id="rangeSeg">
+          <label><input type="radio" name="range" value="all" checked><span>All</span></label>
+          <label><input type="radio" name="range" value="current"><span>Current</span></label>
+          <label><input type="radio" name="range" value="selected"><span>Selected</span></label>
+          <label><input type="radio" name="range" value="custom"><span>Custom</span></label>
+        </div>
+        <input id="rangeCustom" placeholder="e.g. 1-3, 5, 8-" hidden>
+      </div>
+      <div class="field" data-opt="dpi">
+        <label class="row-label"><span>Resolution</span><output id="oDpi"></output></label>
+        <input type="range" id="optDpi" min="72" max="600" step="6" value="150">
+      </div>
+      <div class="field" data-opt="quality">
+        <label class="row-label"><span>Quality</span><output id="oQuality"></output></label>
+        <input type="range" id="optQuality" min="0.3" max="1" step="0.05" value="0.85">
+      </div>
+      <div class="field" data-opt="mode">
+        <label>Layout</label>
+        <div class="seg">
+          <label><input type="radio" name="mode" value="text" checked><span>Editable text</span></label>
+          <label><input type="radio" name="mode" value="images"><span>Page images</span></label>
+        </div>
+      </div>
+      <label class="chk" data-opt="flatten"><input type="checkbox" id="optFlatten"> Flatten form fields (make them non‑editable)</label>
+      <label class="chk" data-opt="annots"><input type="checkbox" id="optAnnots" checked> Include annotations, watermark &amp; page numbers</label>
+      <label class="chk" data-opt="zip"><input type="checkbox" id="optZip" checked> Bundle multiple files into one .zip</label>
+      <div class="field"><label>File name</label><input id="exportName"></div>
+      <p class="hint" id="formatHint"></p>
+    </div>
+    <div class="progress" id="exportProgress" hidden><div class="bar"><i></i></div><span></span></div>
+    <footer class="dlg-foot">
+      <button class="ghost-btn" value="cancel" formnovalidate>Cancel</button>
+      <button class="primary-btn" id="btnDoExport" value="default"><svg class="ic"><use href="#i-download"/></svg><span>Export</span></button>
+    </footer>
+  </form>
+</dialog>
+
+<!-- Signature dialog -->
+<dialog id="sigDlg" class="dlg">
+  <div class="dlg-body">
+    <header class="dlg-head"><h2>Signature</h2><button class="icon-btn" id="sigClose"><svg class="ic"><use href="#i-close"/></svg></button></header>
+    <div class="saved-sigs" id="savedSigs"></div>
+    <div class="seg" id="sigModeSeg">
+      <label><input type="radio" name="sigmode" value="draw" checked><span>Draw</span></label>
+      <label><input type="radio" name="sigmode" value="type"><span>Type</span></label>
+      <label><input type="radio" name="sigmode" value="upload"><span>Upload</span></label>
+    </div>
+    <div class="sig-pad-wrap" id="sigDrawWrap"><canvas id="sigPad" width="1040" height="320"></canvas><span class="sig-line"></span></div>
+    <div id="sigTypeWrap" hidden>
+      <input id="sigTyped" placeholder="Type your name" maxlength="60">
+      <div class="sig-fonts" id="sigFonts"></div>
+    </div>
+    <div id="sigUploadWrap" hidden><p class="hint">Use a PNG with a transparent background for the best result.</p><button class="ghost-btn" id="sigUploadBtn">Choose image…</button></div>
+    <div class="row sig-tools">
+      <div class="swatches" id="sigColors"></div>
+      <div class="spacer"></div>
+      <label class="chk"><input type="checkbox" id="sigSave" checked> Remember</label>
+      <button class="ghost-btn sm" id="sigClear">Clear</button>
+    </div>
+    <footer class="dlg-foot"><button class="primary-btn" id="sigPlace">Place signature</button></footer>
+  </div>
+</dialog>
+
+<!-- Password dialog -->
+<dialog id="pwDlg" class="dlg narrow">
+  <form method="dialog" class="dlg-body">
+    <header class="dlg-head"><h2>Password required</h2></header>
+    <p class="hint" id="pwMsg">This PDF is protected. Enter its password to open it.</p>
+    <input type="password" id="pwInput" autocomplete="off">
+    <footer class="dlg-foot"><button class="ghost-btn" value="cancel" formnovalidate>Cancel</button><button class="primary-btn" value="ok">Open</button></footer>
+  </form>
+</dialog>
+
+<div class="toasts" id="toasts" aria-live="polite"></div>
+<div class="drop-overlay" id="dropOverlay"><div>Drop to open · hold <kbd>Shift</kbd> to add to this document</div></div>
+
+<input type="file" id="fileOpen" accept=".pdf,application/pdf,image/*,.json" multiple hidden>
+<input type="file" id="fileAdd" accept=".pdf,application/pdf,image/*" multiple hidden>
+<input type="file" id="fileImage" accept="image/*" hidden>
+<input type="file" id="fileFont" accept=".ttf,.otf,font/ttf,font/otf" hidden>
+<input type="file" id="fileSig" accept="image/*" hidden>
+
+<script src="lib/pdf.min.js"></script>
+<script src="lib/pdf-lib.min.js"></script>
+<script src="lib/fontkit.umd.min.js"></script>
+<script src="lib/jszip.min.js"></script>
+<script src="js/core.js"></script>
+<script src="js/docx.js"></script>
+<script src="js/exporter.js"></script>
+<script src="js/editor.js"></script>
+</body>
+</html>
