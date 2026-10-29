@@ -1,0 +1,83 @@
+/* Media Studio, video mode — builds on app.css */
+.player { position: absolute; inset: 20px; display: grid; place-items: center; line-height: 0; }
+.player video { display: block; max-width: 100%; max-height: 100%; background: #000; box-shadow: 0 10px 40px rgba(0, 0, 0, .35); }
+#capView { position: absolute; left: 0; top: 0; pointer-events: none; }
+.no-preview { position: absolute; inset: 0; display: flex; flex-direction: column; align-items: center; justify-content: center; gap: 6px; padding: 20px; text-align: center; color: #cbd5e1; line-height: 1.45; }
+.no-preview .ic { width: 40px; height: 40px; color: var(--acc); stroke-width: 1.4; }
+.no-preview span { font-size: 13px; color: #94a3b8; }
+.player.audio-only video { width: min(520px, 100%); height: 64px; box-shadow: none; background: transparent; }
+body.audio-only .video-only { display: none; }
+body.busy .panel, body.busy .bar .btn, body.busy .trimbar { opacity: .55; pointer-events: none; }
+
+/* trim timeline */
+.trimbar { flex: none; padding: 12px 16px 10px; border-top: 1px solid var(--line); background: var(--panel); }
+.track { position: relative; height: 36px; border-radius: 8px; background: var(--panel-2); cursor: pointer; touch-action: none; user-select: none; -webkit-user-select: none; }
+.sel { position: absolute; top: 0; bottom: 0; border-radius: 6px; background: var(--acc-soft); border: 2px solid var(--acc); pointer-events: none; }
+.handle { position: absolute; top: -4px; bottom: -4px; width: 14px; margin-left: -7px; border-radius: 5px; background: var(--acc); cursor: ew-resize; box-shadow: 0 1px 6px rgba(0, 0, 0, .35); outline: none; }
+.handle::after { content: ""; position: absolute; left: 5px; top: 12px; bottom: 12px; width: 4px; border-left: 1px solid rgba(255, 255, 255, .8); border-right: 1px solid rgba(255, 255, 255, .8); }
+.handle:focus-visible { box-shadow: 0 0 0 3px var(--acc-soft), 0 0 0 5px var(--acc); }
+.playhead { position: absolute; top: -6px; bottom: -6px; width: 2px; margin-left: -1px; background: var(--fg); pointer-events: none; border-radius: 2px; }
+.cue-marks { position: absolute; left: 0; right: 0; bottom: 3px; height: 5px; pointer-events: none; }
+.cue-marks i { position: absolute; top: 0; bottom: 0; border-radius: 2px; background: var(--acc-2); opacity: .8; }
+.trim-row { display: flex; align-items: center; flex-wrap: wrap; gap: 8px; margin-top: 10px; }
+.time { font: 600 12px/1 ui-monospace, SFMono-Regular, Consolas, monospace; color: var(--fg-2); font-variant-numeric: tabular-nums; }
+.clip-len { font-size: 12px; color: var(--mut); }
+.btn.sm { height: 30px; padding: 0 11px; font-size: 12px; gap: 5px; }
+.btn.sm .ic { width: 15px; height: 15px; }
+
+/* progress */
+.job { flex: none; padding: 10px 16px 12px; border-top: 1px solid var(--line); background: var(--panel); }
+.job-top { display: flex; align-items: center; gap: 10px; margin-bottom: 8px; font-size: 13px; }
+.job-top span { color: var(--fg-2); font-variant-numeric: tabular-nums; }
+.bar-track { height: 6px; border-radius: 6px; background: var(--panel-2); overflow: hidden; }
+.bar-fill { height: 100%; width: 0; border-radius: 6px; background: var(--grad); transition: width .2s; }
+.job.indeterminate .bar-fill { width: 30% !important; animation: indet 1.2s ease-in-out infinite; }
+@keyframes indet { from { transform: translateX(-100%); } to { transform: translateX(340%); } }
+body.busy .busy-lock { opacity: .4; pointer-events: none; }
+
+/* panel bits */
+.seg.wide { display: flex; margin-bottom: 10px; }
+.seg.wide .seg-btn { flex: 1; padding: 0 8px; }
+.chips { display: flex; flex-wrap: wrap; gap: 6px; margin: -4px 0 12px; }
+.chip { height: 28px; padding: 0 10px; border-radius: 999px; border: 1px solid var(--line-2); background: transparent; cursor: pointer; font-size: 12px; font-weight: 600; color: var(--fg-2); }
+.chip:hover { border-color: var(--acc); color: var(--acc); }
+.estimate { font-size: 12px; color: var(--fg-2); padding: 8px 12px; border-radius: 10px; background: var(--panel-2); margin-bottom: 4px; }
+.estimate b { color: var(--fg); }
+.estimate .bad { color: var(--warn); }
+.check-row { display: flex; align-items: center; gap: 8px; font-size: 13px; font-weight: 500; color: var(--fg-2); cursor: pointer; margin: 2px 0 10px; }
+.check-row input { width: 16px; height: 16px; accent-color: var(--acc); margin: 0; }
+.mini select { width: 100%; }
+
+.cues { display: flex; flex-direction: column; gap: 6px; max-height: 280px; overflow-y: auto; margin-top: 6px; padding-right: 2px; }
+.sub-ready { margin-top: 12px; padding: 12px; border-radius: 12px; border: 1px solid var(--acc); background: var(--acc-soft); }
+.sub-ready .btn-row { margin-top: 4px; }
+.sub-head { display: flex; align-items: center; gap: 8px; font-size: 13px; }
+.sub-head > .ic { color: var(--ok); stroke-width: 2.4; }
+.sub-head .icon-btn { width: 30px; height: 30px; }
+.sub-label { margin-top: 12px; font-size: 12px; font-weight: 600; color: var(--fg-2); }
+.check-row.strong { color: var(--fg); font-weight: 600; }
+.cues:empty { display: none; }
+.cue { display: grid; grid-template-columns: 1fr auto; gap: 4px 6px; padding: 8px; border-radius: 10px; background: var(--panel-2); border: 1px solid transparent; }
+.cue.active { border-color: var(--acc); }
+.cue-times { display: flex; align-items: center; gap: 4px; }
+.cue-times input { width: 74px; height: 26px; padding: 0 6px; border-radius: 6px; border: 1px solid var(--line-2); background: var(--panel); font: 600 12px/1 ui-monospace, SFMono-Regular, Consolas, monospace; color: var(--fg-2); }
+.cue-times span { color: var(--mut); font-size: 12px; }
+.cue-go { border: 0; background: transparent; color: var(--acc); cursor: pointer; font-size: 12px; font-weight: 600; padding: 0 4px; }
+.cue .rm { display: grid; place-items: center; width: 26px; height: 26px; border-radius: 50%; border: 0; background: transparent; color: var(--mut); cursor: pointer; }
+.cue .rm:hover { color: var(--danger); background: var(--acc-soft); }
+.cue .rm .ic { width: 14px; height: 14px; }
+.cue textarea { grid-column: 1 / -1; width: 100%; min-height: 34px; resize: vertical; padding: 6px 8px; border-radius: 6px; border: 1px solid var(--line-2); background: var(--panel); color: var(--fg); font: 13px/1.4 var(--font); outline: none; }
+.cue textarea:focus, .cue-times input:focus { border-color: var(--acc); }
+.burn { margin-top: 12px; padding: 12px; border-radius: 12px; background: var(--panel-2); }
+.result { margin-top: 10px; padding: 10px 12px; border-radius: 10px; background: var(--acc-soft); font-size: 13px; }
+.result b { color: var(--fg); }
+.result .good { color: var(--ok); font-weight: 700; }
+.result .bad { color: var(--warn); font-weight: 700; }
+
+@media (max-width: 860px) {
+  .player { inset: 12px; }
+  .viewport { height: 42vh; min-height: 240px; }
+  .clip-len { display: none; }
+  .trim-row .btn span { display: none; }
+  .trim-row .btn.sm { padding: 0 9px; }
+}

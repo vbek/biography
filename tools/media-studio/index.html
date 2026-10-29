@@ -1,0 +1,227 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Media Studio — Bibek Koirala</title>
+<meta name="description" content="Free in-browser image and video editor. Images: resize, crop, rotate, convert to JPEG/PNG/WebP, compress to a target size, adjust colours and add a watermark. Files never leave your device.">
+<script>
+  try { if (localStorage.getItem('theme') === 'light') document.documentElement.setAttribute('data-theme', 'light'); } catch (e) {}
+</script>
+<link rel="icon" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24'%3E%3Crect x='2' y='3' width='20' height='18' rx='4' fill='%2322d3ee'/%3E%3Ccircle cx='8.5' cy='9' r='2' fill='%23fff'/%3E%3Cpath d='M3 18l6-5 4 3 3-2 5 4' stroke='%23fff' stroke-width='2' fill='none'/%3E%3C/svg%3E">
+<link rel="stylesheet" href="app.css">
+</head>
+<body>
+<svg xmlns="http://www.w3.org/2000/svg" style="display:none">
+  <symbol id="i-img" viewBox="0 0 24 24"><rect x="3" y="4" width="18" height="16" rx="3"/><circle cx="9" cy="10" r="1.8"/><path d="M4 18l5-4.5 4 3.5 3-2.5 4 3.5"/></symbol>
+  <symbol id="i-open" viewBox="0 0 24 24"><path d="M3 7a2 2 0 0 1 2-2h4l2 2h8a2 2 0 0 1 2 2v8a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2z"/></symbol>
+  <symbol id="i-undo" viewBox="0 0 24 24"><path d="M9 14L4 9l5-5M4 9h10.5a5.5 5.5 0 0 1 0 11H11"/></symbol>
+  <symbol id="i-redo" viewBox="0 0 24 24"><path d="M15 14l5-5-5-5M20 9H9.5a5.5 5.5 0 0 0 0 11H13"/></symbol>
+  <symbol id="i-reset" viewBox="0 0 24 24"><path d="M4 12a8 8 0 1 0 2.3-5.7M4 4v4h4"/></symbol>
+  <symbol id="i-eye" viewBox="0 0 24 24"><path d="M2 12s3.5-7 10-7 10 7 10 7-3.5 7-10 7S2 12 2 12z"/><circle cx="12" cy="12" r="3"/></symbol>
+  <symbol id="i-down" viewBox="0 0 24 24"><path d="M12 4v11M7 10l5 5 5-5M5 20h14"/></symbol>
+  <symbol id="i-crop" viewBox="0 0 24 24"><path d="M6 2v14a2 2 0 0 0 2 2h14M2 6h14a2 2 0 0 1 2 2v14"/></symbol>
+  <symbol id="i-rotl" viewBox="0 0 24 24"><path d="M4 4v5h5M4.5 9A8 8 0 1 1 6 17"/></symbol>
+  <symbol id="i-rotr" viewBox="0 0 24 24"><path d="M20 4v5h-5M19.5 9A8 8 0 1 0 18 17"/></symbol>
+  <symbol id="i-fliph" viewBox="0 0 24 24"><path d="M12 3v18M9 7L4 17h5zM15 7l5 10h-5z"/></symbol>
+  <symbol id="i-flipv" viewBox="0 0 24 24"><path d="M3 12h18M7 9L17 4v5zM7 15l10 5v-5z"/></symbol>
+  <symbol id="i-copy" viewBox="0 0 24 24"><rect x="8" y="8" width="12" height="12" rx="2"/><path d="M16 8V6a2 2 0 0 0-2-2H6a2 2 0 0 0-2 2v8a2 2 0 0 0 2 2h2"/></symbol>
+  <symbol id="i-zip" viewBox="0 0 24 24"><path d="M6 3h9l4 4v14H6zM11 3v2h2v2h-2v2h2v2h-2v3h2"/></symbol>
+  <symbol id="i-plus" viewBox="0 0 24 24"><path d="M12 5v14M5 12h14"/></symbol>
+  <symbol id="i-x" viewBox="0 0 24 24"><path d="M6 6l12 12M18 6L6 18"/></symbol>
+  <symbol id="i-lock" viewBox="0 0 24 24"><rect x="5" y="11" width="14" height="9" rx="2"/><path d="M8 11V8a4 4 0 0 1 8 0v3"/></symbol>
+  <symbol id="i-check" viewBox="0 0 24 24"><path d="M5 12l5 5 9-10"/></symbol>
+  <symbol id="i-split" viewBox="0 0 24 24"><path d="M9 7l-5 5 5 5M15 7l5 5-5 5"/></symbol>
+</svg>
+
+<header class="bar">
+  <a class="brand" href="../index.html" title="Back to tools"><svg class="ic brand-ic"><use href="#i-img"/></svg><span>Media Studio</span></a>
+  <nav class="seg modes" aria-label="Media type"><a class="seg-btn" href="index.html" aria-current="page">Image</a><a class="seg-btn" href="video.html">Video</a></nav>
+  <div class="bar-group">
+    <button class="btn" id="btnOpen" title="Open images (Ctrl+O)"><svg class="ic"><use href="#i-open"/></svg><span>Open</span></button>
+  </div>
+  <div class="bar-group needs-img">
+    <button class="icon-btn" id="btnUndo" title="Undo (Ctrl+Z)" aria-label="Undo"><svg class="ic"><use href="#i-undo"/></svg></button>
+    <button class="icon-btn" id="btnRedo" title="Redo (Ctrl+Y)" aria-label="Redo"><svg class="ic"><use href="#i-redo"/></svg></button>
+    <button class="icon-btn" id="btnReset" title="Reset all edits" aria-label="Reset"><svg class="ic"><use href="#i-reset"/></svg></button>
+    <button class="btn" id="btnCompare" title="Compare before and after with a slider"><svg class="ic"><use href="#i-eye"/></svg><span>Compare</span></button>
+  </div>
+  <div class="spacer"></div>
+  <button class="btn primary needs-img" id="btnDownload" title="Download (Ctrl+S)"><svg class="ic"><use href="#i-down"/></svg><span>Download</span></button>
+</header>
+
+<main class="layout">
+  <section class="stage" id="stage">
+    <div class="viewport" id="viewport">
+      <div class="drop" id="drop">
+        <svg class="ic drop-ic"><use href="#i-img"/></svg>
+        <h1>Drop images here</h1>
+        <p>Resize, crop, convert, compress and touch up — right in your browser. Got a video? <a href="video.html">Open the video tools</a>.</p>
+        <button class="btn primary lg" id="btnOpen2"><svg class="ic"><use href="#i-open"/></svg><span>Choose images</span></button>
+        <p class="hint">or paste with <kbd>Ctrl</kbd>+<kbd>V</kbd> · JPEG, PNG, WebP, GIF, BMP, AVIF, SVG</p>
+        <ul class="perks"><li><svg class="ic"><use href="#i-check"/></svg>Free</li><li><svg class="ic"><use href="#i-check"/></svg>No uploads</li><li><svg class="ic"><use href="#i-check"/></svg>No watermark</li><li><svg class="ic"><use href="#i-check"/></svg>Batch editing</li></ul>
+      </div>
+      <div class="canvas-wrap" id="wrap" hidden>
+        <canvas id="view"></canvas>
+        <div class="crop" id="crop" hidden>
+          <span class="h" data-h="nw"></span><span class="h" data-h="n"></span><span class="h" data-h="ne"></span>
+          <span class="h" data-h="w"></span><span class="h" data-h="e"></span>
+          <span class="h" data-h="sw"></span><span class="h" data-h="s"></span><span class="h" data-h="se"></span>
+          <span class="crop-size" id="cropSize"></span>
+        </div>
+        <canvas id="before" hidden></canvas>
+        <div class="split-ui" id="splitUi" hidden>
+          <span class="tag tag-before">Before</span><span class="tag tag-after">After</span>
+          <div class="divider" id="divider" role="slider" tabindex="0" aria-label="Before and after divider" aria-valuemin="0" aria-valuemax="100" aria-valuenow="50">
+            <span class="knob"><svg class="ic"><use href="#i-split"/></svg></span>
+          </div>
+        </div>
+      </div>
+      <div class="ov-stage" id="ovStage" hidden tabindex="0" aria-label="Overlay comparison. Drag or use arrow keys to move the original; scroll to scale it.">
+        <canvas id="ovOrig"></canvas><canvas id="ovEdit"></canvas>
+      </div>
+    </div>
+    <div class="cropbar cmpbar" id="cmpbar" hidden>
+      <div class="seg" role="group" aria-label="Comparison type">
+        <button class="seg-btn" id="cmpOverlay" aria-pressed="true">Overlay</button><button class="seg-btn" id="cmpSplit" aria-pressed="false">Slider</button>
+      </div>
+      <div class="ov-ctl" id="ovCtl">
+        <label>Original <input type="range" id="ovOpacity" min="0" max="100" value="50"><output id="ovOpacityV">50%</output></label>
+        <label>Scale <input type="range" id="ovScale" min="10" max="400" value="100"><output id="ovScaleV">100%</output></label>
+        <label>Line up
+          <select id="ovAlign">
+            <option value="match">Match position</option>
+            <option value="actual">Actual size</option>
+          </select>
+        </label>
+        <label class="check" title="Draw the original over the edit so you can see through to the changes"><input type="checkbox" id="ovTop"> Original on top</label>
+        <label class="check" title="Blend the layers so unchanged areas turn black and only differences show"><input type="checkbox" id="ovDiff"> Highlight changes</label>
+        <button class="btn" id="ovReset">Reset position</button>
+      </div>
+      <span class="cmp-hint" id="cmpHint" hidden>Drag the line to compare</span>
+      <span class="spacer"></span>
+      <button class="btn primary" id="cmpClose"><svg class="ic"><use href="#i-check"/></svg><span>Done</span></button>
+      <div class="cmp-info" id="cmpInfo"></div>
+    </div>
+    <div class="cropbar" id="cropbar" hidden>
+      <label>Aspect
+        <select id="cropAspect">
+          <option value="free">Free</option>
+          <option value="orig">Original</option>
+          <option value="1:1">1:1 Square</option>
+          <option value="4:3">4:3</option>
+          <option value="3:2">3:2</option>
+          <option value="16:9">16:9</option>
+          <option value="4:5">4:5 Portrait</option>
+          <option value="9:16">9:16 Story</option>
+        </select>
+      </label>
+      <button class="btn" id="cropFull">Select all</button>
+      <span class="spacer"></span>
+      <button class="btn" id="cropCancel">Cancel</button>
+      <button class="btn primary" id="cropApply"><svg class="ic"><use href="#i-check"/></svg><span>Apply crop</span></button>
+    </div>
+    <div class="strip" id="strip" hidden></div>
+  </section>
+
+  <aside class="panel needs-img" id="panel">
+    <details open>
+      <summary>Resize</summary>
+      <div class="field">
+        <label for="resizeMode">Mode</label>
+        <select id="resizeMode" data-k="resize.mode">
+          <option value="none">Original size</option>
+          <option value="px">Exact pixels</option>
+          <option value="pct">Percentage</option>
+          <option value="fit">Fit within (max size)</option>
+        </select>
+      </div>
+      <div class="row" id="rowWH">
+        <label class="mini">W <input type="number" id="rw" min="1" max="16384" inputmode="numeric"></label>
+        <span class="x">×</span>
+        <label class="mini">H <input type="number" id="rh" min="1" max="16384" inputmode="numeric"></label>
+        <label class="lock" id="lockWrap" title="Keep aspect ratio"><input type="checkbox" data-k="resize.lock"><svg class="ic"><use href="#i-lock"/></svg></label>
+      </div>
+      <div class="slider" id="rowPct"><label>Scale <output></output></label><input type="range" min="1" max="200" data-k="resize.pct" data-unit="%"></div>
+      <div class="field">
+        <label for="quick">Quick</label>
+        <select id="quick">
+          <option value="">Choose a preset…</option>
+          <option value="pct:50">Half size (50%)</option>
+          <option value="pct:25">Quarter size (25%)</option>
+          <option value="fit:3840">Max 3840 px (4K)</option>
+          <option value="fit:1920">Max 1920 px (Full HD)</option>
+          <option value="fit:1280">Max 1280 px (web)</option>
+          <option value="fit:1080">Max 1080 px (social)</option>
+          <option value="fit:800">Max 800 px (email)</option>
+          <option value="fit:400">Max 400 px (thumbnail)</option>
+          <option value="px:512x512">Avatar 512 × 512</option>
+        </select>
+      </div>
+      <p class="note" id="sizeNote"></p>
+    </details>
+
+    <details open>
+      <summary>Crop &amp; rotate</summary>
+      <div class="btn-row">
+        <button class="btn" id="btnCrop"><svg class="ic"><use href="#i-crop"/></svg><span>Crop</span></button>
+        <button class="icon-btn" id="btnRotL" title="Rotate left" aria-label="Rotate left"><svg class="ic"><use href="#i-rotl"/></svg></button>
+        <button class="icon-btn" id="btnRotR" title="Rotate right" aria-label="Rotate right"><svg class="ic"><use href="#i-rotr"/></svg></button>
+        <button class="icon-btn" id="btnFlipH" title="Flip horizontal" aria-label="Flip horizontal"><svg class="ic"><use href="#i-fliph"/></svg></button>
+        <button class="icon-btn" id="btnFlipV" title="Flip vertical" aria-label="Flip vertical"><svg class="ic"><use href="#i-flipv"/></svg></button>
+      </div>
+    </details>
+
+    <details>
+      <summary>Filters</summary>
+      <div class="presets" id="presets"></div>
+    </details>
+
+    <details>
+      <summary>Adjust</summary>
+      <div id="adjust"></div>
+      <p class="note">Double-click a slider to reset it.</p>
+    </details>
+
+    <details>
+      <summary>Watermark</summary>
+      <div class="field"><label for="wmText">Text</label><input id="wmText" type="text" data-k="wm.text" placeholder="© Your name"></div>
+      <div class="slider"><label>Size <output></output></label><input type="range" min="1" max="30" data-k="wm.size" data-unit="%"></div>
+      <div class="slider"><label>Opacity <output></output></label><input type="range" min="5" max="100" data-k="wm.opacity" data-unit="%"></div>
+      <div class="row">
+        <label class="mini grow">Position
+          <select data-k="wm.pos">
+            <option value="tl">Top left</option><option value="tc">Top centre</option><option value="tr">Top right</option>
+            <option value="ml">Middle left</option><option value="mc">Centre</option><option value="mr">Middle right</option>
+            <option value="bl">Bottom left</option><option value="bc">Bottom centre</option><option value="br">Bottom right</option>
+            <option value="tile">Tiled (diagonal)</option>
+          </select>
+        </label>
+        <label class="mini">Colour <input type="color" data-k="wm.color"></label>
+      </div>
+    </details>
+
+    <details open>
+      <summary>Export</summary>
+      <div class="field"><label for="fmt">Format</label><select id="fmt" data-k="out.format"></select></div>
+      <div class="slider" id="rowQuality"><label>Quality <output></output></label><input type="range" min="1" max="100" data-k="out.quality" data-unit="%"></div>
+      <div class="field" id="rowMaxKB"><label for="maxKB">Max file size (KB) <span class="opt">optional</span></label><input id="maxKB" type="number" min="1" placeholder="e.g. 200" data-k="out.maxKB" inputmode="numeric"></div>
+      <div class="field inline" id="rowBg"><label for="bg">Background for transparent areas</label><input id="bg" type="color" data-k="out.bg"></div>
+      <div class="field"><label for="outName">File name</label><div class="suffix-input"><input id="outName" type="text" spellcheck="false"><span id="outExt">.jpg</span></div></div>
+      <div class="out-info" id="outInfo"></div>
+      <button class="btn primary block" id="btnDownload2"><svg class="ic"><use href="#i-down"/></svg><span>Download</span></button>
+      <div class="btn-row">
+        <button class="btn grow" id="btnCopy"><svg class="ic"><use href="#i-copy"/></svg><span>Copy</span></button>
+        <button class="btn grow multi" id="btnApplyAll" title="Copy these settings (except crop) to every open image">Apply to all</button>
+      </div>
+      <button class="btn block multi" id="btnZip"><svg class="ic"><use href="#i-zip"/></svg><span>Download all (.zip)</span></button>
+      <p class="note">Metadata such as camera details and GPS location is removed on export.</p>
+    </details>
+  </aside>
+</main>
+
+<input type="file" id="file" accept="image/*,.svg,.avif,.webp,.bmp,.ico" multiple hidden>
+<div class="toasts" id="toasts" aria-live="polite"></div>
+<script src="app.js"></script>
+</body>
+</html>
