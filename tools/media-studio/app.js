@@ -1,4 +1,4 @@
-/* Image Editor — a small, dependency-free, non-destructive image editor.
+/* Media Studio, image mode — a small, dependency-free, non-destructive image editor.
    Each image keeps a plain settings object; the preview and every export are rendered from the original
    pixels through the same pipeline: orient (rotate/flip) → crop → resize → blur/sharpen → colour → vignette → watermark. */
 'use strict';

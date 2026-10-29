@@ -1,4 +1,4 @@
-/* Image Editor — palette follows the portfolio (dark by default, light when the site theme is light) */
+/* Media Studio — palette follows the portfolio (dark by default, light when the site theme is light) */
 :root {
   --bg: #05080f; --panel: #0b111d; --panel-2: #111a2a; --line: rgba(255, 255, 255, .09); --line-2: rgba(255, 255, 255, .16);
   --fg: #e7ecf6; --fg-2: #b6c0d2; --mut: #7d8aa1;
@@ -109,7 +109,11 @@ body.dragging .drop, body.dragging .viewport { border-color: var(--acc); backgro
 .cmpbar { row-gap: 10px; }
 .seg { display: inline-flex; padding: 3px; border-radius: 999px; border: 1px solid var(--line-2); }
 .seg-btn { height: 30px; padding: 0 14px; border: 0; border-radius: 999px; background: transparent; cursor: pointer; font-weight: 600; font-size: 13px; color: var(--fg-2); }
-.seg-btn[aria-pressed="true"] { background: var(--acc-soft); color: var(--acc); }
+.seg-btn[aria-pressed="true"], .seg-btn[aria-current="page"] { background: var(--acc-soft); color: var(--acc); }
+.modes { flex: none; }
+.modes .seg-btn { display: inline-flex; align-items: center; text-decoration: none; }
+.modes .seg-btn:hover { color: var(--fg); }
+.drop a { color: var(--acc); }
 .ov-ctl { display: flex; align-items: center; flex-wrap: wrap; gap: 8px 16px; order: 2; flex-basis: 100%; }
 .ov-ctl input[type="range"] { width: 100px; }
 .ov-ctl output { min-width: 38px; color: var(--mut); font-weight: 500; font-variant-numeric: tabular-nums; }
@@ -199,6 +203,7 @@ input[type="range"]::-moz-range-thumb { width: 14px; height: 14px; border-radius
   .panel { border-left: 0; border-top: 1px solid var(--line); overflow: visible; }
   .bar { padding: 0 10px; gap: 6px; position: sticky; top: 0; z-index: 10; }
   .bar .btn span, .brand span { display: none; }
+  .modes .seg-btn { padding: 0 10px; }
   .bar .btn { padding: 0 10px; }
   .drop { padding: 28px 18px; }
   .drop h1 { font-size: 22px; }
