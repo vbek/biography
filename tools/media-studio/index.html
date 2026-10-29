@@ -6,7 +6,7 @@
 <title>Media Studio — Bibek Koirala</title>
 <meta name="description" content="Free in-browser image and video editor. Images: resize, crop, rotate, convert to JPEG/PNG/WebP, compress to a target size, adjust colours and add a watermark. Files never leave your device.">
 <script>
-  try { if (localStorage.getItem('theme') === 'light') document.documentElement.setAttribute('data-theme', 'light'); } catch (e) {}
+  try { if (localStorage.getItem('theme') !== 'dark') document.documentElement.setAttribute('data-theme', 'light'); } catch (e) { document.documentElement.setAttribute('data-theme', 'light'); }
 </script>
 <link rel="icon" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24'%3E%3Crect x='2' y='3' width='20' height='18' rx='4' fill='%2322d3ee'/%3E%3Ccircle cx='8.5' cy='9' r='2' fill='%23fff'/%3E%3Cpath d='M3 18l6-5 4 3 3-2 5 4' stroke='%23fff' stroke-width='2' fill='none'/%3E%3C/svg%3E">
 <link rel="stylesheet" href="app.css">

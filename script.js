@@ -327,7 +327,7 @@ function initThemeToggle() {
 
     let saved = null;
     try { saved = localStorage.getItem('theme'); } catch (e) {}
-    apply(saved === 'light' ? 'light' : 'dark');
+    apply(saved === 'dark' ? 'dark' : 'light'); // light unless the visitor chose dark
 
     toggle.addEventListener('click', () => {
         const isLight = document.documentElement.getAttribute('data-theme') === 'light';
