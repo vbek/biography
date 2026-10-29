@@ -39,9 +39,6 @@
         .tool-card:hover .tool-cta i { transform: translateX(3px); }
         .tool-card .tool-cta i { transition: var(--transition); }
         .ribbon { position: absolute; top: 16px; right: -34px; width: 130px; padding: 4px 0; transform: rotate(45deg); background: #22c55e; color: #fff; font-size: 11px; font-weight: 800; letter-spacing: .12em; text-align: center; box-shadow: 0 2px 8px rgba(0, 0, 0, .25); }
-        .chips { display: flex; flex-wrap: wrap; gap: 6px; }
-        .chips span { font-size: 12px; padding: 3px 10px; border-radius: 999px; border: 1px solid var(--border); color: var(--text-muted); }
-        .chips i { color: #22c55e; margin-right: 4px; }
         .tools-perks { display: flex; flex-wrap: wrap; gap: 10px 22px; margin: -16px 0 32px; color: var(--text-muted); font-size: 14px; }
         .tools-perks i { color: #22c55e; margin-right: 6px; }
         .tool-card.soon { opacity: .55; pointer-events: none; border-style: dashed; }
@@ -56,8 +53,9 @@
             <p>Everything runs in your browser — your files never leave your device.</p>
             <div class="tools-perks">
                 <span><i class="fas fa-check-circle"></i>100% free</span>
-                <span><i class="fas fa-check-circle"></i>No sign-up</span>
-                <span><i class="fas fa-check-circle"></i>No uploads</span>
+                <span><i class="fas fa-check-circle"></i>No account needed</span>
+                <span><i class="fas fa-check-circle"></i>Private — no uploads</span>
+                <span><i class="fas fa-check-circle"></i>Instant</span>
                 <span><i class="fas fa-check-circle"></i>No watermarks</span>
             </div>
         </header>
@@ -67,7 +65,6 @@
                 <div class="tool-icon"><i class="fas fa-file-pdf"></i></div>
                 <h2>PDF Editor</h2>
                 <p>Annotate, add text, sign, fill forms, redact, merge and reorder pages — then export to PDF, Word, images, HTML or Markdown.</p>
-                <div class="chips"><span><i class="fas fa-lock"></i>Private</span><span><i class="fas fa-bolt"></i>Instant</span><span><i class="fas fa-user-slash"></i>No account</span></div>
                 <span class="tool-cta">Open editor <i class="fas fa-arrow-right"></i></span>
             </a>
             <a class="tool-card" href="locallabel/index.html">
@@ -75,7 +72,6 @@
                 <div class="tool-icon"><i class="fas fa-vector-square"></i></div>
                 <h2>LocalLabel</h2>
                 <p>Annotate images and videos for ML — boxes, polygons, masks, keypoints, tracks and ONNX-powered AI assist. Export COCO, YOLO, CVAT or Pascal VOC.</p>
-                <div class="chips"><span><i class="fas fa-lock"></i>Private</span><span><i class="fas fa-bolt"></i>Instant</span><span><i class="fas fa-user-slash"></i>No account</span></div>
                 <span class="tool-cta">Open annotator <i class="fas fa-arrow-right"></i></span>
             </a>
             <a class="tool-card" href="image-editor/index.html">
@@ -83,7 +79,6 @@
                 <div class="tool-icon"><i class="fas fa-image"></i></div>
                 <h2>Image Editor</h2>
                 <p>Resize, crop, rotate and convert images to JPEG, PNG or WebP. Compress to a target size, tweak colours, add filters or a watermark — one image or a whole batch.</p>
-                <div class="chips"><span><i class="fas fa-lock"></i>Private</span><span><i class="fas fa-bolt"></i>Instant</span><span><i class="fas fa-user-slash"></i>No account</span></div>
                 <span class="tool-cta">Open editor <i class="fas fa-arrow-right"></i></span>
             </a>
             <div class="tool-card soon">
