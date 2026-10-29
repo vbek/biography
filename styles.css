@@ -236,22 +236,6 @@ html[data-theme="light"] .bg-orb { opacity: 0.45; }
     transform: rotate(20deg);
 }
 
-.election-nav-btn {
-    display: flex;
-    align-items: center;
-    gap: 5px;
-    padding: 7px 14px;
-    background: linear-gradient(135deg, #c0392b, #1a3a6b);
-    color: #fff !important;
-    font-weight: 700;
-    font-size: 13px;
-    border-radius: 20px;
-    text-decoration: none;
-    white-space: nowrap;
-    box-shadow: 0 2px 10px rgba(192, 57, 43, 0.4);
-    transition: var(--transition);
-}
-.election-nav-btn:hover { transform: scale(1.06); box-shadow: 0 4px 16px rgba(192, 57, 43, 0.55); }
 
 .tools-nav-btn {
     position: relative;
@@ -1287,9 +1271,7 @@ a:focus-visible {
 @media (max-width: 600px) {
     .news-slider-track { gap: 0; }
     .news-nav-btn { width: 38px; height: 38px; font-size: 1rem; }
-    .election-nav-btn { font-size: 11px; padding: 6px 10px; }
     .tools-nav-btn { font-size: 11px; padding: 6px 6px 6px 10px; gap: 5px; }
-    .tools-nav-label { display: none; }
     .games-nav-btn { width: 34px; height: 34px; padding: 0; justify-content: center; font-size: 14px; }
     .games-nav-label { display: none; }
     .nav-right { gap: 6px; }
@@ -1297,10 +1279,10 @@ a:focus-visible {
 }
 @media (max-width: 359px) {
     .nav-right { gap: 4px; }
-    .election-nav-btn { font-size: 10px; padding: 5px 7px; }
     .tools-nav-btn { padding: 5px 5px 5px 8px; gap: 4px; }
     .tools-nav-btn .free-badge { padding: 2px 5px; }
     .games-nav-btn, .theme-toggle { width: 30px; height: 30px; }
+    .tools-nav-label { display: none; }
 }
 
 @media (max-width: 576px) {
@@ -1316,3 +1298,9 @@ a:focus-visible {
     .hero-stats { gap: 22px; }
     .float-chip { display: none; }
 }
+
+/* footer archive link (past projects that no longer belong in the top bar) */
+.footer-archive { display: flex; flex-wrap: wrap; justify-content: center; align-items: center; gap: 8px; margin: 10px 0 0; font-size: 13px; }
+.footer-archive span { color: var(--text-muted); text-transform: uppercase; letter-spacing: .08em; font-size: 11px; }
+.footer-archive a { display: inline-flex; align-items: center; gap: 6px; color: var(--text-muted); text-decoration: none; border-bottom: 1px dashed var(--border); transition: var(--transition); }
+.footer-archive a:hover { color: var(--accent); border-bottom-color: var(--accent); }
