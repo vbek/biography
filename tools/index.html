@@ -41,11 +41,6 @@
         .ribbon { position: absolute; top: 16px; right: -34px; width: 130px; padding: 4px 0; transform: rotate(45deg); background: #22c55e; color: #fff; font-size: 11px; font-weight: 800; letter-spacing: .12em; text-align: center; box-shadow: 0 2px 8px rgba(0, 0, 0, .25); }
         .tools-perks { display: flex; flex-wrap: wrap; gap: 10px 22px; margin: -16px 0 32px; color: var(--text-muted); font-size: 14px; }
         .tools-perks i { color: #22c55e; margin-right: 6px; }
-        .games-title { display: flex; align-items: center; gap: 10px; font-family: var(--font-display); font-size: 1.35rem; margin: 48px 0 18px; }
-        .games-title i { color: var(--accent); }
-        .tool-card.game .ribbon { background: #f59e0b; }
-        .tool-card .best { font-size: 13px; color: var(--text-muted); }
-        .tool-card .best b { color: var(--text); }
         .tool-card.soon { opacity: .55; pointer-events: none; border-style: dashed; }
     </style>
 </head>
@@ -92,30 +87,6 @@
                 <p>New tools will be added here.</p>
             </div>
         </section>
-
-        <h2 class="games-title"><i class="fas fa-gamepad"></i> Take a break</h2>
-        <section class="tools-grid">
-            <a class="tool-card game" href="stack/index.html">
-                <span class="ribbon">PLAY</span>
-                <div class="tool-icon"><i class="fas fa-layer-group"></i></div>
-                <h2>Stack Tower</h2>
-                <p>A one-tap arcade game: drop the sliding blocks, nail perfect stacks to build combos and beat your best. Scores are saved on your device.</p>
-                <span class="tool-cta">Play now <i class="fas fa-play"></i></span>
-            </a>
-        </section>
     </main>
-    <script>
-      // show the saved Stack Tower best score on its card
-      try {
-        var r = JSON.parse(localStorage.getItem('stackTower.v1') || 'null');
-        if (r && r.games) {
-          var el = document.createElement('span');
-          el.className = 'best';
-          el.innerHTML = 'Your best: <b>' + (r.best | 0) + '</b> · ' + (r.games | 0) + ' game' + (r.games === 1 ? '' : 's') + ' played';
-          var card = document.querySelector('.tool-card.game');
-          card.insertBefore(el, card.querySelector('.tool-cta'));
-        }
-      } catch (e) {}
-    </script>
 </body>
 </html>

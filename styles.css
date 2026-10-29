@@ -292,6 +292,24 @@ html[data-theme="light"] .bg-orb { opacity: 0.45; }
     border-radius: 10px;
     animation: free-pulse 2s ease-in-out infinite;
 }
+.games-nav-btn {
+    display: flex;
+    align-items: center;
+    gap: 7px;
+    padding: 7px 14px;
+    background: linear-gradient(120deg, #f59e0b, #ec4899);
+    color: #fff !important;
+    font-weight: 700;
+    font-size: 13px;
+    border-radius: 20px;
+    text-decoration: none;
+    white-space: nowrap;
+    box-shadow: 0 2px 14px rgba(236, 72, 153, 0.4);
+    transition: var(--transition);
+}
+.games-nav-btn i { animation: games-wiggle 3s ease-in-out infinite; }
+.games-nav-btn:hover { transform: scale(1.06); box-shadow: 0 4px 22px rgba(236, 72, 153, 0.6); }
+@keyframes games-wiggle { 0%, 80%, 100% { transform: rotate(0); } 85% { transform: rotate(-14deg); } 90% { transform: rotate(12deg); } 95% { transform: rotate(-6deg); } }
 @keyframes tools-shift { 0%, 100% { background-position: 0% 50%; } 50% { background-position: 100% 50%; } }
 @keyframes tools-shine { 0% { left: -60%; } 60%, 100% { left: 130%; } }
 @keyframes free-pulse { 0%, 100% { transform: scale(1); } 50% { transform: scale(1.12); } }
@@ -1272,8 +1290,17 @@ a:focus-visible {
     .election-nav-btn { font-size: 11px; padding: 6px 10px; }
     .tools-nav-btn { font-size: 11px; padding: 6px 6px 6px 10px; gap: 5px; }
     .tools-nav-label { display: none; }
+    .games-nav-btn { width: 34px; height: 34px; padding: 0; justify-content: center; font-size: 14px; }
+    .games-nav-label { display: none; }
     .nav-right { gap: 6px; }
     .theme-toggle { width: 34px; height: 34px; font-size: .9rem; }
+}
+@media (max-width: 359px) {
+    .nav-right { gap: 4px; }
+    .election-nav-btn { font-size: 10px; padding: 5px 7px; }
+    .tools-nav-btn { padding: 5px 5px 5px 8px; gap: 4px; }
+    .tools-nav-btn .free-badge { padding: 2px 5px; }
+    .games-nav-btn, .theme-toggle { width: 30px; height: 30px; }
 }
 
 @media (max-width: 576px) {

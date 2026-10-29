@@ -2,64 +2,13 @@
 <html lang="en">
 <head>
 <meta charset="utf-8">
-<meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1, user-scalable=no">
 <title>Stack Tower — Bibek Koirala</title>
-<meta name="description" content="Stack Tower: a free one-tap arcade game. Drop the sliding blocks, land perfect stacks and beat your best — scores are saved on your device.">
-<script>
-  try { if (localStorage.getItem('theme') === 'light') document.documentElement.setAttribute('data-theme', 'light'); } catch (e) {}
-</script>
-<link rel="icon" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24'%3E%3Crect x='5' y='15' width='14' height='5' rx='1.5' fill='%2322d3ee'/%3E%3Crect x='6' y='9.5' width='12' height='5' rx='1.5' fill='%23818cf8'/%3E%3Crect x='8' y='4' width='9' height='5' rx='1.5' fill='%23c084fc'/%3E%3C/svg%3E">
-<link rel="stylesheet" href="game.css">
+<meta name="robots" content="noindex">
+<link rel="canonical" href="../../games/stack/index.html">
+<meta http-equiv="refresh" content="0; url=../../games/stack/index.html">
+<script>location.replace('../../games/stack/index.html' + location.search + location.hash);</script>
 </head>
 <body>
-<header class="bar">
-  <a class="brand" href="../index.html" title="Back to tools">
-    <svg class="ic" viewBox="0 0 24 24"><path d="M15 6l-6 6 6 6"/></svg><span>Stack Tower</span>
-  </a>
-  <div class="hud" aria-live="polite"><span class="hud-score" id="hudScore">0</span><span class="hud-best">Best <b id="hudBest">0</b></span></div>
-  <div class="bar-right">
-    <button class="icon-btn" id="btnSound" title="Sound on/off (M)" aria-label="Toggle sound" aria-pressed="true">
-      <svg class="ic on" viewBox="0 0 24 24"><path d="M4 9v6h4l5 4V5L8 9zM16.5 8.5a5 5 0 0 1 0 7M19 6a8.5 8.5 0 0 1 0 12"/></svg>
-      <svg class="ic off" viewBox="0 0 24 24"><path d="M4 9v6h4l5 4V5L8 9zM17 9l5 6M22 9l-5 6"/></svg>
-    </button>
-    <button class="icon-btn" id="btnScores" title="Your scores" aria-label="Your scores">
-      <svg class="ic" viewBox="0 0 24 24"><path d="M8 21h8M12 17v4M7 4h10v5a5 5 0 0 1-10 0zM7 6H4a3 3 0 0 0 3 4M17 6h3a3 3 0 0 1-3 4"/></svg>
-    </button>
-  </div>
-</header>
-
-<main class="stage" id="stage">
-  <canvas id="game" aria-label="Stack Tower game. Press space, click or tap to drop the block."></canvas>
-  <div class="combo" id="combo" aria-hidden="true"></div>
-
-  <section class="card" id="startCard">
-    <h1>Stack <span>Tower</span></h1>
-    <p>Drop each sliding block on the tower. Whatever hangs over the edge is sliced off — land it <b>perfectly</b> to build a combo and grow the block back.</p>
-    <button class="btn primary lg" id="btnPlay">Play</button>
-    <p class="keys"><kbd>Space</kbd> / click / tap to drop</p>
-    <div class="mini-stats" id="startStats"></div>
-  </section>
-
-  <section class="card" id="overCard" hidden>
-    <div class="badge" id="newBest" hidden>New best!</div>
-    <div class="final"><span id="finalScore">0</span><small>blocks</small></div>
-    <div class="row-stats" id="overStats"></div>
-    <div class="btns">
-      <button class="btn primary lg" id="btnAgain">Play again</button>
-      <button class="btn" id="btnScores2">Scores</button>
-    </div>
-    <p class="keys"><kbd>Space</kbd> to play again</p>
-  </section>
-
-  <section class="card wide" id="scoresCard" hidden>
-    <div class="card-head"><h2>Your scores</h2><button class="icon-btn" id="btnCloseScores" aria-label="Close"><svg class="ic" viewBox="0 0 24 24"><path d="M6 6l12 12M18 6L6 18"/></svg></button></div>
-    <div class="stat-grid" id="statGrid"></div>
-    <h3>Recent games</h3>
-    <ol class="history" id="history"></ol>
-    <p class="note">Saved in this browser on this device only — nothing is uploaded.</p>
-    <button class="btn danger" id="btnReset">Reset scores</button>
-  </section>
-</main>
-<script src="game.js"></script>
+<p>Stack Tower has moved to <a href="../../games/stack/index.html">Games</a>.</p>
 </body>
 </html>
