@@ -22,9 +22,34 @@ export const OUTPUT_KINDS = {
   yoloseg: 'YOLO-seg (boxes + mask prototypes)',
 };
 
-let worker = null, seq = 0;
+let worker = null, seq = 0, loadGen = 0;
 const pending = new Map();
 export const model = { loaded: false, name: '', names: COCO80, namesFromModel: false, backend: '', input: null, outputs: [], cfg: null };
+
+// Terminating the worker is the only way to free a session's WebAssembly memory, and to recover after a
+// WebAssembly trap (which leaves the runtime unusable: every later call fails with "memory access out of bounds").
+function resetWorker(reason) {
+  if (worker) worker.terminate();
+  worker = null;
+  for (const p of pending.values()) p.reject(new Error(reason));
+  pending.clear();
+}
+
+const isWasmTrap = (msg) => /out of bounds|out of memory|unreachable|Aborted|RuntimeError|Cannot enlarge memory|failed to allocate/i.test(msg);
+
+function explainLoadError(err, file) {
+  const msg = String(err?.message || err);
+  if (isWasmTrap(msg)) {
+    const mb = (file.size / 1048576).toFixed(0);
+    return new Error(`${msg}. The browser ran out of memory for this model (${mb} MB file). In-browser WebAssembly is capped at 4 GB, `
+      + 'so very large models may not fit: try a smaller, FP16 or quantized export, or close other tabs and reload the page.');
+  }
+  if (/external data|\.onnx\.data|\.bin\b/i.test(msg)) {
+    return new Error(`${msg}. This model keeps its weights in a separate file, which the browser can't open alongside it. `
+      + 'Re-save it as a single file: onnx.save(onnx.load("model.onnx"), "single.onnx", save_as_external_data=False).');
+  }
+  return err;
+}
 
 function call(msg, transfer = []) {
   if (!worker) {
@@ -86,11 +111,28 @@ export function saveConfig(cfg) {
   try { localStorage.setItem('aicfg:' + model.name, JSON.stringify(cfg)); } catch { /* storage unavailable */ }
 }
 
+// Every load gets a fresh worker so the previous model's memory is released before the new one is allocated.
+function loadInFreshWorker(buf, preferGPU) {
+  resetWorker('Superseded by another model load');
+  return call({ cmd: 'load', buffer: buf, preferGPU }, [buf]);
+}
+
 export async function loadModel(file, preferGPU = true, remember = true) {
+  const gen = ++loadGen;
   const buf = await file.arrayBuffer();
-  const copy = remember ? buf.slice(0) : null;
+  const copy = buf.slice(0); // the worker takes ownership of buf; keep bytes to remember and for the CPU retry
   const names = readClassNames(new Uint8Array(buf));
-  const info = await call({ cmd: 'load', buffer: buf, preferGPU }, [buf]);
+  let info;
+  try {
+    info = await loadInFreshWorker(buf, preferGPU);
+  } catch (e) {
+    if (gen !== loadGen) throw e;
+    if (!preferGPU) throw explainLoadError(e, file);
+    // WebGPU failed (unsupported op, driver, or a trap). Retry on plain WebAssembly in a clean worker.
+    try { info = await loadInFreshWorker(copy.slice(0), false); }
+    catch (e2) { throw gen === loadGen ? explainLoadError(e2, file) : e2; }
+  }
+  if (gen !== loadGen) throw new Error('Superseded by another model load');
   Object.assign(model, {
     loaded: true, name: file.name, names: names || COCO80, namesFromModel: !!names, backend: info.backend,
     input: info.inputs[0], outputs: info.outputs,
@@ -404,7 +446,17 @@ export async function infer(m, frame, { conf = 0.35, iou: iouThr = 0.45 } = {}) 
   const cfg = model.cfg || defaultConfig();
   const names = cfg.names ? cfg.names.split(',').map(s => s.trim()) : model.names;
   const pre = await preprocess(m, frame, cfg);
-  const res = await call({ cmd: 'run', data: pre.data, dims: pre.dims, type: pre.type }, [pre.data.buffer]);
+  let res;
+  try {
+    res = await call({ cmd: 'run', data: pre.data, dims: pre.dims, type: pre.type }, [pre.data.buffer]);
+  } catch (e) {
+    if (isWasmTrap(e.message)) { // the worker is unusable now; drop it so the next run reloads the model cleanly
+      resetWorker(e.message);
+      model.loaded = false;
+      throw new Error(`${e.message}. The model ran out of memory or got an input it can't handle — try a smaller input size in Model settings.`);
+    }
+    throw e;
+  }
   const outs = res.outputs;
   const kind = cfg.output === 'auto' ? detectKind(outs) : cfg.output;
   let items;

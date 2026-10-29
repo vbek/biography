@@ -16,16 +16,12 @@ function meta(list, names) {
   });
 }
 
+// The main thread gives each model its own worker and retries a failed WebGPU load on WASM in a fresh one:
+// retrying here could hit a runtime left broken by the first attempt.
 async function load(buffer, preferGPU) {
   const providers = preferGPU && self.navigator.gpu ? ['webgpu', 'wasm'] : ['wasm'];
-  try {
-    session = await ort.InferenceSession.create(buffer, { executionProviders: providers, graphOptimizationLevel: 'all' });
-    backend = providers[0];
-  } catch (e) {
-    if (providers[0] !== 'webgpu') throw e;
-    session = await ort.InferenceSession.create(buffer, { executionProviders: ['wasm'] });
-    backend = 'wasm';
-  }
+  session = await ort.InferenceSession.create(new Uint8Array(buffer), { executionProviders: providers, graphOptimizationLevel: 'all' });
+  backend = providers[0];
   return {
     backend,
     inputs: meta(session.inputMetadata, session.inputNames),
