@@ -11,6 +11,7 @@ window.ARTracker = (() => {
 
   const api = {
     video,
+    handsEnabled: false, // hand gestures are switched off for now; true brings back the model and swipe pushes
     cameraOn: false, faceReady: false, handReady: false, aiFailed: false,
     faceMs: 0, handMs: 0, delegate: '',
     onProgress: null, onResult: null, onStatus: null,
@@ -58,8 +59,8 @@ window.ARTracker = (() => {
       else if (m.type === 'ready') {
         lane.ready = true;
         api[role + 'Ready'] = true;
-        if (role === 'face') startLane('hand');
-        else api.delegate = m.delegate;
+        if (role === 'hand') api.delegate = m.delegate;
+        else if (api.handsEnabled) startLane('hand');
         api.onStatus?.();
       } else if (m.type === 'error') fail(role, m.message);
       else if (m.type === 'result') {
@@ -72,7 +73,7 @@ window.ARTracker = (() => {
       }
     };
     lane.worker.onerror = (e) => fail(role, e.message || 'AI worker failed');
-    lane.worker.postMessage({ type: 'init', role });
+    lane.worker.postMessage({ type: 'init', role, withHands: api.handsEnabled });
   }
 
   function startAI() {

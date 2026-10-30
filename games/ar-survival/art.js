@@ -268,6 +268,30 @@ window.ARArt = (() => {
     ctx.beginPath(); ctx.ellipse(80, 72, 15, 28, 0, 0, TAU); ctx.fill();
   });
 
+  const ourMissile = () => mk(80, 240, (ctx) => {
+    ctx.fillStyle = '#0e7490';
+    poly(ctx, [[26, 170], [6, 216], [26, 206]]); ctx.fill();
+    poly(ctx, [[54, 170], [74, 216], [54, 206]]); ctx.fill();
+    ctx.fillStyle = grad(ctx, 22, 0, 58, 0, ['#64748b', '#f8fafc', '#64748b']);
+    ctx.beginPath();
+    ctx.moveTo(40, 4);
+    ctx.quadraticCurveTo(60, 40, 58, 80);
+    ctx.lineTo(58, 210);
+    ctx.lineTo(22, 210);
+    ctx.lineTo(22, 80);
+    ctx.quadraticCurveTo(20, 40, 40, 4);
+    ctx.fill();
+    ctx.fillStyle = '#22d3ee';
+    ctx.beginPath();
+    ctx.moveTo(40, 4);
+    ctx.quadraticCurveTo(54, 30, 56, 56);
+    ctx.lineTo(24, 56);
+    ctx.quadraticCurveTo(26, 30, 40, 4);
+    ctx.fill();
+    ctx.fillStyle = grad(ctx, 0, 208, 0, 240, ['#fff7c2', 'rgba(255,140,40,.9)', 'rgba(255,90,20,0)']);
+    poly(ctx, [[24, 208], [56, 208], [40, 240]]); ctx.fill();
+  });
+
   const glow = (rgb, hard) => mk(64, 64, (ctx) => {
     ctx.fillStyle = radial(ctx, 32, 32, 0, 32, hard
       ? [`rgba(${rgb},1)`, `rgba(${rgb},.75)`, `rgba(${rgb},0)`]
@@ -286,7 +310,7 @@ window.ARArt = (() => {
   const sprites = {
     rock0: rock(false), rock1: rock(false), rock2: rock(false), hot: rock(true),
     craft: craft(), jet: jet(), missile: missile(), bomber: bomber(), warship: warship(),
-    torpedo: torpedo(), bomb: bomb(), shell: shell(), bolt: bolt(), pod: pod(), cloud: cloud(),
+    torpedo: torpedo(), bomb: bomb(), shell: shell(), bolt: bolt(), pod: pod(), cloud: cloud(), ourMissile: ourMissile(),
   };
   const glows = {
     fire: glow('255,150,50'), hot: glow('255,235,170', true), red: glow('255,60,60'), cyan: glow('90,235,255'),
