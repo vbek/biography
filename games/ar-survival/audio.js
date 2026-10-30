@@ -119,6 +119,12 @@ window.ARAudio = (() => {
       tone(660, 0.13, { type: 'square', vol: 0.1, delay: 0.17, pan });
       tone(880, 0.13, { type: 'square', vol: 0.1, delay: 0.34, pan });
     },
+    powerDrop(pan) {
+      tone(1320, 0.18, { type: 'sine', vol: 0.07, pan });
+      tone(1760, 0.24, { type: 'sine', vol: 0.06, delay: 0.1, pan });
+    },
+    powerUp() { [523, 784, 1047, 1568].forEach((f, i) => tone(f, 0.17, { type: 'triangle', vol: 0.13, delay: i * 0.06 })); },
+    powerOff() { tone(700, 0.22, { type: 'triangle', vol: 0.09, to: 260 }); },
     clang(pan) { tone(620, 0.2, { type: 'square', vol: 0.09, to: 210, pan }); tone(930, 0.14, { type: 'triangle', vol: 0.07, pan }); },
     dodge(combo) { tone(520 * 2 ** (Math.min(combo, 16) / 12), 0.09, { type: 'triangle', vol: 0.09 }); },
     near() { tone(1000, 0.16, { type: 'sine', vol: 0.1, to: 1800 }); },

@@ -292,6 +292,92 @@ window.ARArt = (() => {
     poly(ctx, [[24, 208], [56, 208], [40, 240]]); ctx.fill();
   });
 
+  // power-ups: a glowing orb in the power's colour with a white symbol, centred on (64, 64)
+  const POWER_ICONS = {
+    shield(c) {
+      c.beginPath();
+      c.moveTo(64, 32);
+      c.lineTo(88, 41);
+      c.quadraticCurveTo(89, 78, 64, 96);
+      c.quadraticCurveTo(39, 78, 40, 41);
+      c.closePath();
+      c.fill();
+    },
+    repel(c) {
+      c.beginPath(); c.arc(64, 64, 8, 0, TAU); c.fill();
+      for (let i = 0; i < 4; i++) {
+        c.save();
+        c.translate(64, 64);
+        c.rotate((i * Math.PI) / 2);
+        c.beginPath();
+        c.moveTo(0, -15); c.lineTo(0, -33);
+        c.moveTo(-8, -25); c.lineTo(0, -33); c.lineTo(8, -25);
+        c.stroke();
+        c.restore();
+      }
+    },
+    ghost(c) {
+      c.beginPath();
+      c.moveTo(42, 94);
+      c.lineTo(42, 58);
+      c.arc(64, 58, 22, Math.PI, 0);
+      c.lineTo(86, 94);
+      c.lineTo(75, 84); c.lineTo(64, 94); c.lineTo(53, 84);
+      c.closePath();
+      c.fill();
+      c.fillStyle = '#334155';
+      c.beginPath(); c.arc(56, 58, 5, 0, TAU); c.arc(72, 58, 5, 0, TAU); c.fill();
+    },
+    slow(c) {
+      c.beginPath(); c.arc(64, 64, 28, 0, TAU); c.stroke();
+      c.beginPath(); c.moveTo(64, 46); c.lineTo(64, 64); c.lineTo(77, 72); c.stroke();
+    },
+    rapid(c) {
+      poly(c, [[70, 28], [42, 70], [60, 70], [54, 100], [86, 56], [67, 56]]);
+      c.fill();
+    },
+    double(c) {
+      c.font = '900 42px Orbitron, "Segoe UI", sans-serif';
+      c.textAlign = 'center';
+      c.textBaseline = 'middle';
+      c.fillText('×2', 64, 66);
+    },
+    nova(c) {
+      const pts = [];
+      for (let i = 0; i < 16; i++) {
+        const a = (i / 16) * TAU, r = i % 2 ? 15 : 38;
+        pts.push([64 + Math.cos(a) * r, 64 + Math.sin(a) * r]);
+      }
+      poly(c, pts);
+      c.fill();
+    },
+    life(c) {
+      c.beginPath();
+      c.moveTo(64, 94);
+      c.bezierCurveTo(26, 66, 34, 34, 54, 36);
+      c.quadraticCurveTo(62, 37, 64, 46);
+      c.quadraticCurveTo(66, 37, 74, 36);
+      c.bezierCurveTo(94, 34, 102, 66, 64, 94);
+      c.fill();
+    },
+  };
+  const POWER_COLORS = { shield: '56,189,248', repel: '167,139,250', ghost: '148,163,184', slow: '52,211,153', rapid: '249,115,22', double: '234,179,8', nova: '236,72,153', life: '239,68,68' };
+  const powerOrb = (id) => mk(128, 128, (ctx) => {
+    const rgb = POWER_COLORS[id];
+    ctx.fillStyle = radial(ctx, 64, 64, 34, 64, [`rgba(${rgb},.75)`, `rgba(${rgb},0)`]);
+    ctx.fillRect(0, 0, 128, 128);
+    ctx.fillStyle = radial(ctx, 52, 48, 4, 58, ['rgba(255,255,255,.55)', `rgba(${rgb},1)`, 'rgba(8,12,28,1)']);
+    ctx.beginPath(); ctx.arc(64, 64, 48, 0, TAU); ctx.fill();
+    ctx.strokeStyle = 'rgba(255,255,255,.9)';
+    ctx.lineWidth = 3;
+    ctx.stroke();
+    ctx.fillStyle = '#fff';
+    ctx.lineWidth = 7;
+    ctx.lineCap = 'round';
+    ctx.lineJoin = 'round';
+    POWER_ICONS[id](ctx);
+  });
+
   const glow = (rgb, hard) => mk(64, 64, (ctx) => {
     ctx.fillStyle = radial(ctx, 32, 32, 0, 32, hard
       ? [`rgba(${rgb},1)`, `rgba(${rgb},.75)`, `rgba(${rgb},0)`]
@@ -311,6 +397,7 @@ window.ARArt = (() => {
     rock0: rock(false), rock1: rock(false), rock2: rock(false), hot: rock(true),
     craft: craft(), jet: jet(), missile: missile(), bomber: bomber(), warship: warship(),
     torpedo: torpedo(), bomb: bomb(), shell: shell(), bolt: bolt(), pod: pod(), cloud: cloud(), ourMissile: ourMissile(),
+    power: Object.fromEntries(Object.keys(POWER_ICONS).map((id) => [id, powerOrb(id)])),
   };
   const glows = {
     fire: glow('255,150,50'), hot: glow('255,235,170', true), red: glow('255,60,60'), cyan: glow('90,235,255'),
