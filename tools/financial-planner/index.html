@@ -1,0 +1,53 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<!-- Financial records stay here: this policy stops the page sending data to, or loading code from, any other site. -->
+<meta http-equiv="Content-Security-Policy" content="default-src 'none'; script-src 'self' 'wasm-unsafe-eval'; worker-src 'self'; style-src 'self' 'unsafe-inline'; img-src 'self' blob: data:; font-src 'self'; connect-src 'self'; manifest-src 'self'; base-uri 'none'; form-action 'none'">
+<meta name="referrer" content="no-referrer">
+<meta name="robots" content="index, follow">
+<meta name="theme-color" content="#0b1020">
+<title>Financial Planner — Bibek Koirala</title>
+<meta name="description" content="A private financial planner that runs in your browser: budgets, expenses, receipt scanning, grocery planning, a calendar, loans and reports. No account, and nothing is uploaded.">
+<link rel="manifest" href="manifest.webmanifest">
+<link rel="icon" href="icon.svg" type="image/svg+xml">
+<link rel="stylesheet" href="app.css">
+<script src="js/core.js"></script>
+</head>
+<body>
+<div id="boot" class="boot" role="status"><span class="spinner"></span>Loading your planner…</div>
+<div id="app" hidden>
+  <aside id="side" class="side">
+    <a class="brand" href="../index.html" title="Back to Tools"><span class="brand-mark"></span><span>Financial<br>Planner</span></a>
+    <nav id="nav" aria-label="Main"></nav>
+  </aside>
+  <div class="main">
+    <header class="top">
+      <button class="icon-btn only-phone" data-act="openMore" aria-label="Open menu" id="btnMenu"></button>
+      <div class="search" role="search">
+        <span id="searchIcon"></span>
+        <input id="globalSearch" type="search" placeholder="Search everything…" aria-label="Search transactions, people, events and grocery items" autocomplete="off">
+        <div id="searchResults" class="search-results" hidden></div>
+      </div>
+      <button class="icon-btn" id="btnBell" data-act="openBell" aria-label="Notifications"></button>
+      <button class="icon-btn" id="btnTheme" data-act="toggleTheme" aria-label="Switch between light and dark theme"></button>
+      <a class="btn subtle only-wide" href="../index.html">All tools</a>
+    </header>
+    <div id="alerts"></div>
+    <main id="view" tabindex="-1"></main>
+  </div>
+  <nav id="tabs" class="tabs" aria-label="Quick navigation"></nav>
+  <button id="fab" class="fab" data-act="quickAdd" aria-label="Quick add"></button>
+</div>
+<div id="toasts" class="toasts" role="status" aria-live="polite"></div>
+<noscript><p class="boot">The Financial Planner needs JavaScript to run.</p></noscript>
+<script src="js/store.js"></script>
+<script src="js/domain.js"></script>
+<script src="js/charts.js"></script>
+<script src="js/views-money.js"></script>
+<script src="js/views-plan.js"></script>
+<script src="js/views-more.js"></script>
+<script src="js/app.js"></script>
+</body>
+</html>

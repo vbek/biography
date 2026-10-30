@@ -44,12 +44,24 @@
     torpedo: { sprite: ['torpedo'], rx: 0.06, ry: 0.06, speed: 2.8, accel: 1.5, trail: 'water', spin: 0.6, label: 'Torpedo', small: 1 },
     shell: { sprite: ['shell'], rx: 0.038, ry: 0.078, fall: 1, speed: 0.34, gravity: 0.5, label: 'Shell', small: 1, aspectH: 1 },
   };
+  // time is in seconds; powers without a time happen once on pickup. w is how often each one drops.
+  const POWERS = {
+    shield: { name: 'SHIELD', time: 8, w: 3, color: '#38bdf8' },
+    repel: { name: 'REPULSOR', time: 8, w: 3, color: '#a78bfa' },
+    ghost: { name: 'GHOST', time: 7, w: 2.5, color: '#e2e8f0' },
+    slow: { name: 'SLOW-MO', time: 7, w: 2.5, color: '#34d399' },
+    rapid: { name: 'RAPID FIRE', time: 8, w: 2.5, color: '#fb923c' },
+    double: { name: 'DOUBLE SCORE', time: 10, w: 2, color: '#fbbf24' },
+    nova: { name: 'NOVA BLAST', w: 1.5, color: '#f472b6' },
+    life: { name: 'EXTRA LIFE', w: 1, color: '#fb4e5e' },
+  };
   const VIEWS = [['ar', 'Camera'], ['blend', 'Blend'], ['scene', 'Scene']];
   const Z_FAR = 9, LEVEL_TIME = 18, LIVES = 3, MAX_LIVES = 5, ONE_UP_EVERY = 6000;
   const INVULN = 1.7, FACE_LOST_AFTER = 650, HAND_LOST_AFTER = 240, HAND_REACQUIRE = 600;
   const SWIPE_MIN = 0.38, SWIPE_HARD = 1.15, SWIPE_DECAY = 3, MAX_HAND_SPEED = 7; // hand speed in screen short-edges per second
-  const PTS = { second: 10, dodge: 50, near: 40, push: 150, heavy: 300, chain: 250, kill: 100, heavyKill: 350 };
-  const MAX_AMMO = 3, RELOAD_TIME = 2.4, FIRE_GAP = 0.18, MAX_LOCK_Z = 7.5;
+  const PTS = { second: 10, dodge: 50, near: 40, push: 150, heavy: 300, chain: 250, kill: 100, heavyKill: 350, block: 60, fullLives: 500 };
+  const MAX_AMMO = 3, RELOAD_TIME = 2.4, FIRE_GAP = 0.18, RAPID_GAP = 0.09, MAX_LOCK_Z = 7.5;
+  const POWER_FIRST = 5, POWER_GAP = [7, 11], POWER_ENDING = 1.5, SLOW_RATE = 0.45, REPEL_RANGE = 0.2;
 
   /* ---------- records and settings ---------- */
   const blank = () => ({ best: 0, bestTime: 0, games: 0, dodges: 0, pushes: 0, byTheme: {}, theme: 'space', backdrop: {}, view: 'ar' });
@@ -66,6 +78,7 @@
   let objects = [], score = 0, displayScore = 0, lives = LIVES, runTime = 0, level = 1, combo = 0, bestCombo = 0;
   let spawnTimer = 0, salvoTimer = 0, invuln = 0, shake = 0, dodges = 0, pushes = 0, chains = 0, nextOneUp = ONE_UP_EVERY, runTheme = 'space';
   let missiles = [], ammo = MAX_AMMO, reload = 0, fireCooldown = 0, kills = 0;
+  let powerups = [], effects = {}, waves = [], powerTimer = POWER_FIRST, worldTime = 0;
   let scoreCarry = 0, pushCooldown = 0, manualUntil = 0, lastFaceAt = -1e9, lastHandAt = -1e9, faceSeen = false, handSeen = false;
   const player = { x: 0, y: 0, tx: 0, ty: 0, r: 40, tr: 40, ang: 0 };
   const hands = [newHand(), newHand()];
@@ -303,8 +316,10 @@
       sx: 0, sy: 0, s: 1, vx: 0, vy: 0,
     };
     const spread = opts.spread ?? U * 0.12;
-    const tx = clamp((opts.tx ?? player.x) + rand(-spread, spread), U * 0.05, W - U * 0.05);
-    const ty = clamp((opts.ty ?? player.y) + rand(-spread, spread) * 0.8, U * 0.08, H - U * 0.05);
+    // enemies can't aim at a ghost, so new arrivals head for a random spot instead
+    const lost = powered('ghost');
+    const tx = clamp((opts.tx ?? (lost ? rand(0.1, 0.9) * W : player.x)) + rand(-spread, spread), U * 0.05, W - U * 0.05);
+    const ty = clamp((opts.ty ?? (lost ? rand(0.2, 0.9) * H : player.y)) + rand(-spread, spread) * 0.8, U * 0.08, H - U * 0.05);
     o.tx = tx; o.ty = ty;
     if (k.fall) {
       // falling objects hold off-screen while their warning shows, then land exactly where it pointed
@@ -355,7 +370,7 @@
   /* ---------- scoring ---------- */
   const multiplier = () => Math.min(5, 1 + Math.floor(combo / 6));
   function addScore(base, x, y, label, color, size) {
-    const m = multiplier(), pts = base * m;
+    const m = multiplier() * (powered('double') ? 2 : 1), pts = base * m;
     score += pts;
     if (x !== undefined) floater(x, y, `${label ? label + ' ' : ''}+${pts}`, color || '#fff', size);
     if (score >= nextOneUp) {
@@ -389,6 +404,13 @@
   }
   function hitPlayer(o) {
     destroyWithFx(o);
+    if (powered('shield')) {
+      raiseCombo();
+      addScore(PTS.block, player.x, player.y - player.r * 1.5, 'BLOCKED', POWERS.shield.color, 20);
+      burst(player.x, player.y, 18, U * 0.6, 0.4, U * 0.025, 'cyan', { drag: 2 });
+      Sfx.clang(panOf(player.x));
+      return;
+    }
     if (invuln > 0) return;
     lives--;
     invuln = INVULN;
@@ -404,7 +426,7 @@
     floater(player.x, player.y - player.r * 1.5, o.kind.label.toUpperCase() + ' HIT', '#fb4e5e', 21);
     if (lives <= 0) gameOver();
   }
-  function launchPushed(o, side, handVy, power) {
+  function launchPushed(o, side, handVy, power, label) {
     o.state = 'pushed';
     o.vx = side * U * (1.8 + power * 1.1);
     o.vy = clamp(handVy * 0.35, -U, U);
@@ -412,7 +434,7 @@
     pushes++;
     raiseCombo();
     const heavy = !!o.kind.heavy;
-    addScore(heavy ? PTS.heavy : PTS.push, o.sx, o.sy - U * 0.05, heavy ? 'HEAVY PUSH' : 'PUSHED', '#22d3ee', heavy ? 24 : 21);
+    addScore(heavy ? PTS.heavy : PTS.push, o.sx, o.sy - U * 0.05, label || (heavy ? 'HEAVY PUSH' : 'PUSHED'), '#22d3ee', heavy ? 24 : 21);
     const r = Math.max(o.rx, o.ry) * U * o.s;
     burst(o.sx - side * r * 0.5, o.sy, 16, U * 0.65, 0.48, U * 0.03, 'cyan', { drag: 2 });
     shake = Math.max(shake, reduceMotion ? 0 : U * 0.012);
@@ -483,7 +505,8 @@
   }
   function fireMissile(px, py) {
     if (state !== 'play' || fireCooldown > 0) return;
-    if (ammo <= 0) {
+    const rapid = powered('rapid');
+    if (ammo <= 0 && !rapid) {
       floater(player.x, player.y - player.r * 1.5, 'RELOADING', '#fbbf24', 16);
       Sfx.clang(panOf(player.x));
       return;
@@ -493,8 +516,8 @@
       floater(player.x, player.y - player.r * 1.5, 'NO TARGET', '#a3b1c8', 15);
       return;
     }
-    ammo--;
-    fireCooldown = FIRE_GAP;
+    if (!rapid) ammo--;
+    fireCooldown = rapid ? RAPID_GAP : FIRE_GAP;
     renderAmmo();
     missiles.push({ x: player.x, y: player.y - player.r, ang: -Math.PI / 2 + rand(-0.35, 0.35), speed: U * 0.9, age: 0, target, trailT: 0 });
     burst(player.x, player.y - player.r, 8, U * 0.3, 0.25, U * 0.02, 'cyan', { drag: 3 });
@@ -553,12 +576,105 @@
     missiles = missiles.filter((m) => !m.done);
   }
 
+  /* ---------- power-ups: orbs that drift down and are collected by moving into them ---------- */
+  function powered(id) { return effects[id] > 0; }
+  function spawnPower() {
+    const table = Object.keys(POWERS).filter((id) => id !== 'life' || lives < MAX_LIVES);
+    let r = Math.random() * table.reduce((sum, id) => sum + POWERS[id].w, 0), id = table[0];
+    for (const key of table) if ((r -= POWERS[key].w) <= 0) { id = key; break; }
+    // kept away from the screen edges, where a face is hard to track
+    const x = rand(0.18, 0.82) * W;
+    powerups.push({ id, x, baseX: x, y: -U * 0.08, r: U * 0.062, age: rand(0, TAU) });
+    Sfx.powerDrop(panOf(x));
+  }
+  function collectPower(p) {
+    const def = POWERS[p.id];
+    p.done = true;
+    burst(p.x, p.y, 22, U * 0.6, 0.55, U * 0.03, 'white', { drag: 2.4 });
+    floater(player.x, player.y - player.r * 1.7, def.name, def.color, 25);
+    Sfx.powerUp();
+    try { navigator.vibrate?.(30); } catch {}
+    if (def.time) {
+      effects[p.id] = def.time;
+      renderPowers();
+    } else if (p.id === 'nova') {
+      novaBlast();
+    } else if (lives < MAX_LIVES) {
+      lives++;
+      renderLives(true);
+    } else {
+      addScore(PTS.fullLives, player.x, player.y - player.r * 2.2, 'BONUS', def.color, 20);
+    }
+  }
+  function novaBlast() {
+    waves.push({ x: player.x, y: player.y, life: 0.7, max: 0.7 });
+    let destroyed = 0;
+    for (const o of objects) {
+      if (o.state !== 'live' || o.passed) continue;
+      if (!(o.fall && o.warn > 0)) {
+        explosion(o.sx, o.sy, Math.max(Math.max(o.rx, o.ry) * U * o.s, U * 0.03), o.kind.heavy);
+        kills++;
+        destroyed++;
+      }
+      removeObject(o);
+    }
+    if (destroyed) addScore(destroyed * PTS.kill, player.x, player.y - player.r * 2.2, 'NOVA', POWERS.nova.color, 26);
+    shake = Math.max(shake, reduceMotion ? 0 : U * 0.03);
+    Sfx.explode(true, 0);
+  }
+  function repelObjects() {
+    for (const o of objects) {
+      if (o.state !== 'live' || o.passed || (o.fall ? o.warn > 0 : o.z > 2.4)) continue;
+      const dx = o.sx - player.x, dy = o.sy - player.y;
+      if (Math.hypot(dx, dy) > player.r + Math.max(o.rx, o.ry) * U * o.s * 0.8 + U * REPEL_RANGE) continue;
+      launchPushed(o, Math.sign(dx) || 1, Math.sign(dy) * U, 1.4, 'REPELLED');
+    }
+  }
+  function stepPowers(dt) {
+    let changed = false;
+    for (const id of Object.keys(effects)) {
+      effects[id] -= dt;
+      if (effects[id] <= 0) {
+        delete effects[id];
+        changed = true;
+        Sfx.powerOff();
+      }
+    }
+    if (changed) renderPowers();
+    powerTimer -= dt;
+    if (powerTimer <= 0) {
+      spawnPower();
+      powerTimer = rand(POWER_GAP[0], POWER_GAP[1]);
+    }
+    for (const p of powerups) {
+      p.age += dt;
+      p.y += H * 0.19 * dt;
+      p.x = p.baseX + Math.sin(p.age * 1.6) * U * 0.05;
+      if (Math.hypot(p.x - player.x, p.y - player.y) < player.r * 1.15 + p.r * 0.9) collectPower(p);
+      else if (p.y > H + p.r * 2) p.done = true;
+    }
+    powerups = powerups.filter((p) => !p.done);
+    if (powered('repel')) repelObjects();
+    for (const w of waves) w.life -= dt;
+    waves = waves.filter((w) => w.life > 0);
+  }
+  function clearPowers() {
+    effects = {};
+    powerups = [];
+    waves = [];
+    renderPowers();
+  }
+
   /* ---------- simulation ---------- */
   function step(dt, now) {
     runTime += dt;
     invuln = Math.max(0, invuln - dt);
     pushCooldown = Math.max(0, pushCooldown - dt);
     stepMissiles(dt);
+    stepPowers(dt);
+    // slow-mo only slows the enemy: the player, missiles, power-ups and clock keep their normal speed
+    const worldDt = powered('slow') ? dt * SLOW_RATE : dt;
+    worldTime += worldDt;
 
     const newLevel = 1 + Math.floor(runTime / LEVEL_TIME);
     if (newLevel !== level) {
@@ -567,7 +683,7 @@
       Sfx.level();
       salvoTimer = Math.min(salvoTimer, 3);
     }
-    scoreCarry += dt * PTS.second * multiplier();
+    scoreCarry += dt * PTS.second * multiplier() * (powered('double') ? 2 : 1);
     if (scoreCarry >= 1) { const n = Math.floor(scoreCarry); score += n; scoreCarry -= n; }
 
     // manual controls take over for a moment whenever they are used, and permanently without tracking
@@ -583,13 +699,13 @@
       manualUntil = now + 900;
     }
 
-    spawnTimer -= dt;
+    spawnTimer -= worldDt;
     if (spawnTimer <= 0 && objects.length < 5 + level) {
       spawn(pickKind());
       spawnTimer = spawnInterval() * rand(0.75, 1.25);
     }
     if (level >= 3) {
-      salvoTimer -= dt;
+      salvoTimer -= worldDt;
       if (salvoTimer <= 0) {
         spawnSalvo();
         salvoTimer = rand(13, 19);
@@ -600,11 +716,11 @@
 
     for (const o of objects) {
       if (o.state === 'dead') continue;
-      o.rot += o.spin * dt;
-      o.pushLock = Math.max(0, (o.pushLock || 0) - dt);
-      if (o.state === 'pushed') stepPushed(o, dt);
-      else if (o.fall) stepFalling(o, dt);
-      else stepApproach(o, dt);
+      o.rot += o.spin * worldDt;
+      o.pushLock = Math.max(0, (o.pushLock || 0) - worldDt);
+      if (o.state === 'pushed') stepPushed(o, worldDt);
+      else if (o.fall) stepFalling(o, worldDt);
+      else stepApproach(o, worldDt);
       if (state !== 'play') return;
     }
     objects = objects.filter((o) => o.state !== 'dead');
@@ -617,7 +733,7 @@
     const prevZ = o.z;
     o.z -= o.vz * dt;
     // missiles keep correcting course until late, which leaves time to see the final path and move
-    if (k.home && o.z > 3) {
+    if (k.home && o.z > 3 && !powered('ghost')) {
       const rate = k.home * dt;
       o.tx += (player.x - o.tx) * rate;
       o.ty += (player.y - o.ty) * rate;
@@ -626,9 +742,9 @@
     let ix = o.i0x + (o.tx - o.i0x) * prog, iy = o.i0y + (o.ty - o.i0y) * prog;
     if (k.weave) {
       const fade = clamp((o.z - 1) / 2.5, 0, 1);
-      const w = Math.sin(runTime * k.weaveRate + o.phase);
+      const w = Math.sin(worldTime * k.weaveRate + o.phase);
       ix += w * k.weave * U * fade;
-      if (k.bank) o.rot = Math.cos(runTime * k.weaveRate + o.phase) * -0.42 * k.bank * fade;
+      if (k.bank) o.rot = Math.cos(worldTime * k.weaveRate + o.phase) * -0.42 * k.bank * fade;
     }
     o.s = 1 / Math.max(o.z, 0.22);
     o.sx = W / 2 + (ix - W / 2) * o.s;
@@ -645,7 +761,7 @@
       Sfx.whoosh(panOf(o.sx));
     }
     if (!o.passed && o.z <= 1.14 && prevZ > 0) {
-      if (overlap(o)) { hitPlayer(o); return; }
+      if (overlap(o) && !powered('ghost')) { hitPlayer(o); return; }
       if (o.z < 0.92) {
         o.passed = true;
         awardDodge(o);
@@ -664,7 +780,7 @@
     if (o.kind.spin === undefined) o.rot = -Math.atan2(o.vx, o.vy);
     trail(o, dt);
     if (!o.passed) {
-      if (overlap(o)) { hitPlayer(o); return; }
+      if (overlap(o) && !powered('ghost')) { hitPlayer(o); return; }
       if (o.sy > player.y + player.r + o.ry * U) {
         o.passed = true;
         awardDodge(o);
@@ -709,7 +825,7 @@
   function awardDodge(o) {
     dodges++;
     raiseCombo();
-    if (o.nearDist < 1.65) {
+    if (o.nearDist < 1.65 && !powered('ghost')) {
       addScore(PTS.dodge + PTS.near, player.x, player.y - player.r * 1.45, 'NEAR MISS', '#a5f3fc', 20);
       Sfx.near();
     } else {
@@ -788,7 +904,7 @@
         urgency = clamp((4.4 - o.z) / 3.4, 0, 1);
       }
       const r = Math.max(o.rx, o.ry) * U * (1.6 - urgency * 0.6);
-      const danger = Math.hypot(x - player.x, y - player.y) < r + player.r;
+      const danger = !powered('ghost') && Math.hypot(x - player.x, y - player.y) < r + player.r;
       ctx.strokeStyle = danger ? '#ff4557' : 'rgba(255,190,70,.8)';
       ctx.globalAlpha = 0.18 + urgency * 0.62;
       ctx.lineWidth = danger ? 3 : 1.8;
@@ -845,7 +961,7 @@
     ctx.globalAlpha = 1;
   }
   function drawLock() {
-    if (ammo <= 0) return;
+    if (ammo <= 0 && !powered('rapid')) return;
     const o = pickTarget();
     if (!o) return;
     const r = Math.max(o.rx, o.ry) * U * o.s * 1.25 + 6, c = r * 0.4;
@@ -869,6 +985,54 @@
     }
     ctx.setTransform(dpr, 0, 0, dpr, shakeX * dpr, shakeY * dpr);
   }
+  function drawPowerups() {
+    const labelPx = Math.round(clamp(U * 0.022, 11, 15));
+    ctx.textAlign = 'center';
+    ctx.font = `800 ${labelPx}px Orbitron, "Segoe UI", sans-serif`;
+    ctx.lineWidth = 3;
+    ctx.strokeStyle = 'rgba(0,0,0,.8)';
+    for (const p of powerups) {
+      const def = POWERS[p.id], pulse = 1 + Math.sin(p.age * 5) * 0.07, d = p.r * 2.5 * pulse;
+      ctx.drawImage(SPR.power[p.id], p.x - d / 2, p.y - d / 2, d, d);
+      ctx.strokeText(def.name, p.x, p.y - p.r * 1.45);
+      ctx.fillStyle = def.color;
+      ctx.fillText(def.name, p.x, p.y - p.r * 1.45);
+    }
+    for (const w of waves) {
+      const k = 1 - w.life / w.max;
+      ctx.globalAlpha = 1 - k;
+      ctx.strokeStyle = POWERS.nova.color;
+      ctx.lineWidth = U * 0.03 * (1 - k) + 1;
+      ctx.beginPath(); ctx.arc(w.x, w.y, k * Math.hypot(W, H), 0, TAU); ctx.stroke();
+    }
+    ctx.globalAlpha = 1;
+  }
+  // the shield and repulsor rings blink for their last moments, as a warning that they are about to stop
+  function drawPlayerPowers(now) {
+    const { x, y, r } = player;
+    const visible = (id) => powered(id) && (effects[id] > POWER_ENDING || Math.floor(now / 110) % 2 === 0);
+    if (visible('shield')) {
+      const R = r * 1.42;
+      ctx.fillStyle = POWERS.shield.color;
+      ctx.globalAlpha = 0.2;
+      ctx.beginPath(); ctx.arc(x, y, R, 0, TAU); ctx.fill();
+      ctx.globalAlpha = 0.95;
+      ctx.strokeStyle = POWERS.shield.color;
+      ctx.lineWidth = Math.max(4, U * 0.012);
+      ctx.beginPath(); ctx.arc(x, y, R, 0, TAU); ctx.stroke();
+    }
+    if (visible('repel')) {
+      const R = r + U * REPEL_RANGE;
+      ctx.strokeStyle = POWERS.repel.color;
+      ctx.lineWidth = Math.max(2, U * 0.005);
+      for (let i = 0; i < 3; i++) {
+        const k = (now / 900 + i / 3) % 1;
+        ctx.globalAlpha = (1 - k) * 0.8;
+        ctx.beginPath(); ctx.arc(x, y, r + (R - r) * k, 0, TAU); ctx.stroke();
+      }
+    }
+    ctx.globalAlpha = 1;
+  }
 
   function drawPlayer(dt, now) {
     const k = 1 - Math.exp(-dt * (usingCamera && now > manualUntil ? 26 : 22));
@@ -878,11 +1042,14 @@
     player.ang += dt * 1.7;
     const { x, y, r } = player;
     const lost = usingCamera && now - lastFaceAt > FACE_LOST_AFTER;
+    // a ghost is nearly see-through, and flickers back into view just before the power ends
+    const ghostAlpha = !powered('ghost') ? 1 : effects.ghost < POWER_ENDING && Math.floor(now / 110) % 2 ? 0.7 : 0.18;
+    ctx.globalAlpha = ghostAlpha;
     if (!usingCamera || viewMode() === 'scene') {
       const sz = r * 1.75;
       ctx.drawImage(SPR.pod, x - sz / 2, y - sz / 2, sz, sz);
     }
-    if (invuln > 0 && Math.floor(now / 90) % 2) ctx.globalAlpha = 0.28;
+    if (invuln > 0 && Math.floor(now / 90) % 2) ctx.globalAlpha = 0.28 * ghostAlpha;
     const col = lost ? '#fbbf24' : invuln > 0 ? '#fda4af' : '#22d3ee';
     ctx.strokeStyle = col;
     ctx.lineWidth = Math.max(2, U * 0.005);
@@ -892,10 +1059,11 @@
       const a = player.ang + (i * TAU) / 3;
       ctx.beginPath(); ctx.arc(x, y, r * 1.18, a, a + 0.8); ctx.stroke();
     }
-    ctx.globalAlpha = 0.16;
+    ctx.globalAlpha = 0.16 * ghostAlpha;
     ctx.fillStyle = col;
     ctx.beginPath(); ctx.arc(x, y, r, 0, TAU); ctx.fill();
     ctx.globalAlpha = 1;
+    drawPlayerPowers(now);
   }
   const BONES = [[0, 1], [1, 2], [2, 3], [3, 4], [0, 5], [5, 6], [6, 7], [7, 8], [5, 9], [9, 10], [10, 11], [11, 12], [9, 13], [13, 14], [14, 15], [15, 16], [13, 17], [17, 18], [18, 19], [19, 20], [0, 17]];
   function drawHands() {
@@ -997,6 +1165,10 @@
     }
     ctx.setTransform(dpr, 0, 0, dpr, shakeX * dpr, shakeY * dpr);
     drawDecor(state === 'pause' ? 0 : dt, mode === 'scene' ? 1 : 0.65);
+    if (powered('slow')) {
+      ctx.fillStyle = 'rgba(52,211,153,.1)';
+      ctx.fillRect(0, 0, W, H);
+    }
     if (state === 'play' || state === 'pause') {
       drawWarnings();
       drawFallWarnings();
@@ -1012,6 +1184,7 @@
       drawObject(o);
     }
     if (!playerDrawn) drawPlayer(state === 'pause' ? 0 : dt, now);
+    drawPowerups();
     drawMissiles();
     drawHands();
     drawParticles(dt);
@@ -1036,8 +1209,29 @@
     const el = $('#ammo');
     el.innerHTML = '<i class="full"></i>'.repeat(ammo) + '<i></i>'.repeat(MAX_AMMO - ammo);
     el.setAttribute('aria-label', `${ammo} missiles ready`);
-    $('#fireCount').textContent = ammo;
-    $('#btnFire').classList.toggle('empty', ammo === 0);
+    const rapid = powered('rapid');
+    $('#fireCount').textContent = rapid ? '∞' : ammo;
+    $('#btnFire').classList.toggle('empty', ammo === 0 && !rapid);
+  }
+  const powerIcons = {};
+  function renderPowers() {
+    const el = $('#powers');
+    el.innerHTML = '';
+    for (const id of Object.keys(effects)) {
+      powerIcons[id] ||= SPR.power[id].toDataURL();
+      const chip = document.createElement('div'), im = document.createElement('img');
+      chip.className = 'pw';
+      chip.dataset.id = id;
+      chip.style.setProperty('--c', POWERS[id].color);
+      chip.setAttribute('role', 'img');
+      chip.setAttribute('aria-label', `${POWERS[id].name} active`);
+      im.src = powerIcons[id];
+      im.alt = '';
+      chip.append(im);
+      el.append(chip);
+    }
+    document.body.classList.toggle('ghost', powered('ghost'));
+    renderAmmo();
   }
   let hudScoreShown = -1, hudSec = -1, hudMultShown = -1, hudLevelShown = -1;
   function updateHud(now) {
@@ -1060,6 +1254,12 @@
     if (m !== hudMultShown) { $('#hudMult').textContent = m > 1 ? `×${m}` : ''; hudMultShown = m; }
 
     $('#btnFire').style.setProperty('--reload', ammo < MAX_AMMO ? `${Math.round((reload / RELOAD_TIME) * 100)}%` : '100%');
+
+    for (const chip of $('#powers').children) {
+      const left = effects[chip.dataset.id] || 0;
+      chip.style.setProperty('--left', (left / POWERS[chip.dataset.id].time).toFixed(3));
+      chip.classList.toggle('ending', left < POWER_ENDING);
+    }
 
     const chips = $('#trackChips');
     chips.hidden = !usingCamera;
@@ -1096,7 +1296,8 @@
   function resetRun() {
     objects = [];
     missiles = []; ammo = MAX_AMMO; reload = 0; fireCooldown = 0; kills = 0;
-    renderAmmo();
+    powerTimer = POWER_FIRST; worldTime = 0;
+    clearPowers();
     score = 0; displayScore = 0; lives = LIVES; runTime = 0; level = 1; combo = 0; bestCombo = 0;
     spawnTimer = 0.2; salvoTimer = 8; invuln = 0; shake = 0; dodges = 0; pushes = 0; chains = 0; scoreCarry = 0; pushCooldown = 0;
     nextOneUp = ONE_UP_EVERY;
@@ -1164,6 +1365,7 @@
     if (state !== 'play') return;
     state = 'over';
     missiles = [];
+    clearPowers();
     Sfx.music(null);
     Sfx.over();
     explosion(player.x, player.y, U * 0.09, true);
@@ -1502,6 +1704,9 @@
       get pushes() { return pushes; }, get dodges() { return dodges; }, get level() { return level; },
       get objects() { return objects; }, get runTime() { return runTime; }, set runTime(v) { runTime = v; },
       get kills() { return kills; }, get ammo() { return ammo; }, get missiles() { return missiles; },
+      get powerups() { return powerups; }, get effects() { return effects; },
+      dropPower(id, x, y) { powerups.push({ id, x, baseX: x, y, r: U * 0.062, age: 0 }); },
+      stopPowers() { powerTimer = 1e9; },
       player, hands, spawn, Tracker, setInvuln(v) { invuln = v; }, stopSpawns() { spawnTimer = 1e9; salvoTimer = 1e9; },
     };
   }

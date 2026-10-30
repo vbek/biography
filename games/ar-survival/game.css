@@ -60,6 +60,16 @@ body.view-scene #cam { z-index: 1; inset: calc(100px + env(safe-area-inset-top))
 .ammo { display: flex; gap: 4px; margin-top: 6px; }
 .ammo i { width: 9px; height: 20px; border-radius: 5px 5px 2px 2px; border: 1px solid rgba(255, 255, 255, .5); background: rgba(0, 0, 0, .35); }
 .ammo i.full { background: linear-gradient(#22d3ee 30%, #f8fafc 30%); border-color: #fff; box-shadow: 0 0 6px rgba(34, 211, 238, .8); }
+/* between the push and fire buttons, because the top edge has to stay clear for falling-object warnings */
+.powers { position: absolute; z-index: 3; left: calc(166px + env(safe-area-inset-left)); right: calc(116px + env(safe-area-inset-right)); bottom: calc(22px + env(safe-area-inset-bottom)); display: flex; flex-wrap: wrap-reverse; justify-content: center; gap: 5px; pointer-events: none; }
+.pw { --left: 1; position: relative; width: 34px; height: 40px; }
+.pw img { display: block; width: 34px; height: 34px; }
+.pw::after { content: ''; position: absolute; left: 3px; right: 3px; bottom: 0; height: 4px; border-radius: 3px; background: var(--c); transform: scaleX(var(--left)); transform-origin: left; box-shadow: 0 0 5px var(--c); }
+.pw.ending img { animation: pw-end .25s steps(2) infinite; }
+@keyframes pw-end { 50% { opacity: .3; } }
+/* ghost mode fades your own camera image so you look as invisible as you are to the enemy */
+#cam { transition: opacity .3s; }
+body.ghost #cam { opacity: .35; }
 .fire-btn { --reload: 100%; position: absolute; z-index: 3; right: calc(16px + env(safe-area-inset-right)); bottom: calc(18px + env(safe-area-inset-bottom)); width: 92px; height: 92px; padding: 0; display: flex; flex-direction: column; align-items: center; justify-content: center; line-height: 1; border: 0; border-radius: 50%; color: #fff; cursor: pointer; touch-action: none; background: radial-gradient(circle, #c2410c 58%, transparent 60%), conic-gradient(#fbbf24 var(--reload), rgba(255, 255, 255, .2) 0); box-shadow: 0 4px 22px rgba(249, 115, 22, .55); }
 .fire-btn b { font: 900 16px var(--display); letter-spacing: .05em; }
 .fire-btn span { font: 800 20px var(--display); margin-top: 2px; }
@@ -147,5 +157,6 @@ kbd { display: inline-block; min-width: 19px; padding: 0 4px; margin-right: 2px;
 }
 @media (prefers-reduced-motion: reduce) {
   .card, #big.show, .score.bump, .record, .lives svg.pop { animation-duration: .01s; }
+  .pw.ending img { animation: none; opacity: .55; }
   #flash.on { animation-duration: .25s; }
 }
