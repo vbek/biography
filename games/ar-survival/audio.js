@@ -110,6 +110,15 @@ window.ARAudio = (() => {
       hiss(0.22, { vol: 0.3, from: 3000, to: 500, q: 1.2, filter: 'bandpass', pan });
       tone(240, 0.16, { type: 'square', vol: 0.09, to: 760, pan });
     },
+    launch(pan) {
+      hiss(0.5, { vol: 0.3, from: 900, to: 4200, q: 1, filter: 'bandpass', pan });
+      tone(180, 0.35, { type: 'sawtooth', vol: 0.09, to: 720, pan });
+    },
+    alarm(pan) {
+      tone(880, 0.13, { type: 'square', vol: 0.1, pan });
+      tone(660, 0.13, { type: 'square', vol: 0.1, delay: 0.17, pan });
+      tone(880, 0.13, { type: 'square', vol: 0.1, delay: 0.34, pan });
+    },
     clang(pan) { tone(620, 0.2, { type: 'square', vol: 0.09, to: 210, pan }); tone(930, 0.14, { type: 'triangle', vol: 0.07, pan }); },
     dodge(combo) { tone(520 * 2 ** (Math.min(combo, 16) / 12), 0.09, { type: 'triangle', vol: 0.09 }); },
     near() { tone(1000, 0.16, { type: 'sine', vol: 0.1, to: 1800 }); },

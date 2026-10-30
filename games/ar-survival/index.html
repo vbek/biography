@@ -5,7 +5,7 @@
 <meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1, user-scalable=no, viewport-fit=cover">
 <meta name="theme-color" content="#05060f">
 <title>AR Survival — Bibek Koirala</title>
-<meta name="description" content="AR Survival: dodge with your face and push with your hands to survive asteroids, missiles and torpedoes. Free, in your browser, and camera video never leaves your device.">
+<meta name="description" content="AR Survival: dodge with your face and fire back to survive asteroids, missiles and torpedoes. Free, in your browser, and camera video never leaves your device.">
 <link rel="icon" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24'%3E%3Ccircle cx='12' cy='12' r='9' fill='none' stroke='%2322d3ee' stroke-width='2.5'/%3E%3Ccircle cx='12' cy='12' r='3.5' fill='%23f97316'/%3E%3C/svg%3E">
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
@@ -15,13 +15,14 @@
 <body class="view-scene">
 <main id="stage">
   <video id="cam" playsinline muted autoplay aria-hidden="true"></video>
-  <canvas id="game" aria-label="AR Survival play field. Move your head, or use the arrow keys, to dodge. Swipe your hands, or press Q and E, to push objects away."></canvas>
+  <canvas id="game" aria-label="AR Survival play field. Move your head, or use the arrow keys, to dodge. Press Space, or tap an object, to fire a missile at it. Press Q and E to push objects away."></canvas>
   <div id="flash" aria-hidden="true"></div>
 
   <header id="hud" hidden>
     <div class="hud-left">
       <div class="lives" id="lives" role="img" aria-label="Lives"></div>
       <div class="sub"><span id="hudTime">0:00</span> · <span id="hudLevel">LV 1</span></div>
+      <div class="ammo" id="ammo" role="img" aria-label="Missiles ready"></div>
     </div>
     <div class="hud-mid">
       <div class="score" id="hudScore">0</div>
@@ -41,6 +42,8 @@
   <button class="push-btn left" id="pushL" aria-label="Push left" hidden><svg viewBox="0 0 24 24"><path d="M15 5l-7 7 7 7"/></svg></button>
   <button class="push-btn right" id="pushR" aria-label="Push right" hidden><svg viewBox="0 0 24 24"><path d="M9 5l7 7-7 7"/></svg></button>
 
+  <button class="fire-btn" id="btnFire" aria-label="Fire missile" hidden><b>FIRE</b><span id="fireCount">3</span><small>SPACE</small></button>
+
   <section class="card" id="menu">
     <div class="card-top">
       <a class="back" href="../index.html"><svg viewBox="0 0 24 24"><path d="M15 6l-6 6 6 6"/></svg>Games</a>
@@ -50,7 +53,7 @@
       </div>
     </div>
     <h1>AR <span>Survival</span></h1>
-    <p class="tag"><b>Dodge</b> with your head. <b>Swipe</b> with your hands. Stay alive.</p>
+    <p class="tag"><b>Dodge</b> with your head. <b>Fire</b> back. Stay alive.</p>
 
     <div class="label">Battlefield</div>
     <div class="themes" id="themePicks" role="radiogroup" aria-label="Battlefield"></div>
@@ -78,13 +81,14 @@
     <details class="how">
       <summary>How to play</summary>
       <ul>
-        <li><b>Camera:</b> move your head to dodge. Swipe a hand into an object to knock it aside. Warships and bombers need a hard swipe.</li>
-        <li><b>Keyboard:</b> <kbd>←</kbd><kbd>↑</kbd><kbd>↓</kbd><kbd>→</kbd> or <kbd>W</kbd><kbd>A</kbd><kbd>S</kbd><kbd>D</kbd> move, <kbd>Q</kbd>/<kbd>E</kbd> push, <kbd>P</kbd> pause, <kbd>M</kbd> sound, <kbd>F</kbd> fullscreen.</li>
-        <li><b>Touch:</b> drag anywhere to move, tap the arrow buttons to push.</li>
-        <li><b>Scoring:</b> survive, dodge, and push. Unbroken streaks raise your multiplier up to ×5, and a pushed object that hits another scores a chain bonus.</li>
+        <li><b>Camera:</b> move your head to dodge. A red <b>!</b> at the top of the screen and a dashed line show where something will fall.</li>
+        <li><b>Missiles:</b> you carry 3 and they reload over time. Each one homes in on its target, and warships and warplanes take two hits.</li>
+        <li><b>Laptop:</b> <kbd>Space</kbd> fires at the target in the green brackets, or click any object. <kbd>←</kbd><kbd>↑</kbd><kbd>↓</kbd><kbd>→</kbd> or <kbd>W</kbd><kbd>A</kbd><kbd>S</kbd><kbd>D</kbd> move, <kbd>Q</kbd>/<kbd>E</kbd> push, <kbd>P</kbd> pause, <kbd>M</kbd> sound, <kbd>F</kbd> fullscreen.</li>
+        <li><b>Phone:</b> tap an object or the FIRE button to shoot, drag to move, and use the arrow buttons to push.</li>
+        <li><b>Scoring:</b> survive, dodge, destroy and push. Unbroken streaks raise your multiplier up to ×5.</li>
       </ul>
     </details>
-    <p class="privacy">Face and hand tracking runs only on this device. Camera video is never uploaded or stored. The AI files download once, then load from your browser's cache.</p>
+    <p class="privacy">Face tracking runs only on this device. Camera video is never uploaded or stored. The AI files download once, then load from your browser's cache.</p>
   </section>
 
   <section class="card small" id="pauseCard" hidden>

@@ -112,13 +112,13 @@ async function chooseHandTask(buffer) {
   return useGpu ? gpu : cpu;
 }
 
-async function init(which) {
+async function init(which, withHands) {
   role = which;
   try { cache = await caches.open(CACHE_NAME); } catch { cache = null; }
   const simd = WebAssembly.validate(SIMD_PROBE);
   const keys = ['bundle', simd ? 'loader' : 'loaderNoSimd', simd ? 'wasm' : 'wasmNoSimd', 'face'];
   const coreSize = keys.reduce((sum, k) => sum + ASSETS[k].size, 0);
-  total = coreSize + ASSETS.hand.size;
+  total = coreSize + (withHands ? ASSETS.hand.size : 0);
 
   // the hand worker starts after the face worker has stored the shared files, so nothing is fetched twice
   const [bundle, loader, wasm, face] = await Promise.all((role === 'face' ? keys : keys.slice(0, 3)).map(getAsset));
@@ -179,6 +179,6 @@ function onFrame(bitmap) {
 
 self.onmessage = (e) => {
   const m = e.data;
-  if (m.type === 'init') init(m.role).catch((err) => postMessage({ type: 'error', role, message: String(err && err.message || err) }));
+  if (m.type === 'init') init(m.role, m.withHands).catch((err) => postMessage({ type: 'error', role, message: String(err && err.message || err) }));
   else if (m.type === 'frame') onFrame(m.bitmap);
 };

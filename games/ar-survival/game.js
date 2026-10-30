@@ -33,22 +33,23 @@
   // sizes are fractions of the short screen edge; speed is depth units per second
   const KINDS = {
     asteroid: { sprite: ['rock0', 'rock1', 'rock2'], rx: 0.115, ry: 0.115, size: [0.85, 1.25], speed: 2.9, spin: 1.3, label: 'Asteroid' },
-    meteor: { sprite: ['hot'], rx: 0.075, ry: 0.075, fall: 1, speed: 0.72, gravity: 0.8, spin: 3, trail: 'fire', big: 0, label: 'Meteor' },
+    meteor: { sprite: ['hot'], rx: 0.075, ry: 0.075, fall: 1, speed: 0.42, gravity: 0.42, spin: 3, trail: 'fire', big: 0, label: 'Meteor' },
     craft: { sprite: ['craft'], rx: 0.15, ry: 0.075, speed: 2.5, weave: 0.42, weaveRate: 2.2, bank: 1, fires: 'bolt', label: 'Spacecraft' },
     bolt: { sprite: ['bolt'], rx: 0.055, ry: 0.055, speed: 4.2, trail: 'green', label: 'Plasma bolt', small: 1 },
     jet: { sprite: ['jet'], rx: 0.15, ry: 0.07, speed: 3.5, weave: 0.34, weaveRate: 2.8, bank: 1, label: 'Fighter jet' },
     missile: { sprite: ['missile'], rx: 0.062, ry: 0.062, speed: 2.5, accel: 2.6, home: 0.7, spin: 2.2, trail: 'smoke', label: 'Missile', small: 1 },
     bomber: { sprite: ['bomber'], rx: 0.24, ry: 0.08, speed: 1.8, heavy: 1, fires: 'bomb', bank: 0.4, weave: 0.1, weaveRate: 1, label: 'Warplane' },
-    bomb: { sprite: ['bomb'], rx: 0.042, ry: 0.082, fall: 1, speed: 0.34, gravity: 1.15, label: 'Bomb', small: 1, aspectH: 1 },
+    bomb: { sprite: ['bomb'], rx: 0.042, ry: 0.082, fall: 1, speed: 0.28, gravity: 0.5, label: 'Bomb', small: 1, aspectH: 1 },
     warship: { sprite: ['warship'], rx: 0.17, ry: 0.14, speed: 1.65, heavy: 1, fires: 'shell', weave: 0.05, weaveRate: 0.8, label: 'Warship' },
     torpedo: { sprite: ['torpedo'], rx: 0.06, ry: 0.06, speed: 2.8, accel: 1.5, trail: 'water', spin: 0.6, label: 'Torpedo', small: 1 },
-    shell: { sprite: ['shell'], rx: 0.038, ry: 0.078, fall: 1, speed: 0.55, gravity: 1.05, label: 'Shell', small: 1, aspectH: 1 },
+    shell: { sprite: ['shell'], rx: 0.038, ry: 0.078, fall: 1, speed: 0.34, gravity: 0.5, label: 'Shell', small: 1, aspectH: 1 },
   };
   const VIEWS = [['ar', 'Camera'], ['blend', 'Blend'], ['scene', 'Scene']];
   const Z_FAR = 9, LEVEL_TIME = 18, LIVES = 3, MAX_LIVES = 5, ONE_UP_EVERY = 6000;
   const INVULN = 1.7, FACE_LOST_AFTER = 650, HAND_LOST_AFTER = 240, HAND_REACQUIRE = 600;
   const SWIPE_MIN = 0.38, SWIPE_HARD = 1.15, SWIPE_DECAY = 3, MAX_HAND_SPEED = 7; // hand speed in screen short-edges per second
-  const PTS = { second: 10, dodge: 50, near: 40, push: 150, heavy: 300, chain: 250 };
+  const PTS = { second: 10, dodge: 50, near: 40, push: 150, heavy: 300, chain: 250, kill: 100, heavyKill: 350 };
+  const MAX_AMMO = 3, RELOAD_TIME = 2.4, FIRE_GAP = 0.18, MAX_LOCK_Z = 7.5;
 
   /* ---------- records and settings ---------- */
   const blank = () => ({ best: 0, bestTime: 0, games: 0, dodges: 0, pushes: 0, byTheme: {}, theme: 'space', backdrop: {}, view: 'ar' });
@@ -64,6 +65,7 @@
   let state = 'menu', usingCamera = false;
   let objects = [], score = 0, displayScore = 0, lives = LIVES, runTime = 0, level = 1, combo = 0, bestCombo = 0;
   let spawnTimer = 0, salvoTimer = 0, invuln = 0, shake = 0, dodges = 0, pushes = 0, chains = 0, nextOneUp = ONE_UP_EVERY, runTheme = 'space';
+  let missiles = [], ammo = MAX_AMMO, reload = 0, fireCooldown = 0, kills = 0;
   let scoreCarry = 0, pushCooldown = 0, manualUntil = 0, lastFaceAt = -1e9, lastHandAt = -1e9, faceSeen = false, handSeen = false;
   const player = { x: 0, y: 0, tx: 0, ty: 0, r: 40, tr: 40, ang: 0 };
   const hands = [newHand(), newHand()];
@@ -296,6 +298,7 @@
       kind: k, id: kindId, sprite: SPR[pick(k.sprite)],
       rx: k.rx * size, ry: k.ry * size,
       rot: rand(0, TAU), spin: (k.spin || 0) * rand(0.5, 1.2) * (Math.random() < 0.5 ? -1 : 1),
+      hp: k.heavy ? 2 : 1,
       state: 'live', passed: false, whoosh: false, fired: false, born: runTime, trailT: 0,
       sx: 0, sy: 0, s: 1, vx: 0, vy: 0,
     };
@@ -304,8 +307,12 @@
     const ty = clamp((opts.ty ?? player.y) + rand(-spread, spread) * 0.8, U * 0.08, H - U * 0.05);
     o.tx = tx; o.ty = ty;
     if (k.fall) {
-      const startX = clamp(tx + rand(-0.5, 0.5) * U, 0, W), startY = -k.ry * U * 2;
-      const v = k.speed * U * speedMul(), g = k.gravity * U * speedMul();
+      // falling objects hold off-screen while their warning shows, then land exactly where it pointed
+      const startX = clamp(tx + rand(-0.3, 0.3) * U, U * 0.05, W - U * 0.05), startY = -k.ry * U * 2;
+      const fallMul = Math.min(1.6, speedMul());
+      const v = k.speed * U * fallMul, g = k.gravity * U * fallMul;
+      o.warn = Math.max(0.75, 1.2 - level * 0.03);
+      Sfx.alarm(panOf(startX));
       const dist = ty - startY, t = (-v + Math.sqrt(v * v + 2 * g * dist)) / g;
       o.fall = true;
       o.sx = startX; o.sy = startY; o.z = 1; o.s = 1;
@@ -459,11 +466,99 @@
     else Sfx.clang(panOf(player.x));
   }
 
+  /* ---------- our missiles: limited ammo that reloads, homing on one target each ---------- */
+  const lockedOn = (o) => missiles.reduce((n, m) => n + (m.target === o ? 1 : 0), 0);
+  // nearest to the tapped point when aiming by hand, otherwise whatever will arrive soonest
+  function pickTarget(px, py) {
+    let best = null, bestV = Infinity;
+    for (const o of objects) {
+      if (o.state !== 'live' || o.passed || lockedOn(o) >= o.hp) continue;
+      if (o.fall ? o.warn > 0 || o.sy < 0 : o.z > MAX_LOCK_Z) continue;
+      const v = px !== undefined
+        ? Math.hypot(o.sx - px, o.sy - py)
+        : o.fall ? (o.ty - o.sy) / Math.max(o.vy, 1) : (o.z - 1) / o.vz;
+      if (v < bestV) { bestV = v; best = o; }
+    }
+    return best;
+  }
+  function fireMissile(px, py) {
+    if (state !== 'play' || fireCooldown > 0) return;
+    if (ammo <= 0) {
+      floater(player.x, player.y - player.r * 1.5, 'RELOADING', '#fbbf24', 16);
+      Sfx.clang(panOf(player.x));
+      return;
+    }
+    const target = pickTarget(px, py);
+    if (!target) {
+      floater(player.x, player.y - player.r * 1.5, 'NO TARGET', '#a3b1c8', 15);
+      return;
+    }
+    ammo--;
+    fireCooldown = FIRE_GAP;
+    renderAmmo();
+    missiles.push({ x: player.x, y: player.y - player.r, ang: -Math.PI / 2 + rand(-0.35, 0.35), speed: U * 0.9, age: 0, target, trailT: 0 });
+    burst(player.x, player.y - player.r, 8, U * 0.3, 0.25, U * 0.02, 'cyan', { drag: 3 });
+    Sfx.launch(panOf(player.x));
+    try { navigator.vibrate?.(15); } catch {}
+  }
+  function missileHit(m) {
+    const o = m.target, r = Math.max(o.rx, o.ry) * U * o.s;
+    if (--o.hp > 0) {
+      burst(m.x, m.y, 16, U * 0.5, 0.45, U * 0.025, 'fire', { drag: 2 });
+      floater(o.sx, o.sy - r, 'ARMOR HIT', '#fbbf24', 18);
+      Sfx.clang(panOf(o.sx));
+      return;
+    }
+    kills++;
+    raiseCombo();
+    addScore(o.kind.heavy ? PTS.heavyKill : PTS.kill, o.sx, o.sy - r, 'DESTROYED', '#fb923c', o.kind.heavy ? 25 : 20);
+    destroyWithFx(o);
+  }
+  function stepMissiles(dt) {
+    fireCooldown = Math.max(0, fireCooldown - dt);
+    if (ammo < MAX_AMMO) {
+      reload += dt;
+      if (reload >= RELOAD_TIME) {
+        reload = 0;
+        ammo++;
+        renderAmmo();
+      }
+    }
+    for (const m of missiles) {
+      m.age += dt;
+      if (m.target?.state !== 'live') m.target = pickTarget();
+      m.speed = Math.min(U * 3.4, m.speed + U * 6 * dt);
+      if (m.target) {
+        // turning sharpens with age, so a missile can't end up circling its target
+        const want = Math.atan2(m.target.sy - m.y, m.target.sx - m.x);
+        const diff = Math.atan2(Math.sin(want - m.ang), Math.cos(want - m.ang)), turn = (7 + m.age * 40) * dt;
+        m.ang += clamp(diff, -turn, turn);
+      }
+      m.x += Math.cos(m.ang) * m.speed * dt;
+      m.y += Math.sin(m.ang) * m.speed * dt;
+      m.trailT -= dt;
+      if (m.trailT <= 0) {
+        m.trailT = quality < 1 ? 0.04 : 0.02;
+        emit(m.x, m.y, rand(-12, 12), rand(-12, 12), 0.42, U * 0.016, 'smoke', { add: false, a: 0.45, grow: U * 0.022 });
+        emit(m.x, m.y, 0, 0, 0.12, U * 0.018, 'fire');
+      }
+      const t = m.target;
+      if (t && Math.hypot(t.sx - m.x, t.sy - m.y) < Math.max(t.rx, t.ry) * U * t.s * 0.9 + U * 0.025) {
+        missileHit(m);
+        m.done = true;
+      } else if (m.age > 2.5 || m.x < -U || m.x > W + U || m.y < -U || m.y > H + U) {
+        m.done = true;
+      }
+    }
+    missiles = missiles.filter((m) => !m.done);
+  }
+
   /* ---------- simulation ---------- */
   function step(dt, now) {
     runTime += dt;
     invuln = Math.max(0, invuln - dt);
     pushCooldown = Math.max(0, pushCooldown - dt);
+    stepMissiles(dt);
 
     const newLevel = 1 + Math.floor(runTime / LEVEL_TIME);
     if (newLevel !== level) {
@@ -559,6 +654,10 @@
     if (o.z < 0.34) removeObject(o);
   }
   function stepFalling(o, dt) {
+    if (o.warn > 0) {
+      o.warn -= dt;
+      return;
+    }
     o.vy += o.g * dt;
     o.sx += o.vx * dt;
     o.sy += o.vy * dt;
@@ -704,6 +803,73 @@
   }
   const hasHands = () => usingCamera && Tracker.handReady;
 
+  // caution marker at the top edge plus the predicted path, from before a falling object appears until it lands
+  function drawFallWarnings() {
+    const markerY = 92, pulse = 0.65 + 0.35 * Math.sin(runTime * 14);
+    ctx.textAlign = 'center';
+    for (const o of objects) {
+      if (!o.fall || o.state !== 'live' || o.passed) continue;
+      const sx = clamp(o.warn > 0 ? o.sx : o.sx, U * 0.07, W - U * 0.07);
+      ctx.strokeStyle = '#ff4557';
+      ctx.lineWidth = 2;
+      ctx.globalAlpha = 0.55;
+      ctx.setLineDash([10, 9]);
+      ctx.lineDashOffset = -runTime * 60;
+      ctx.beginPath();
+      ctx.moveTo(o.warn > 0 ? sx : o.sx, o.warn > 0 ? 0 : o.sy);
+      ctx.lineTo(o.tx, o.ty);
+      ctx.stroke();
+      ctx.setLineDash([]);
+      if (o.warn <= 0 && o.sy > markerY) continue;
+      const s = clamp(U * 0.045, 20, 34);
+      ctx.globalAlpha = pulse;
+      ctx.fillStyle = '#ff2d42';
+      ctx.beginPath();
+      ctx.moveTo(sx, markerY - s * 0.6);
+      ctx.lineTo(sx + s * 0.75, markerY + s * 0.65);
+      ctx.lineTo(sx - s * 0.75, markerY + s * 0.65);
+      ctx.closePath();
+      ctx.fill();
+      ctx.globalAlpha = 1;
+      ctx.fillStyle = '#fff';
+      ctx.font = `900 ${Math.round(s * 0.8)}px Orbitron, "Segoe UI", sans-serif`;
+      ctx.fillText('!', sx, markerY + s * 0.5);
+      ctx.font = `800 ${Math.round(s * 0.5)}px Orbitron, "Segoe UI", sans-serif`;
+      ctx.lineWidth = 3;
+      ctx.strokeStyle = 'rgba(0,0,0,.8)';
+      const label = o.kind.label.toUpperCase() + ' ABOVE';
+      ctx.strokeText(label, sx, markerY + s * 1.3);
+      ctx.fillStyle = '#ffd5d9';
+      ctx.fillText(label, sx, markerY + s * 1.3);
+    }
+    ctx.globalAlpha = 1;
+  }
+  function drawLock() {
+    if (ammo <= 0) return;
+    const o = pickTarget();
+    if (!o) return;
+    const r = Math.max(o.rx, o.ry) * U * o.s * 1.25 + 6, c = r * 0.4;
+    ctx.strokeStyle = '#4ade80';
+    ctx.lineWidth = 2.5;
+    ctx.beginPath();
+    for (const [dx, dy] of [[-1, -1], [1, -1], [1, 1], [-1, 1]]) {
+      const x = o.sx + dx * r, y = o.sy + dy * r;
+      ctx.moveTo(x - dx * c, y);
+      ctx.lineTo(x, y);
+      ctx.lineTo(x, y - dy * c);
+    }
+    ctx.stroke();
+  }
+  function drawMissiles() {
+    const img = SPR.ourMissile;
+    for (const m of missiles) {
+      const h = U * 0.1, w = h / 3, a = m.ang + Math.PI / 2, c = Math.cos(a), s = Math.sin(a);
+      ctx.setTransform(c * dpr, s * dpr, -s * dpr, c * dpr, (m.x + shakeX) * dpr, (m.y + shakeY) * dpr);
+      ctx.drawImage(img, -w / 2, -h / 2, w, h);
+    }
+    ctx.setTransform(dpr, 0, 0, dpr, shakeX * dpr, shakeY * dpr);
+  }
+
   function drawPlayer(dt, now) {
     const k = 1 - Math.exp(-dt * (usingCamera && now > manualUntil ? 26 : 22));
     player.x += (player.tx - player.x) * k;
@@ -831,7 +997,11 @@
     }
     ctx.setTransform(dpr, 0, 0, dpr, shakeX * dpr, shakeY * dpr);
     drawDecor(state === 'pause' ? 0 : dt, mode === 'scene' ? 1 : 0.65);
-    if (state === 'play' || state === 'pause') drawWarnings();
+    if (state === 'play' || state === 'pause') {
+      drawWarnings();
+      drawFallWarnings();
+      drawLock();
+    }
     objects.sort((a, b) => (b.z || 1) - (a.z || 1));
     let playerDrawn = false;
     for (const o of objects) {
@@ -842,6 +1012,7 @@
       drawObject(o);
     }
     if (!playerDrawn) drawPlayer(state === 'pause' ? 0 : dt, now);
+    drawMissiles();
     drawHands();
     drawParticles(dt);
     drawFloaters(state === 'pause' ? 0 : dt);
@@ -860,6 +1031,13 @@
     el.innerHTML = HEART.repeat(Math.max(0, lives));
     el.setAttribute('aria-label', `${lives} lives left`);
     if (pop) el.lastElementChild?.classList.add('pop');
+  }
+  function renderAmmo() {
+    const el = $('#ammo');
+    el.innerHTML = '<i class="full"></i>'.repeat(ammo) + '<i></i>'.repeat(MAX_AMMO - ammo);
+    el.setAttribute('aria-label', `${ammo} missiles ready`);
+    $('#fireCount').textContent = ammo;
+    $('#btnFire').classList.toggle('empty', ammo === 0);
   }
   let hudScoreShown = -1, hudSec = -1, hudMultShown = -1, hudLevelShown = -1;
   function updateHud(now) {
@@ -880,6 +1058,8 @@
     if (level !== hudLevelShown) { $('#hudLevel').textContent = `LV ${level}`; hudLevelShown = level; }
     const m = multiplier();
     if (m !== hudMultShown) { $('#hudMult').textContent = m > 1 ? `×${m}` : ''; hudMultShown = m; }
+
+    $('#btnFire').style.setProperty('--reload', ammo < MAX_AMMO ? `${Math.round((reload / RELOAD_TIME) * 100)}%` : '100%');
 
     const chips = $('#trackChips');
     chips.hidden = !usingCamera;
@@ -915,6 +1095,8 @@
   }
   function resetRun() {
     objects = [];
+    missiles = []; ammo = MAX_AMMO; reload = 0; fireCooldown = 0; kills = 0;
+    renderAmmo();
     score = 0; displayScore = 0; lives = LIVES; runTime = 0; level = 1; combo = 0; bestCombo = 0;
     spawnTimer = 0.2; salvoTimer = 8; invuln = 0; shake = 0; dodges = 0; pushes = 0; chains = 0; scoreCarry = 0; pushCooldown = 0;
     nextOneUp = ONE_UP_EVERY;
@@ -981,6 +1163,7 @@
   function gameOver() {
     if (state !== 'play') return;
     state = 'over';
+    missiles = [];
     Sfx.music(null);
     Sfx.over();
     explosion(player.x, player.y, U * 0.09, true);
@@ -996,8 +1179,8 @@
     $('#overTitle').textContent = isBest ? 'Legendary run' : 'Destroyed';
     $('#finalScore').textContent = score.toLocaleString();
     $('#overStats').innerHTML = [
-      ['Survived', fmtTime(runTime)], ['Dodged', dodges], ['Pushed', pushes],
-      ['Best streak', bestCombo], ['Chains', chains], ['High score', rec.best.toLocaleString()],
+      ['Survived', fmtTime(runTime)], ['Dodged', dodges], ['Destroyed', kills],
+      ['Pushed', pushes], ['Best streak', bestCombo], ['High score', rec.best.toLocaleString()],
     ].map(([k, v]) => `<div><b>${v}</b>${k}</div>`).join('');
     setBanner('');
     setTimeout(() => { if (state === 'over') { showOnly('#overCard'); $('#btnAgain').focus({ preventScroll: true }); } }, 750);
@@ -1024,6 +1207,7 @@
   function updatePushButtons() {
     const show = document.body.classList.contains('playing') && (!usingCamera || matchMedia('(pointer: coarse)').matches);
     $('#pushL').hidden = $('#pushR').hidden = !show;
+    $('#btnFire').hidden = !document.body.classList.contains('playing');
   }
 
   /* ---------- menu ---------- */
@@ -1113,6 +1297,9 @@
     } else if (Tracker.handReady) {
       $('#progress').hidden = true;
       $('#setupMsg').textContent = 'Tracking ready. Line up your face, then raise a hand to test it.';
+    } else if (Tracker.faceReady && !Tracker.handsEnabled) {
+      $('#progress').hidden = true;
+      $('#setupMsg').textContent = 'Tracking ready. Line up your face, then start.';
     } else if (Tracker.faceReady) {
       $('#setupMsg').textContent = 'Face tracking ready. You can start now; hand tracking joins when it finishes loading.';
     } else if (!Tracker.cameraOn && usingCamera) {
@@ -1218,22 +1405,31 @@
   };
   pushButton($('#pushL'), -1);
   pushButton($('#pushR'), 1);
+  $('#btnFire').addEventListener('pointerdown', (e) => { e.preventDefault(); Sfx.unlock(); fireMissile(); });
 
-  let dragId = null, dragX = 0, dragY = 0;
+  // a quick tap or click fires at the object under it; pressing and moving steers instead
+  let dragId = null, dragX = 0, dragY = 0, downX = 0, downY = 0, downAt = 0, dragging = false;
   canvas.addEventListener('pointerdown', (e) => {
     if (state !== 'play' && state !== 'countdown') return;
-    dragId = e.pointerId; dragX = e.clientX; dragY = e.clientY;
+    dragId = e.pointerId; dragX = downX = e.clientX; dragY = downY = e.clientY;
+    downAt = performance.now();
+    dragging = false;
     try { canvas.setPointerCapture(dragId); } catch {}
   });
   canvas.addEventListener('pointermove', (e) => {
     if (e.pointerId !== dragId) return;
+    if (!dragging && Math.hypot(e.clientX - downX, e.clientY - downY) < 12) return;
+    dragging = true;
     player.tx = clamp(player.tx + (e.clientX - dragX) * 1.3, 0, W);
     player.ty = clamp(player.ty + (e.clientY - dragY) * 1.3, 0, H);
     dragX = e.clientX; dragY = e.clientY;
     manualUntil = performance.now() + 1100;
   });
   const endDrag = (e) => { if (e.pointerId === dragId) dragId = null; };
-  canvas.addEventListener('pointerup', endDrag);
+  canvas.addEventListener('pointerup', (e) => {
+    if (e.pointerId === dragId && !dragging && performance.now() - downAt < 350) fireMissile(e.clientX, e.clientY);
+    endDrag(e);
+  });
   canvas.addEventListener('pointercancel', endDrag);
 
   const GAME_KEYS = new Set(['ArrowLeft', 'ArrowRight', 'ArrowUp', 'ArrowDown', 'Space']);
@@ -1253,6 +1449,7 @@
         else if (state === 'pause') resumeGame();
         break;
       case 'Space':
+        if (state === 'play') { fireMissile(); break; }
         if (onButton) break;
         if (state === 'pause') resumeGame();
         else if (state === 'over' && !$('#overCard').hidden) beginRun();
@@ -1293,6 +1490,7 @@
 
   /* ---------- start up ---------- */
   syncSoundButtons();
+  if (!Tracker.handsEnabled) $('#chipHand').hidden = $('#ckHand').hidden = true;
   resize();
   player.x = player.tx; player.y = player.ty; player.r = player.tr;
   renderPicks();
@@ -1303,6 +1501,7 @@
       get state() { return state; }, get score() { return score; }, get lives() { return lives; },
       get pushes() { return pushes; }, get dodges() { return dodges; }, get level() { return level; },
       get objects() { return objects; }, get runTime() { return runTime; }, set runTime(v) { runTime = v; },
+      get kills() { return kills; }, get ammo() { return ammo; }, get missiles() { return missiles; },
       player, hands, spawn, Tracker, setInvuln(v) { invuln = v; }, stopSpawns() { spawnTimer = 1e9; salvoTimer = 1e9; },
     };
   }
