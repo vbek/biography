@@ -1,0 +1,121 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1, user-scalable=no, viewport-fit=cover">
+<meta name="theme-color" content="#05060f">
+<title>AR Survival — Bibek Koirala</title>
+<meta name="description" content="AR Survival: dodge with your face and push with your hands to survive asteroids, missiles and torpedoes. Free, in your browser, and camera video never leaves your device.">
+<link rel="icon" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24'%3E%3Ccircle cx='12' cy='12' r='9' fill='none' stroke='%2322d3ee' stroke-width='2.5'/%3E%3Ccircle cx='12' cy='12' r='3.5' fill='%23f97316'/%3E%3C/svg%3E">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Orbitron:wght@600;800;900&family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="game.css">
+</head>
+<body class="view-scene">
+<main id="stage">
+  <video id="cam" playsinline muted autoplay aria-hidden="true"></video>
+  <canvas id="game" aria-label="AR Survival play field. Move your head, or use the arrow keys, to dodge. Swipe your hands, or press Q and E, to push objects away."></canvas>
+  <div id="flash" aria-hidden="true"></div>
+
+  <header id="hud" hidden>
+    <div class="hud-left">
+      <div class="lives" id="lives" role="img" aria-label="Lives"></div>
+      <div class="sub"><span id="hudTime">0:00</span> · <span id="hudLevel">LV 1</span></div>
+    </div>
+    <div class="hud-mid">
+      <div class="score" id="hudScore">0</div>
+      <div class="mult" id="hudMult"></div>
+    </div>
+    <div class="hud-right">
+      <div class="track" id="trackChips"><span id="chipFace">FACE</span><span id="chipHand">HANDS</span></div>
+      <div class="hud-btns">
+        <button class="icon-btn" id="btnPause" aria-label="Pause" title="Pause (P)"><svg viewBox="0 0 24 24"><path d="M8 5v14M16 5v14"/></svg></button>
+        <button class="icon-btn" id="btnSound2" aria-label="Toggle sound" title="Sound (M)"><svg viewBox="0 0 24 24"><path d="M4 9v6h4l5 4V5L8 9zM17 9a4 4 0 0 1 0 6"/></svg></button>
+      </div>
+    </div>
+  </header>
+
+  <div id="banner" role="status" aria-live="polite"></div>
+  <div id="big" aria-live="assertive"></div>
+  <button class="push-btn left" id="pushL" aria-label="Push left" hidden><svg viewBox="0 0 24 24"><path d="M15 5l-7 7 7 7"/></svg></button>
+  <button class="push-btn right" id="pushR" aria-label="Push right" hidden><svg viewBox="0 0 24 24"><path d="M9 5l7 7-7 7"/></svg></button>
+
+  <section class="card" id="menu">
+    <div class="card-top">
+      <a class="back" href="../index.html"><svg viewBox="0 0 24 24"><path d="M15 6l-6 6 6 6"/></svg>Games</a>
+      <div class="top-btns">
+        <button class="icon-btn" id="btnSound" aria-label="Toggle sound" title="Sound (M)"><svg viewBox="0 0 24 24"><path d="M4 9v6h4l5 4V5L8 9zM17 9a4 4 0 0 1 0 6"/></svg></button>
+        <button class="icon-btn" id="btnFull" aria-label="Toggle fullscreen" title="Fullscreen (F)"><svg viewBox="0 0 24 24"><path d="M4 9V4h5M15 4h5v5M20 15v5h-5M9 20H4v-5"/></svg></button>
+      </div>
+    </div>
+    <h1>AR <span>Survival</span></h1>
+    <p class="tag"><b>Dodge</b> with your head. <b>Swipe</b> with your hands. Stay alive.</p>
+
+    <div class="label">Battlefield</div>
+    <div class="themes" id="themePicks" role="radiogroup" aria-label="Battlefield"></div>
+    <div class="label">Backdrop</div>
+    <div class="chips" id="bgPicks" role="radiogroup" aria-label="Backdrop"></div>
+    <div class="label">View</div>
+    <div class="chips" id="viewPicks" role="radiogroup" aria-label="View"></div>
+
+    <div id="setup">
+      <div class="check-row" id="checks" hidden>
+        <span id="ckCam">Camera</span><span id="ckFace">Face</span><span id="ckHand">Hands</span>
+      </div>
+      <div class="progress" id="progress" hidden>
+        <div class="bar"><i id="progressBar"></i></div>
+        <div class="progress-text" id="progressText"></div>
+      </div>
+      <p class="msg" id="setupMsg" role="status" aria-live="polite"></p>
+      <div class="btns">
+        <button class="btn primary lg" id="btnMain">Enable camera</button>
+        <button class="btn" id="btnManual">Play without camera</button>
+      </div>
+    </div>
+
+    <div class="best-line" id="bestLine"></div>
+    <details class="how">
+      <summary>How to play</summary>
+      <ul>
+        <li><b>Camera:</b> move your head to dodge. Swipe a hand into an object to knock it aside. Warships and bombers need a hard swipe.</li>
+        <li><b>Keyboard:</b> <kbd>←</kbd><kbd>↑</kbd><kbd>↓</kbd><kbd>→</kbd> or <kbd>W</kbd><kbd>A</kbd><kbd>S</kbd><kbd>D</kbd> move, <kbd>Q</kbd>/<kbd>E</kbd> push, <kbd>P</kbd> pause, <kbd>M</kbd> sound, <kbd>F</kbd> fullscreen.</li>
+        <li><b>Touch:</b> drag anywhere to move, tap the arrow buttons to push.</li>
+        <li><b>Scoring:</b> survive, dodge, and push. Unbroken streaks raise your multiplier up to ×5, and a pushed object that hits another scores a chain bonus.</li>
+      </ul>
+    </details>
+    <p class="privacy">Face and hand tracking runs only on this device. Camera video is never uploaded or stored. The AI files download once, then load from your browser's cache.</p>
+  </section>
+
+  <section class="card small" id="pauseCard" hidden>
+    <h2>Paused</h2>
+    <div class="label">Battlefield</div>
+    <div class="themes compact" id="themePicks2" role="radiogroup" aria-label="Battlefield"></div>
+    <div class="label">Backdrop</div>
+    <div class="chips" id="bgPicks2" role="radiogroup" aria-label="Backdrop"></div>
+    <div class="label">View</div>
+    <div class="chips" id="viewPicks2" role="radiogroup" aria-label="View"></div>
+    <div class="btns">
+      <button class="btn primary lg" id="btnResume">Resume</button>
+      <button class="btn" id="btnQuit">End run</button>
+    </div>
+  </section>
+
+  <section class="card small" id="overCard" hidden>
+    <div class="record" id="newBest" hidden>New high score!</div>
+    <h2 id="overTitle">Destroyed</h2>
+    <div class="final" id="finalScore">0</div>
+    <div class="stats" id="overStats"></div>
+    <div class="btns">
+      <button class="btn primary lg" id="btnAgain">Play again</button>
+      <button class="btn" id="btnMenu">Change battlefield</button>
+    </div>
+    <button class="link-btn" id="btnReset">Reset my records</button>
+  </section>
+</main>
+<script src="tracker.js"></script>
+<script src="audio.js"></script>
+<script src="art.js"></script>
+<script src="game.js"></script>
+</body>
+</html>
