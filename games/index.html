@@ -69,6 +69,13 @@
                 <p>A one-tap arcade game: drop the sliding blocks, nail perfect stacks to build combos and beat your best. Pick your own background — even your own photo — and block style.</p>
                 <span class="tool-cta">Play now <i class="fas fa-play"></i></span>
             </a>
+            <a class="tool-card game" id="arCard" href="ar-survival/index.html">
+                <span class="ribbon">NEW</span>
+                <div class="tool-icon"><i class="fas fa-meteor"></i></div>
+                <h2>AR Survival</h2>
+                <p>Your camera becomes the controller: dodge asteroids, missiles and torpedoes with your head and swipe them aside with your hands. Tracking runs only on your device, and keyboard or touch work too.</p>
+                <span class="tool-cta">Play now <i class="fas fa-play"></i></span>
+            </a>
             <div class="tool-card soon">
                 <div class="tool-icon"><i class="fas fa-plus"></i></div>
                 <h2>More coming soon</h2>
@@ -86,6 +93,17 @@
           el.innerHTML = 'Your best: <b>' + (r.best | 0) + '</b> · ' + (r.games | 0) + ' game' + (r.games === 1 ? '' : 's') + ' played';
           var card = document.querySelector('.tool-card.game');
           card.insertBefore(el, card.querySelector('.tool-cta'));
+        }
+      } catch (e) {}
+      // and the AR Survival high score on its card
+      try {
+        var ar = JSON.parse(localStorage.getItem('arSurvival.v1') || 'null');
+        if (ar && ar.games) {
+          var arEl = document.createElement('span');
+          arEl.className = 'best';
+          arEl.innerHTML = 'Your best: <b>' + (ar.best | 0).toLocaleString() + '</b> · ' + (ar.games | 0) + ' game' + (ar.games === 1 ? '' : 's') + ' played';
+          var arCard = document.getElementById('arCard');
+          arCard.insertBefore(arEl, arCard.querySelector('.tool-cta'));
         }
       } catch (e) {}
     </script>
