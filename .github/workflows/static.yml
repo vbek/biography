@@ -31,6 +31,9 @@ jobs:
     steps:
       - name: Checkout
         uses: actions/checkout@v4
+      # Scripts are cached for hours but pages for minutes, so without this a browser can mix files from two deploys
+      - name: Version the game files
+        run: sed -E -i "s#(src|href)=\"(\.\./party/[^\"]+|rules\.js|game\.js)\"#\1=\"\2?v=${GITHUB_SHA::8}\"#" games/ludo/index.html games/snakes-ladders/index.html
       - name: Setup Pages
         uses: actions/configure-pages@v5
       - name: Upload artifact
