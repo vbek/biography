@@ -72,7 +72,7 @@
     },
   };
 
-  function buildStatic() {
+  function buildStatic(paintFlag = true) {
     if (!S) return;
     staticLayer = document.createElement('canvas');
     staticLayer.width = staticLayer.height = S * dpr;
@@ -89,6 +89,7 @@
     if (boardStyle === 'wood') {
       g.strokeStyle = '#3b2412'; g.lineWidth = cell * .1; g.strokeRect(0, 0, S, S);
     }
+    if (!paintFlag) return;
     const [hx, hy] = center(100);
     g.font = `${cell * .5}px serif`; g.textAlign = 'center'; g.textBaseline = 'middle';
     g.fillText('🏁', hx * cell, hy * cell + cell * .08);
@@ -397,12 +398,13 @@
         texture() {
           const keep = [S, cell, dpr, staticLayer];
           S = 1024; cell = S / 10; dpr = 2;
-          buildStatic();
+          buildStatic(false);   // the 3D board stands a real flag on square 100
           const painted = staticLayer;
           [S, cell, dpr, staticLayer] = keep;
           return painted;
         },
         sceneryKey: JSON.stringify(state.board),
+        flag: center(100),
         ladders: state.board.ladders.map((l, i) => {
           const [ax, ay] = center(l.bottom), [bx, by] = center(l.top), [rail, rung] = WOOD[l.tint % WOOD.length];
           return { ax, ay, bx, by, rail, rung, glow: ladderFx[i].glow };

@@ -303,6 +303,45 @@ export function createBoard3D({ wrap, saved, onTap, onCameraChange }) {
     scenery.add(body, head);
     return { body, head, skull, mouth, tongue, stamp: null };
   }
+  // a checkered cloth with its ripples set into it, so it holds still between special events
+  const CLOTH_W = .58, CLOTH_H = .38;
+  let clothGeometry = null, clothMap = null;
+  function makeCloth() {
+    clothGeometry = new THREE.PlaneGeometry(CLOTH_W, CLOTH_H, 20, 6);
+    clothGeometry.translate(CLOTH_W / 2, 0, 0);
+    const at = clothGeometry.attributes.position;
+    for (let i = 0; i < at.count; i++) {
+      const k = at.getX(i) / CLOTH_W;
+      at.setZ(i, Math.sin(k * 8) * .055 * (.25 + k));
+      at.setY(i, at.getY(i) - k * .05);
+    }
+    clothGeometry.computeVertexNormals();
+    const c = document.createElement('canvas');
+    c.width = 96; c.height = 64;
+    const g = c.getContext('2d');
+    for (let x = 0; x < 6; x++) for (let y = 0; y < 4; y++) {
+      g.fillStyle = (x + y) % 2 ? '#111827' : '#f8fafc';
+      g.fillRect(x * 16, y * 16, 16, 16);
+    }
+    clothMap = new THREE.CanvasTexture(c);
+    clothMap.colorSpace = THREE.SRGBColorSpace;
+    clothMap.anisotropy = renderer.capabilities.getMaxAnisotropy();
+  }
+  function buildFlag([x, y]) {
+    if (!clothGeometry) makeCloth();
+    // to the side of the square, so that a piece standing in the middle is never hidden by the pole
+    const px = x - .36, py = y - .08, height = 1.18;
+    const metal = new THREE.MeshStandardMaterial({ color: '#cbd5e1', metalness: .55, roughness: .35 });
+    addStick(scenery, metal, toWorld(px, py, undefined, 0), toWorld(px, py, undefined, height), .022);
+    const knob = new THREE.Mesh(ball, new THREE.MeshStandardMaterial({ color: '#fbbf24', metalness: .4, roughness: .3 }));
+    toWorld(px, py, knob.position, height + .03);
+    knob.scale.setScalar(.05);
+    knob.castShadow = true;
+    const cloth = new THREE.Mesh(clothGeometry, new THREE.MeshStandardMaterial({ map: clothMap, side: THREE.DoubleSide, roughness: .8 }));
+    toWorld(px, py, cloth.position, height - CLOTH_H / 2 - .02);
+    cloth.castShadow = true;
+    scenery.add(knob, cloth);
+  }
   const dummy = new THREE.Object3D();
   function updateSnake(part, s) {
     if (part.stamp === s.stamp) return;
@@ -335,6 +374,7 @@ export function createBoard3D({ wrap, saved, onTap, onCameraChange }) {
     scenery.clear();
     ladderParts = (desc.ladders ?? []).map(buildLadder);
     snakeParts = (desc.snakes ?? []).map(buildSnake);
+    if (desc.flag) buildFlag(desc.flag);
   }
 
   /* ----- picking ----- */
