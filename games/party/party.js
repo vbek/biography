@@ -5,8 +5,9 @@
    through PeerJS (join by room code), which is the only option on a static site. */
 (() => {
   'use strict';
+  const BUILD = new URL(document.currentScript.src).search;   // the deploy's ?v=, so that files loaded later match this one
   const $ = (s, r = document) => r.querySelector(s);
-  const esc = (s) => String(s).replace(/[&<>"']/g, (c) => ({ '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;', "'": '&#39;' }[c]));
+  const esc =(s) => String(s).replace(/[&<>"']/g, (c) => ({ '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;', "'": '&#39;' }[c]));
   const clamp = (v, a, b) => Math.max(a, Math.min(b, v));
   const sleep = (ms) => new Promise((r) => setTimeout(r, ms / speed()));
   const reduced = () => matchMedia('(prefers-reduced-motion: reduce)').matches;
@@ -949,18 +950,27 @@
       view.resize(S, dpr);
     }
     function loop(now) {
-      if (!table.hidden && shown && boardSize && is3d) board3d.render(view.scene3d(now), now);
-      else if (!table.hidden && shown && boardSize) {
-        const dpr = Math.min(devicePixelRatio || 1, 2);
-        bctx.setTransform(dpr, 0, 0, dpr, 0, 0);
-        view.draw(bctx, boardSize, now);
-      }
+      // one bad frame must not stop the drawing, or the game plays on with only its sound
       requestAnimationFrame(loop);
+      if (table.hidden || !shown || !boardSize) return;
+      if (is3d) {
+        try { board3d.render(view.scene3d(now), now); } catch (e) { no3d(e); setView(false); }
+        return;
+      }
+      const dpr = Math.min(devicePixelRatio || 1, 2);
+      bctx.setTransform(dpr, 0, 0, dpr, 0, 0);
+      view.draw(bctx, boardSize, now);
     }
 
     /* ----- 2D or 3D, chosen per device ----- */
     const VIEW_KEY = 'party.view', CAMERA_KEY = `party.${rules.id}.camera`;
     const viewBtn = $('#btnView');
+    viewBtn.hidden = !view.scene3d;
+    function no3d(e) {
+      console.warn('3D is unavailable', e);
+      toast('3D isn\'t available on this device.');
+      setTimeout(() => toast(''), 3000);
+    }
     function markView() {
       viewBtn.textContent = is3d ? '2D' : '3D';
       viewBtn.title = is3d ? 'Switch to the 2D board' : 'Switch to the 3D board';
@@ -972,7 +982,7 @@
     async function setView(want3d) {
       if (want3d && !board3d) {
         try {
-          const { createBoard3D } = await import('./board3d.js');
+          const { createBoard3D } = await import(`./board3d.js${BUILD}`);
           let saved;
           try { saved = JSON.parse(localStorage.getItem(CAMERA_KEY)) ?? undefined; } catch {}
           board3d = createBoard3D({
@@ -981,10 +991,8 @@
             onCameraChange: (camera) => { try { localStorage.setItem(CAMERA_KEY, JSON.stringify(camera)); } catch {} },
           });
         } catch (e) {
-          console.warn('3D is unavailable', e);
+          no3d(e);
           want3d = false;
-          toast('3D isn\'t available on this device.');
-          setTimeout(() => toast(''), 3000);
         }
       }
       is3d = want3d;
@@ -993,7 +1001,7 @@
     }
     viewBtn.addEventListener('click', () => setView(!is3d));
     markView();
-    try { if (localStorage.getItem(VIEW_KEY) === '3d') setView(true); } catch {}
+    try { if (view.scene3d && localStorage.getItem(VIEW_KEY) === '3d') setView(true); } catch {}
 
     /* ----- wiring ----- */
     buildDice();
