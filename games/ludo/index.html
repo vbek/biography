@@ -1,0 +1,47 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1, user-scalable=no">
+<title>Ludo — Bibek Koirala</title>
+<meta name="description" content="Free Ludo for 2 to 4 players. Play on one device, or host a room and join from other devices with a QR code, room code or IP address.">
+<script>
+  try { if (localStorage.getItem('theme') !== 'dark') document.documentElement.setAttribute('data-theme', 'light'); } catch (e) { document.documentElement.setAttribute('data-theme', 'light'); }
+</script>
+<link rel="icon" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24'%3E%3Crect x='2' y='2' width='10' height='10' fill='%23ef4444'/%3E%3Crect x='12' y='2' width='10' height='10' fill='%2316a34a'/%3E%3Crect x='12' y='12' width='10' height='10' fill='%23eab308'/%3E%3Crect x='2' y='12' width='10' height='10' fill='%232563eb'/%3E%3C/svg%3E">
+<link rel="stylesheet" href="../party/party.css">
+</head>
+<body>
+<header class="bar">
+  <a class="brand" href="../index.html" title="Back to games">
+    <svg class="ic" viewBox="0 0 24 24"><path d="M15 6l-6 6 6 6"/></svg><span>Ludo</span>
+  </a>
+  <div class="bar-right">
+    <button class="room-chip" id="roomChip" title="Room details" hidden><span class="dot"></span><span id="roomChipText"></span></button>
+    <button class="icon-btn" id="btnSound" title="Sound on/off" aria-label="Toggle sound" aria-pressed="true">
+      <svg class="ic on" viewBox="0 0 24 24"><path d="M4 9v6h4l5 4V5L8 9zM16.5 8.5a5 5 0 0 1 0 7M19 6a8.5 8.5 0 0 1 0 12"/></svg>
+      <svg class="ic off" viewBox="0 0 24 24"><path d="M4 9v6h4l5 4V5L8 9zM17 9l5 6M22 9l-5 6"/></svg>
+    </button>
+  </div>
+</header>
+<main class="stage" id="stage">
+  <div class="table" id="table" hidden>
+    <div class="board-wrap" id="boardWrap"><canvas id="board" aria-label="Ludo board. Press 1 to 4 to choose a token when several can move."></canvas></div>
+    <aside class="side">
+      <div class="seats" id="seats"></div>
+      <div class="dock">
+        <button class="dice-btn" id="dice" aria-label="Roll the dice"><div class="cube-wrap"><div class="cube"></div></div></button>
+        <div class="turn-msg" id="turnMsg" aria-live="polite"></div>
+      </div>
+    </aside>
+  </div>
+  <canvas id="fx" aria-hidden="true"></canvas>
+  <div id="cards"></div>
+</main>
+<script src="../party/vendor/peerjs.min.js"></script>
+<script src="../party/vendor/qrcode.js"></script>
+<script src="../party/party.js"></script>
+<script src="rules.js"></script>
+<script src="game.js"></script>
+</body>
+</html>
