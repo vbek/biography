@@ -31,3 +31,14 @@ If other devices can't connect:
 - If the computer has several network adapters, choose a different address in the room screen.
 
 The script shares the website's files with your network while it runs, but never hidden files such as `.git`. Press Ctrl+C to stop it.
+
+## 3D view
+
+The **3D** button in the top bar switches that device between the 2D board, which is the default, and a 3D one. Each device chooses for itself, so players in the same room can use different views.
+
+- **Rotate and tilt:** drag, or use the arrow keys.
+- **Zoom:** pinch, scroll, or press `+` and `-`.
+- **Move the board:** drag with two fingers, or right-drag with a mouse.
+- **Change the camera:** choose **Angle**, **Top** or **Low**, and use the **Perspective** slider.
+
+3D uses [three.js](https://threejs.org) r170, which is in `vendor/` and only downloads when someone turns 3D on.

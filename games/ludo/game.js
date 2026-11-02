@@ -227,7 +227,6 @@
     setPick(moves) { pickable = moves; },
     async play(ev) {
       if (ev.type === 'move') return playMove(ev);
-      if (ev.type === 'noMove') { api.note('No moves with that roll'); return; }
       if (ev.type === 'threeSixes') {
         api.sfx.down();
         if (ev.sentBack !== null) {
@@ -264,6 +263,22 @@
         tokens[seat]?.forEach((tk, ti) => drawPawn(g, state.players[seat].color, tk, seat === state.mover && pickable?.includes(ti)));
       }
     },
+    scene3d: () => ({
+      units: 15,
+      boardKey: starsOn,
+      texture() {
+        const keep = [S, cell, dpr, staticLayer];
+        S = 1024; cell = S / 15; dpr = 2;
+        buildStatic();
+        const painted = staticLayer;
+        [S, cell, dpr, staticLayer] = keep;
+        return painted;
+      },
+      blocks: blockCells.map(({ point: [x, y], color }) => ({ x, y, color: COLORS[color] })),
+      pieces: state.players.flatMap((p, seat) => tokens[seat].map((tk, ti) => ({
+        ...tk, color: COLORS[p.color], size: .88, selectable: seat === state.mover && Boolean(pickable?.includes(ti)),
+      }))),
+    }),
     init(a) { api = a; },
   };
 

@@ -305,7 +305,7 @@
     let players = [];         // { id, name, online, lostAt }
     let mySeat = -1, state = null, shown = null, seq = 0, inGame = false;
     let queue = [], pumping = false, awaiting = false, awaitTimer = 0;
-    let boardSize = 0, chosenIp = null, note = '';
+    let boardSize = 0, chosenIp = null, note = '', board3d = null, is3d = false;
     const PREFS_KEY = `party.${rules.id}.prefs`;
     const defaultPrefs = () => Object.fromEntries(rules.options.map((o) => [o.key, o.choices[0].value]));
     let prefs = (() => {
@@ -371,15 +371,14 @@
       diceBtn.classList.toggle('ready', canRoll);
       diceBtn.setAttribute('aria-disabled', canRoll ? 'false' : 'true');
       view.setPick?.(canPick ? shown.moves : null);
-      boardCanvas.classList.toggle('pickable', canPick);
+      wrap.classList.toggle('pickable', canPick);
       const who = `<b>${esc(seatName(shown.cur))}</b>`;
       if (pumping || shown.phase === 'over') return;
-      const youTurn = mode === 'local' ? who + ':' : shown.cur === mySeat ? '<b>Your turn:</b>' : null;
-      const lead = note ? `${esc(note)}<br>` : '';
-      turnEl.innerHTML = lead + (youTurn
-        ? `${youTurn} ${canPick ? 'pick a circled token' : 'tap the dice'}`
-        : `Waiting for ${who}…`);
+      const youTurn = mode === 'local' ? who : shown.cur === mySeat ? '<b>Your turn</b>' : null;
+      showTurn(youTurn ?? 'Waiting for', note ? esc(note) : youTurn ? (canPick ? 'Pick a token' : 'Tap the dice') : who);
     }
+    // always two single lines, so that nothing here can change the size of the board
+    const showTurn = (first, second = '') => { turnEl.innerHTML = `<span>${first}</span><span>${second}</span>`; };
     function act(action) {
       if (!inGame || pumping || awaiting || !shown || !isMine(shown.cur)) return;
       if (mode === 'client') {
@@ -406,7 +405,9 @@
       };
     })();
     const boardToStage = (x, y) => {
-      const b = boardCanvas.getBoundingClientRect(), s = stage.getBoundingClientRect();
+      const s = stage.getBoundingClientRect();
+      if (is3d) { const [px, py] = board3d.project(x / boardSize, y / boardSize); return [px - s.left, py - s.top]; }
+      const b = boardCanvas.getBoundingClientRect();
       return [b.left - s.left + x, b.top - s.top + y];
     };
     const shake = () => { wrap.classList.remove('shake'); void wrap.offsetWidth; wrap.classList.add('shake'); };
@@ -416,10 +417,7 @@
     async function playEvent(ev) {
       if (ev.type === 'roll') { await rollDice(ev); return; }
       if (ev.type === 'turn') {
-        if (ev.extra) {
-          const why = { six: 'Rolled a 6', capture: 'Captured', home: 'Made it home' }[ev.why] || 'Bonus';
-          note = `${why}: roll again`;
-        } else if (isMine(ev.seat) && mode !== 'local') {
+        if (!ev.extra && isMine(ev.seat) && mode !== 'local') {
           sfx.turn();
           if (navigator.userActivation?.hasBeenActive) navigator.vibrate?.(60);
         }
@@ -447,7 +445,7 @@
           renderSeats();
           setDie(1, 0);
         }
-        turnEl.innerHTML = shown ? `<b>${esc(seatName(batch.actor ?? shown.cur))}</b>` : '';
+        showTurn(shown ? `<b>${esc(seatName(batch.actor ?? shown.cur))}</b>` : '');
         turnEl.style.setProperty('--seat', view.colorOf(shown, batch.actor ?? shown.cur));
         for (const ev of batch.events) await playEvent(ev);
         shown = batch.state;
@@ -951,13 +949,51 @@
       view.resize(S, dpr);
     }
     function loop(now) {
-      if (!table.hidden && shown && boardSize) {
+      if (!table.hidden && shown && boardSize && is3d) board3d.render(view.scene3d(now), now);
+      else if (!table.hidden && shown && boardSize) {
         const dpr = Math.min(devicePixelRatio || 1, 2);
         bctx.setTransform(dpr, 0, 0, dpr, 0, 0);
         view.draw(bctx, boardSize, now);
       }
       requestAnimationFrame(loop);
     }
+
+    /* ----- 2D or 3D, chosen per device ----- */
+    const VIEW_KEY = 'party.view', CAMERA_KEY = `party.${rules.id}.camera`;
+    const viewBtn = $('#btnView');
+    function markView() {
+      viewBtn.textContent = is3d ? '2D' : '3D';
+      viewBtn.title = is3d ? 'Switch to the 2D board' : 'Switch to the 3D board';
+      viewBtn.setAttribute('aria-pressed', String(is3d));
+      viewBtn.setAttribute('aria-label', viewBtn.title);
+      boardCanvas.hidden = is3d;
+      board3d?.show(is3d);
+    }
+    async function setView(want3d) {
+      if (want3d && !board3d) {
+        try {
+          const { createBoard3D } = await import('./board3d.js');
+          let saved;
+          try { saved = JSON.parse(localStorage.getItem(CAMERA_KEY)) ?? undefined; } catch {}
+          board3d = createBoard3D({
+            wrap, saved,
+            onTap: (x, y) => view.click?.(x * boardSize, y * boardSize),
+            onCameraChange: (camera) => { try { localStorage.setItem(CAMERA_KEY, JSON.stringify(camera)); } catch {} },
+          });
+        } catch (e) {
+          console.warn('3D is unavailable', e);
+          want3d = false;
+          toast('3D isn\'t available on this device.');
+          setTimeout(() => toast(''), 3000);
+        }
+      }
+      is3d = want3d;
+      try { localStorage.setItem(VIEW_KEY, is3d ? '3d' : '2d'); } catch {}
+      markView();
+    }
+    viewBtn.addEventListener('click', () => setView(!is3d));
+    markView();
+    try { if (localStorage.getItem(VIEW_KEY) === '3d') setView(true); } catch {}
 
     /* ----- wiring ----- */
     buildDice();
