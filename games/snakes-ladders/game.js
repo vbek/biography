@@ -128,14 +128,16 @@
     const off = amp * wave;
     return [ax + dx * k + nx * off, ay + dy * k + ny * off];
   }
+  // how thick the body is at k, in board units
+  function bodyRadius(fx, k) {
+    let r = .2 * (k < .06 ? .78 + k * 3 : Math.pow(1 - k, .7)) + .015;
+    if (fx.bulge >= 0) r += .2 * Math.exp(-Math.pow((k - fx.bulge) / .055, 2));
+    return r;
+  }
   function drawSnake(g, sn, fx, dt) {
     fx.clock += fx.wiggle * dt * .012;   // snakes lie still until something lands on them
     const steps = 54, head = cell * .2;
-    const radius = (k) => {
-      let r = head * (k < .06 ? .78 + k * 3 : Math.pow(1 - k, .7)) + cell * .015;
-      if (fx.bulge >= 0) r += cell * .2 * Math.exp(-Math.pow((k - fx.bulge) / .055, 2));
-      return r;
-    };
+    const radius = (k) => bodyRadius(fx, k) * cell;
     const dark = `hsl(${sn.hue} 62% 22%)`, base = `hsl(${sn.hue} 72% 44%)`, band = `hsl(${(sn.hue + 45) % 360} 88% 62%)`;
     const pts = [];
     for (let i = 0; i <= steps; i++) {
@@ -222,7 +224,7 @@
       });
       api.sfx.tick();
     }
-    if (ev.bounce) api.note('Bounced back from 100');
+    if (ev.bounce) api.note('Bounced back');
   }
 
   async function snakeBite(ev) {
@@ -374,7 +376,7 @@
         return;
       }
       if (ev.type === 'overshoot') {
-        api.note(`Needed exactly ${ev.need} to finish`);
+        api.note(`Needed exactly ${ev.need}`);
       }
     },
     draw(g, size, t) {
@@ -385,6 +387,37 @@
       lastFrame = t;
       state.board.snakes.forEach((sn, i) => drawSnake(g, sn, snakeFx[i], dt));
       tokens.forEach((tk, i) => drawToken(g, i, tk));
+    },
+    scene3d(now) {
+      const dt = Math.min(50, now - lastFrame);
+      lastFrame = now;
+      return {
+        units: 10,
+        boardKey: boardStyle,
+        texture() {
+          const keep = [S, cell, dpr, staticLayer];
+          S = 1024; cell = S / 10; dpr = 2;
+          buildStatic();
+          const painted = staticLayer;
+          [S, cell, dpr, staticLayer] = keep;
+          return painted;
+        },
+        sceneryKey: JSON.stringify(state.board),
+        ladders: state.board.ladders.map((l, i) => {
+          const [ax, ay] = center(l.bottom), [bx, by] = center(l.top), [rail, rung] = WOOD[l.tint % WOOD.length];
+          return { ax, ay, bx, by, rail, rung, glow: ladderFx[i].glow };
+        }),
+        snakes: state.board.snakes.map((sn, i) => {
+          const fx = snakeFx[i];
+          fx.clock += fx.wiggle * dt * .012;
+          return {
+            hue: sn.hue, open: fx.open, lunge: fx.lunge,
+            stamp: [fx.clock, fx.bulge, fx.open, fx.lunge, fx.wiggle].join(),
+            at: (k) => spineAt(sn, fx, k), radius: (k) => bodyRadius(fx, k),
+          };
+        }),
+        pieces: tokens.map((tk, i) => ({ ...tk, color: COLORS[i % COLORS.length], label: String(i + 1), size: .62, selectable: false })),
+      };
     },
     init(a) { api = a; },
   };
