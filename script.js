@@ -164,7 +164,14 @@ class ImageSlider {
         this.dots = this.dotsContainer.querySelectorAll('.dot');
     }
 
+    // leaving a project resets its gallery from outside, so check what's really showing
+    syncIndex() {
+        const showing = [...this.items].findIndex(item => item.classList.contains('active'));
+        if (showing >= 0) this.currentIndex = showing;
+    }
+
     goToSlide(index) {
+        this.syncIndex();
         if (index === this.currentIndex) return;
 
         const currentItem = this.items[this.currentIndex];
@@ -181,10 +188,12 @@ class ImageSlider {
     }
 
     nextSlide() {
+        this.syncIndex();
         this.goToSlide((this.currentIndex + 1) % this.items.length);
     }
 
     prevSlide() {
+        this.syncIndex();
         this.goToSlide((this.currentIndex - 1 + this.items.length) % this.items.length);
     }
 
@@ -449,8 +458,8 @@ function initTyping() {
         'Computer Vision Researcher',
         'Machine Learning Engineer',
         'Graduate Researcher @ SIUC',
-        'IEEE ICMLA 2025 Author',
-        'Ex-Lieutenant, Nepali Army'
+        'IEEE ICMLA & EMNLP Author',
+        'Former Nepal Govt Officer'
     ];
     let pi = 0, ci = 0, deleting = false;
 
@@ -680,7 +689,7 @@ document.querySelectorAll('img:not(.slider-images img)').forEach(img => {
 });
 
 // Touch feedback for buttons
-document.querySelectorAll('.btn, .icon-btn, .image-slider-btn, .master-nav-btn').forEach(element => {
+document.querySelectorAll('.btn, .icon-btn, .master-nav-btn').forEach(element => {
     element.addEventListener('touchstart', function () { this.style.transform = 'scale(0.95)'; });
     element.addEventListener('touchend', function () { this.style.transform = 'scale(1)'; });
 });
