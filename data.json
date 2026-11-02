@@ -2,6 +2,54 @@
   "research": [],
   "news": [
     {
+      "id": 1792800000001,
+      "createdAt": "2026-10-23T17:00:00.000Z",
+      "title": "Smaller, Faster, Just as Accurate",
+      "description": "Presented a poster at the IIN conference on a compact deep learning model that detects and identifies E. coli and Salmonella after 2 hours of incubation, 22× faster than a SAM-based model.",
+      "link": "raw/IIN_Poster_48x36.pptx",
+      "linkLabel": "Poster Slides",
+      "images": [
+        "images/IIN_conference.jpeg"
+      ],
+      "tag": "Poster Presentation",
+      "date": "Oct 23, 2026"
+    },
+    {
+      "id": 1790800000002,
+      "createdAt": "2026-09-30T17:00:00.000Z",
+      "title": "M.S. Thesis Defended",
+      "description": "Defended my thesis on deep learning for early detection and identification of E. coli and Salmonella Typhimurium in time-stamped microscopy images.",
+      "link": "raw/Thesis.pptx",
+      "linkLabel": "Thesis Slides",
+      "images": [
+        "images/thesis_defense.jpg"
+      ],
+      "tag": "Milestone",
+      "date": "Sep 30, 2026"
+    },
+    {
+      "id": 1790600000003,
+      "createdAt": "2026-09-28T17:00:00.000Z",
+      "title": "Accepted: Journal of Food Protection",
+      "description": "Rapid Detection of Salmonella Typhimurium Microcolonies Using Phase-Contrast Imaging and Deep Learning was accepted for publication.",
+      "link": "https://www.sciencedirect.com/science/article/pii/S0362028X26002395",
+      "linkLabel": "Read Paper",
+      "images": [],
+      "tag": "Publication",
+      "date": "Sep 28, 2026"
+    },
+    {
+      "id": 1787200000004,
+      "createdAt": "2026-08-20T17:00:00.000Z",
+      "title": "Accepted: EMNLP 2026 Main Conference",
+      "description": "Edits in the Wild: A Multilingual Benchmark for Localizing On-Device Generative Image Edits on Consumer Platforms was accepted to the EMNLP 2026 Main Conference.",
+      "link": "https://aclanthology.org/2026.emnlp-main.1661/",
+      "linkLabel": "Read Paper",
+      "images": [],
+      "tag": "Publication",
+      "date": "Aug 20, 2026"
+    },
+    {
       "id": 1778299447945,
       "createdAt": "2026-05-09T04:04:07.945Z",
       "title": "SIUC Spotlight 🎉",
