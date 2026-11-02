@@ -55,6 +55,8 @@
     wakeAudio();
     if (e.code === 'KeyM' && !e.repeat) toggleSound();
     if (e.code === 'KeyR' && !e.repeat && playing()) restart(true);
+    if (e.code === 'Equal' || e.code === 'NumpadAdd') changeZoom(ZOOM_STEP);
+    if (e.code === 'Minus' || e.code === 'NumpadSubtract') changeZoom(-ZOOM_STEP);
     if (KEYS[e.code]) {
       if (document.activeElement?.tagName === 'BUTTON' && !playing()) return;   // let space press the focused button
       held[KEYS[e.code]] = true; e.preventDefault();
@@ -312,7 +314,27 @@
 
   /* ----- particles and text ----- */
   let bits = [], shake = 0, squash = 0, graves = [], tileLayer = null, scene = null;
-  let overview = 0, zoomK = 0, camP = SCREEN_W / 2, cw = 1, ch = 1, started = false;
+  let overview = 0, zoomK = 0, camP = SCREEN_W / 2, cw = 1, ch = 1, started = false, camQ = SCREEN_H / 2;
+
+  /* ----- zoom, from the whole level to close up; left alone, it uses a size that suits the screen ----- */
+  const ZOOM_RANGE = 2.2, ZOOM_STEP = .25, ZOOM_KEY = 'graveMistake.zoom';
+  let zoomChoice = null, zoomGoal = 0, zoomShown = null;
+  try { const v = parseFloat(localStorage.getItem(ZOOM_KEY)); if (v >= 0 && v <= 1) zoomChoice = v; } catch {}
+  const zoomOut = $('#zoomOut'), zoomIn = $('#zoomIn');
+  function changeZoom(by) {
+    zoomChoice = Math.max(0, Math.min(1, zoomGoal + by));
+    zoomGoal = zoomChoice;
+    overview = 0;
+    try { localStorage.setItem(ZOOM_KEY, String(zoomChoice)); } catch {}
+    markZoom();
+  }
+  function markZoom() {
+    zoomOut.disabled = zoomGoal <= .001;
+    zoomIn.disabled = zoomGoal >= .999;
+  }
+  zoomOut.addEventListener('click', () => changeZoom(-ZOOM_STEP));
+  zoomIn.addEventListener('click', () => changeZoom(ZOOM_STEP));
+  canvas.addEventListener('wheel', (e) => { e.preventDefault(); changeZoom(e.deltaY > 0 ? -ZOOM_STEP / 2 : ZOOM_STEP / 2); }, { passive: false });
   function burst(x, y, colors, n = 36, power = 6) {
     for (let i = 0; i < n; i++) {
       const a = Math.random() * 6.283, v = Math.random() * power + 1;
@@ -341,7 +363,7 @@
     graves = []; bits = []; deathsHere = 0; introFor = 130;
     tileLayer = paintTiles(i); scene = makeScene(i);
     s = R.start(i);
-    overview = 100; zoomK = 0; camP = s.x;   // a look at the whole level first
+    overview = 100; zoomK = 0; camP = s.x; camQ = s.y;   // a look at the whole level first
     deadFor = 0; quip = '';
     hud();
   }
@@ -370,7 +392,7 @@
     if (introFor > 0) introFor--;
     if (overview > 0) overview--;
     zoomK += ((overview > 0 ? 0 : 1) - zoomK) * .07;
-    if (s) camP += (s.x + PW / 2 - camP) * .12;
+    if (s) { camP += (s.x + PW / 2 - camP) * .12; camQ += (s.y + PH / 2 - camQ) * .12; }
     squash *= .8;
     for (const b of bits) { b.x += b.vx; b.y += b.vy; b.vy += .22; b.life--; }
     bits = bits.filter((b) => b.life > 0);
@@ -411,10 +433,17 @@
     const groundRoom = cw < ch ? Math.min(150, ch * .22) : 0;
     const fit = Math.min(cw / SCREEN_W, (ch - groundRoom) / SCREEN_H);
     const close = cw < ch ? Math.max(fit, Math.min((ch - groundRoom) / SCREEN_H, cw / (15 * T))) : fit;
-    const zoom = fit + (close - fit) * zoomK;
+    const closest = Math.max(close, fit * ZOOM_RANGE);
+    zoomGoal = zoomChoice ?? (close - fit) / (closest - fit);
+    zoomShown = zoomShown === null ? zoomGoal : zoomShown + (zoomGoal - zoomShown) * .15;
+    markZoom();
+    const zoom = fit + (closest - fit) * zoomShown * zoomK;
     const viewW = cw / zoom;
     const camX = viewW >= SCREEN_W ? SCREEN_W / 2 : Math.max(viewW / 2, Math.min(SCREEN_W - viewW / 2, camP));
-    const x0 = cw / 2 - camX * zoom, y0 = ch - groundRoom - SCREEN_H * zoom;
+    // zoomed in further than the level is tall, the camera follows up and down too
+    const room = ch - groundRoom, viewH = room / zoom;
+    const camY = viewH >= SCREEN_H ? SCREEN_H / 2 : Math.max(viewH / 2, Math.min(SCREEN_H - viewH / 2, camQ));
+    const x0 = cw / 2 - camX * zoom, y0 = viewH >= SCREEN_H ? room - SCREEN_H * zoom : room / 2 - camY * zoom;
     const dpr = canvas.width / cw;
     const screenView = () => g.setTransform(dpr, 0, 0, dpr, 0, 0);
     const layer = (depth) => g.setTransform(dpr * zoom, 0, 0, dpr * zoom, dpr * (cw / 2 - (SCREEN_W / 2 + (camX - SCREEN_W / 2) * depth) * zoom), dpr * y0);
@@ -512,7 +541,7 @@
     const going = save.reached > 0 || save.deaths > 0, touch = matchMedia('(pointer: coarse)').matches;
     const c = card(`<h1>Grave Mistake</h1>
       <p>Reach the door. The floor lies, the signs lie, and sometimes the door runs away. You will die a lot, and every grave marks something you've learned.</p>
-      <p>${touch ? '<b>Move:</b> slide the joystick · <b>Jump:</b> tap anywhere else' : '<b>Move:</b> arrows or A D · <b>Jump:</b> space, up or click · <b>Retry:</b> R'}</p>
+      <p>${touch ? '<b>Move:</b> slide the joystick · <b>Jump:</b> tap anywhere else' : '<b>Move:</b> arrows or A D · <b>Jump:</b> space, up or click · <b>Retry:</b> R · <b>Zoom:</b> + − or scroll'}</p>
       ${touch ? stickChooser() : ''}
       <div class="btns"><button class="btn primary" id="go">${going ? 'Continue' : 'Play'}</button>${going ? '<button class="btn" id="levels">Levels</button>' : ''}</div>`);
     c.querySelector('#go').addEventListener('click', () => { wakeAudio(); closeCards(); started = true; loadLevel(Math.min(save.level, save.reached)); });

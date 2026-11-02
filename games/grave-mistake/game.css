@@ -22,6 +22,10 @@ button { font: inherit; color: inherit; }
 .stage { position: relative; flex: 1; min-height: 0; overflow: hidden; }
 #game { position: absolute; inset: 0; display: block; width: 100%; height: 100%; touch-action: none; }
 
+.zoom { position: absolute; z-index: 1; top: 12px; right: 12px; display: flex; flex-direction: column; gap: 6px; }
+.zoom-btn { width: 40px; height: 40px; padding: 0; border: 1px solid rgba(255, 255, 255, .3); border-radius: 50%; background: rgba(15, 10, 32, .55); color: #fff; font-size: 24px; font-weight: 700; line-height: 1; cursor: pointer; touch-action: manipulation; }
+.zoom-btn:disabled { opacity: .35; cursor: default; }
+
 /* ---------- cards ---------- */
 #cards:empty { display: none; }
 #cards { position: absolute; z-index: 2; inset: 0; display: grid; place-items: center; padding: 14px; background: rgba(15, 10, 32, .62); overflow-y: auto; }
