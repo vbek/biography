@@ -62,24 +62,128 @@
   });
   addEventListener('keyup', (e) => { if (KEYS[e.code]) held[KEYS[e.code]] = false; });
   addEventListener('blur', () => { held.left = held.right = held.jump = false; });
-  for (const [id, name] of [['#padLeft', 'left'], ['#padRight', 'right'], ['#padJump', 'jump']]) {
-    const b = $(id);
-    const set = (on) => (e) => { e.preventDefault(); wakeAudio(); held[name] = on; b.classList.toggle('held', on); };
-    b.addEventListener('pointerdown', (e) => { b.setPointerCapture?.(e.pointerId); set(true)(e); });
-    for (const type of ['pointerup', 'pointercancel', 'lostpointercapture']) b.addEventListener(type, set(false));
-    b.addEventListener('contextmenu', (e) => e.preventDefault());
+  // on touch screens: a small left and right joystick, and a tap anywhere else is a jump
+  const stick = $('#stick'), knob = $('#knob');
+  const STICK_TRAVEL = 30, STICK_DEAD = 8;
+  let stickId = null;
+  function moveStick(e) {
+    const r = stick.getBoundingClientRect();
+    const dx = Math.max(-STICK_TRAVEL, Math.min(STICK_TRAVEL, e.clientX - (r.left + r.width / 2)));
+    knob.style.transform = `translateX(${dx}px)`;
+    held.left = dx < -STICK_DEAD; held.right = dx > STICK_DEAD;
   }
+  function freeStick() {
+    stickId = null; knob.style.transform = '';
+    held.left = held.right = false;
+  }
+  stick.addEventListener('pointerdown', (e) => { e.preventDefault(); wakeAudio(); stickId = e.pointerId; stick.setPointerCapture?.(e.pointerId); moveStick(e); });
+  stick.addEventListener('pointermove', (e) => { if (e.pointerId === stickId) moveStick(e); });
+  for (const type of ['pointerup', 'pointercancel']) stick.addEventListener(type, (e) => { if (e.pointerId === stickId) freeStick(); });
+  const tappers = new Set();
+  canvas.addEventListener('pointerdown', (e) => { e.preventDefault(); wakeAudio(); tappers.add(e.pointerId); canvas.setPointerCapture?.(e.pointerId); held.jump = true; });
+  for (const type of ['pointerup', 'pointercancel']) canvas.addEventListener(type, (e) => { tappers.delete(e.pointerId); if (!tappers.size) held.jump = false; });
+  for (const el of [stick, canvas]) el.addEventListener('contextmenu', (e) => e.preventDefault());
 
-  /* ----- the scenery behind each level, painted once ----- */
+  let stickSide = 'left';
+  try { if (localStorage.getItem('graveMistake.stick') === 'right') stickSide = 'right'; } catch {}
+  function setStickSide(side) {
+    stickSide = side;
+    stick.classList.toggle('right', side === 'right');
+    try { localStorage.setItem('graveMistake.stick', side); } catch {}
+    document.querySelectorAll('[data-side]').forEach((b) => b.setAttribute('aria-pressed', String(b.dataset.side === side)));
+  }
+  const stickChooser = () => `<div class="side-pick"><span>Joystick</span><button class="btn small" data-side="left" aria-pressed="${stickSide === 'left'}">Left</button><button class="btn small" data-side="right" aria-pressed="${stickSide === 'right'}">Right</button></div>`;
+  cards.addEventListener('click', (e) => { const side = e.target.dataset?.side; if (side) setStickSide(side); });
+  stick.classList.toggle('right', stickSide === 'right');
+
+  /* ----- the living backdrop: a sky that turns from day to night, over a different scene each level ----- */
   const noise = (i, seed) => { const v = Math.sin(i * 12.9898 + seed * 78.233) * 43758.5453; return v - Math.floor(v); };
-  function ridge(c, base, height, seed, color) {
-    c.fillStyle = color;
-    c.beginPath(); c.moveTo(0, SCREEN_H);
-    for (let x = 0; x <= SCREEN_W; x += 12) {
-      const y = base - (Math.sin(x * .007 + seed) + Math.sin(x * .019 + seed * 2) * .5 + 1.5) * height - noise(Math.floor(x / 12), seed) * 5;
-      c.lineTo(x, y);
+  const SKY_MS = 120000;
+  const SKY = [
+    { at: 0, top: [32, 42, 96], mid: [214, 120, 130], low: [255, 190, 140], far: [122, 92, 122], near: [72, 56, 92], cloud: [255, 214, 200], stars: .15 },
+    { at: .25, top: [52, 126, 218], mid: [125, 190, 240], low: [208, 234, 246], far: [116, 164, 172], near: [68, 122, 116], cloud: [255, 255, 255], stars: 0 },
+    { at: .5, top: [50, 40, 112], mid: [226, 106, 96], low: [255, 172, 92], far: [136, 70, 96], near: [76, 40, 76], cloud: [255, 176, 140], stars: .2 },
+    { at: .72, top: [8, 10, 34], mid: [22, 26, 66], low: [46, 46, 96], far: [28, 32, 66], near: [14, 16, 40], cloud: [58, 62, 104], stars: 1 },
+    { at: 1, top: [32, 42, 96], mid: [214, 120, 130], low: [255, 190, 140], far: [122, 92, 122], near: [72, 56, 92], cloud: [255, 214, 200], stars: .15 },
+  ];
+  function skyAt(t) {
+    const i = SKY.findIndex((k) => k.at > t) - 1, a = SKY[i], b = SKY[i + 1], k = (t - a.at) / (b.at - a.at);
+    const out = { stars: a.stars + (b.stars - a.stars) * k };
+    for (const name of ['top', 'mid', 'low', 'far', 'near', 'cloud']) out[name] = `rgb(${a[name].map((v, n) => Math.round(v + (b[name][n] - v) * k)).join()})`;
+    return out;
+  }
+  const SCENES = ['hills', 'pines', 'city', 'dunes', 'peaks'];
+  const LEFT = -700, RIGHT = 1660, DEEP = 3000;
+  function ridgePath(height, seed, base, jag, tree) {
+    const path = new Path2D();
+    path.moveTo(LEFT, DEEP);
+    for (let x = LEFT; x <= RIGHT; x += 12) {
+      const y = base - (Math.sin(x * .007 + seed) + Math.sin(x * .019 + seed * 2) * .5 + 1.5) * height - noise(Math.floor(x / 12), seed) * jag;
+      if (tree && Math.floor(x / 12) % 4 === 0) { path.lineTo(x, y); path.lineTo(x + 7, y - tree - noise(x, seed) * tree); path.lineTo(x + 14, y); } else path.lineTo(x, y);
     }
-    c.lineTo(SCREEN_W, SCREEN_H); c.closePath(); c.fill();
+    path.lineTo(RIGHT, DEEP); path.closePath();
+    return path;
+  }
+  function peaksPath(seed, base, size) {
+    const path = new Path2D();
+    path.moveTo(LEFT, DEEP); path.lineTo(LEFT, base);
+    for (let x = LEFT, i = 0; x < RIGHT; i++) {
+      const w = size * (.7 + noise(i, seed) * .8);
+      path.lineTo(x + w / 2, base - size * (.6 + noise(i, seed + 2) * .9)); path.lineTo(x + w, base);
+      x += w * .8;
+    }
+    path.lineTo(RIGHT, DEEP); path.closePath();
+    return path;
+  }
+  function skylinePath(seed, base, tall, lights) {
+    const path = new Path2D();
+    path.moveTo(LEFT, DEEP);
+    for (let x = LEFT, i = 0; x < RIGHT; i++) {
+      const w = 34 + noise(i, seed) * 46, h = tall * (.45 + noise(i, seed + 3));
+      path.lineTo(x, base - h); path.lineTo(x + w, base - h);
+      if (lights) for (let wy = 10; wy < h - 6; wy += 15) for (let wx = 7; wx < w - 8; wx += 12) {
+        if (noise(wx + i * 31, wy + seed) > .62) lights.push([x + wx, base - h + wy]);
+      }
+      x += w + 3;
+    }
+    path.lineTo(RIGHT, DEEP); path.closePath();
+    return path;
+  }
+  function makeScene(lv) {
+    const kind = SCENES[lv % SCENES.length], s1 = lv + 1, s2 = lv + 5, lights = [];
+    if (kind === 'pines') return { far: ridgePath(30, s1, 400, 3, 16), near: ridgePath(22, s2, 462, 2, 28), lights };
+    if (kind === 'city') return { far: skylinePath(s1, 440, 150), near: skylinePath(s2, 470, 90, lights), lights };
+    if (kind === 'dunes') return { far: ridgePath(34, s1, 420, 0), near: ridgePath(24, s2, 470, 0), lights };
+    if (kind === 'peaks') return { far: peaksPath(s1, 440, 230), near: peaksPath(s2, 480, 130), lights };
+    return { far: ridgePath(46, s1, 410, 5), near: ridgePath(36, s2, 470, 5), lights };
+  }
+  const STARS = Array.from({ length: 90 }, (_, i) => [noise(i, 7), noise(i, 3), .3 + noise(i, 11) * .7, noise(i, 5) > .8 ? 2 : 1.3]);
+  const CLOUDS = Array.from({ length: 7 }, (_, i) => [noise(i, 21), .08 + noise(i, 23) * .62, .7 + noise(i, 25) * .9, .6 + noise(i, 27)]);
+  function puff(x, y, k) {
+    g.beginPath();
+    for (const [dx, dy, r] of [[-34, 5, 18], [-12, -7, 25], [16, -3, 22], [38, 6, 15]]) { g.moveTo(x + dx * k + r * k, y + dy * k); g.arc(x + dx * k, y + dy * k, r * k, 0, 7); }
+    g.fill();
+  }
+  function drawSky(now, cw, ch, horizon) {
+    const t = ((level * .37 + (reduced() ? 0 : now / SKY_MS)) % 1 + 1) % 1, sky = skyAt(t);
+    const grad = g.createLinearGradient(0, 0, 0, horizon);
+    grad.addColorStop(0, sky.top); grad.addColorStop(.65, sky.mid); grad.addColorStop(1, sky.low);
+    g.fillStyle = grad; g.fillRect(0, 0, cw, ch);
+    if (sky.stars > .02) for (const [x, y, a, r] of STARS) { g.fillStyle = `rgba(255, 255, 255, ${a * sky.stars})`; g.fillRect(x * cw, y * horizon * .8, r, r); }
+    // the sun crosses during the first half of the cycle, and the moon during the second
+    const isDay = t < .5, arc = (isDay ? t : t - .5) * 2 * Math.PI;
+    const bx = cw * (.5 - .42 * Math.cos(arc)), by = horizon - Math.sin(arc) * horizon * .82 + 8, size = Math.max(20, Math.min(cw, ch) * .05);
+    g.fillStyle = isDay ? 'rgba(255, 226, 150, .25)' : 'rgba(255, 244, 214, .14)';
+    g.beginPath(); g.arc(bx, by, size * 1.7, 0, 7); g.fill();
+    g.fillStyle = isDay ? '#fff1b8' : '#fff4d6';
+    g.beginPath(); g.arc(bx, by, size, 0, 7); g.fill();
+    g.fillStyle = sky.cloud; g.globalAlpha = .75;
+    CLOUDS.forEach(([x, y, k, speed]) => {
+      const span = cw + 240, drift = reduced() ? 0 : now * .004 * speed;
+      puff((x * span + drift) % span - 120, y * horizon, k * Math.max(.7, Math.min(cw, ch) / 500));
+    });
+    g.globalAlpha = 1;
+    return sky;
   }
   function paintTile(c, x, y, hue, open) {
     const px = x * T, py = y * T;
@@ -97,26 +201,32 @@
     if (open.down) { c.fillStyle = 'rgba(0, 0, 0, .28)'; c.fillRect(px, py + T - 4, T + .5, 4); }
   }
   const looksSolid = (ch) => ch === '#' || ch === 'f' || ch === 'c';
-  function paintBackdrop(lv) {
-    const L = R.parse(lv), hue = L.hue, layer = document.createElement('canvas');
-    layer.width = SCREEN_W; layer.height = SCREEN_H;
+  // the tiles that never change, kept at twice the size so that they stay sharp when the camera moves in
+  function paintTiles(lv) {
+    const L = R.parse(lv), layer = document.createElement('canvas');
+    layer.width = SCREEN_W * 2; layer.height = SCREEN_H * 2;
     const c = layer.getContext('2d');
-    const sky = c.createLinearGradient(0, 0, 0, SCREEN_H);
-    sky.addColorStop(0, `hsl(${hue} 50% 11%)`);
-    sky.addColorStop(.6, `hsl(${hue} 48% 34%)`);
-    sky.addColorStop(1, `hsl(${(hue + 30) % 360} 72% 62%)`);
-    c.fillStyle = sky; c.fillRect(0, 0, SCREEN_W, SCREEN_H);
-    for (let i = 0; i < 46; i++) { c.fillStyle = `rgba(255, 255, 255, ${.2 + noise(i, lv) * .6})`; c.fillRect(noise(i, lv + 7) * SCREEN_W, noise(i, lv + 3) * SCREEN_H * .55, 2, 2); }
-    const mx = 110 + noise(lv, 2) * 740, my = 70 + noise(lv, 4) * 60;
-    c.fillStyle = 'rgba(255, 244, 214, .18)'; c.beginPath(); c.arc(mx, my, 52, 0, 7); c.fill();
-    c.fillStyle = '#fff4d6'; c.beginPath(); c.arc(mx, my, 32, 0, 7); c.fill();
-    ridge(c, 410, 46, lv + 1, `hsl(${hue} 36% 28%)`);
-    ridge(c, 470, 36, lv + 5, `hsl(${hue} 38% 19%)`);
+    c.scale(2, 2);
     L.grid.forEach((row, y) => row.forEach((ch, x) => {
       if (ch !== '#' && ch !== 'f') return;
-      paintTile(c, x, y, hue, { up: y > 0 && !looksSolid(L.grid[y - 1][x]), down: y < H - 1 && !looksSolid(L.grid[y + 1][x]) });
+      paintTile(c, x, y, L.hue, { up: y > 0 && !looksSolid(L.grid[y - 1][x]), down: y < H - 1 && !looksSolid(L.grid[y + 1][x]) });
     }));
     return layer;
+  }
+  // the sides of the screen are walls and the ground goes on below, so that a tall or wide screen is never empty
+  function drawSurround(L) {
+    const rock = `hsl(${L.hue} 34% 22%)`, edge = `hsl(${L.hue} 34% 15%)`, far = 6000;
+    g.fillStyle = rock;
+    g.fillRect(-far, SCREEN_H, far * 2 + SCREEN_W, far);
+    g.fillRect(-far, -far, far, far * 2);
+    g.fillRect(SCREEN_W, -far, far, far * 2);
+    for (let x = 0; x < W; x++) if (looksSolid(L.grid[0][x])) g.fillRect(x * T, -far, T + .5, far);
+    g.fillStyle = edge;
+    g.fillRect(-6, -far, 6, far * 2);
+    g.fillRect(SCREEN_W, -far, 6, far * 2);
+    g.fillRect(0, SCREEN_H, SCREEN_W, 5);
+    g.fillStyle = `hsl(${L.hue} 30% 17%)`;
+    for (let i = 0; i < 90; i++) { g.beginPath(); g.arc(noise(i, 31) * 1400 - 220, SCREEN_H + 14 + noise(i, 33) * 500, 1.5 + noise(i, 35) * 2.5, 0, 7); g.fill(); }
   }
 
   /* ----- pieces ----- */
@@ -201,7 +311,8 @@
   }
 
   /* ----- particles and text ----- */
-  let bits = [], shake = 0, squash = 0, graves = [], backdrop = null;
+  let bits = [], shake = 0, squash = 0, graves = [], tileLayer = null, scene = null;
+  let overview = 0, zoomK = 0, camP = SCREEN_W / 2, cw = 1, ch = 1, started = false;
   function burst(x, y, colors, n = 36, power = 6) {
     for (let i = 0; i < n; i++) {
       const a = Math.random() * 6.283, v = Math.random() * power + 1;
@@ -219,7 +330,7 @@
   let s = null, level = 0, deathsHere = 0, deadFor = 0, introFor = 0, finished = false;
   const playing = () => s && !cards.firstChild;
   function hud() {
-    $('#hudLevel').textContent = `Level ${level + 1} / ${R.LEVELS.length}`;
+    $('#hudLevel').textContent = `Level ${level + 1}/${R.LEVELS.length}`;
     $('#hudDeaths').textContent = save.deaths;
   }
   function loadLevel(i) {
@@ -228,8 +339,9 @@
     save.reached = Math.max(save.reached, i);
     persist();
     graves = []; bits = []; deathsHere = 0; introFor = 130;
-    backdrop = paintBackdrop(i);
+    tileLayer = paintTiles(i); scene = makeScene(i);
     s = R.start(i);
+    overview = 100; zoomK = 0; camP = s.x;   // a look at the whole level first
     deadFor = 0; quip = '';
     hud();
   }
@@ -256,6 +368,9 @@
   let winFor = 0;
   function tick() {
     if (introFor > 0) introFor--;
+    if (overview > 0) overview--;
+    zoomK += ((overview > 0 ? 0 : 1) - zoomK) * .07;
+    if (s) camP += (s.x + PW / 2 - camP) * .12;
     squash *= .8;
     for (const b of bits) { b.x += b.vx; b.y += b.vy; b.vy += .22; b.life--; }
     bits = bits.filter((b) => b.life > 0);
@@ -271,6 +386,7 @@
     if (wasAir && s.grounded) squash = .5;
     for (const ev of s.ev) {
       SOUNDS[ev]?.();
+      if (ev === 'hop') overview = 80;   // pull back to show where the door went
       if (ev === 'hop') burst(s.door.x * T + 20, s.door.y * T, ['#fde047', '#fff'], 18, 3);
       if (ev === 'thud' && !reduced()) shake = 5;
     }
@@ -291,9 +407,28 @@
   function draw(time) {
     if (!s) return;
     const L = R.parse(level);
-    g.setTransform(canvas.width / SCREEN_W, 0, 0, canvas.height / SCREEN_H, 0, 0);
-    if (shake > .3) g.translate((Math.random() - .5) * shake, (Math.random() - .5) * shake);
-    g.drawImage(backdrop, 0, 0);
+    // the whole world fits a landscape screen; on a tall one the camera moves in and follows, with the sky above and the ground below
+    const groundRoom = cw < ch ? Math.min(150, ch * .22) : 0;
+    const fit = Math.min(cw / SCREEN_W, (ch - groundRoom) / SCREEN_H);
+    const close = cw < ch ? Math.max(fit, Math.min((ch - groundRoom) / SCREEN_H, cw / (15 * T))) : fit;
+    const zoom = fit + (close - fit) * zoomK;
+    const viewW = cw / zoom;
+    const camX = viewW >= SCREEN_W ? SCREEN_W / 2 : Math.max(viewW / 2, Math.min(SCREEN_W - viewW / 2, camP));
+    const x0 = cw / 2 - camX * zoom, y0 = ch - groundRoom - SCREEN_H * zoom;
+    const dpr = canvas.width / cw;
+    const screenView = () => g.setTransform(dpr, 0, 0, dpr, 0, 0);
+    const layer = (depth) => g.setTransform(dpr * zoom, 0, 0, dpr * zoom, dpr * (cw / 2 - (SCREEN_W / 2 + (camX - SCREEN_W / 2) * depth) * zoom), dpr * y0);
+    screenView();
+    const sky = drawSky(time, cw, ch, y0 + SCREEN_H * zoom * .88);
+    layer(.25); g.fillStyle = sky.far; g.fill(scene.far);
+    layer(.55); g.fillStyle = sky.near; g.fill(scene.near);
+    if (scene.lights.length && sky.stars > .15) {
+      g.fillStyle = `rgba(253, 224, 120, ${Math.min(.9, sky.stars)})`;
+      for (const [lx, ly] of scene.lights) g.fillRect(lx, ly, 5, 6);
+    }
+    const sx = shake > .3 ? (Math.random() - .5) * shake : 0, sy = shake > .3 ? (Math.random() - .5) * shake : 0;
+    g.setTransform(dpr * zoom, 0, 0, dpr * zoom, dpr * (x0 + sx), dpr * (y0 + sy));
+    g.drawImage(tileLayer, 0, 0, SCREEN_W, SCREEN_H);
 
     // tiles that can change during an attempt
     L.grid.forEach((row, y) => row.forEach((ch, x) => {
@@ -337,24 +472,32 @@
     s.saws.forEach((m, i) => { if (m.on) saw(m.x, m.y, L.saws[i].r * T, time / 40); });
     for (const d of graves) grave(d.x, d.y, d.up);
     if (!s.dead) hero(s, time);
+    drawSurround(L);
     for (const b of bits) { g.fillStyle = b.color; g.globalAlpha = Math.min(1, b.life / 20); g.fillRect(b.x - b.size / 2, b.y - b.size / 2, b.size, b.size); }
     g.globalAlpha = 1;
 
+    screenView();
     g.textAlign = 'center'; g.textBaseline = 'middle';
-    if (introFor > 0) {
+    const big = Math.max(20, Math.min(34, cw * .06));
+    if (introFor > 0 && started) {
       g.globalAlpha = Math.min(1, introFor / 30);
-      g.font = '800 34px system-ui, sans-serif'; g.fillStyle = 'rgba(15, 10, 32, .55)';
+      g.font = `800 ${big}px system-ui, sans-serif`; g.fillStyle = 'rgba(15, 10, 32, .6)';
       const w = g.measureText(L.name).width;
-      g.beginPath(); g.roundRect(SCREEN_W / 2 - w / 2 - 22, 22, w + 44, 54, 12); g.fill();
-      g.fillStyle = '#fff'; g.fillText(L.name, SCREEN_W / 2, 50);
+      g.beginPath(); g.roundRect(cw / 2 - w / 2 - 18, 14, w + 36, big + 20, 12); g.fill();
+      g.fillStyle = '#fff'; g.fillText(L.name, cw / 2, 24 + big / 2);
       g.globalAlpha = 1;
     }
     if (s.rev && !s.dead) {
-      g.font = '800 18px system-ui, sans-serif'; g.fillStyle = '#fda4af'; g.fillText('← controls swapped →', SCREEN_W / 2, 26);
+      const y = big + 50;
+      g.font = '800 15px system-ui, sans-serif'; g.fillStyle = 'rgba(15, 10, 32, .6)';
+      const text = '← controls swapped →', w = g.measureText(text).width;
+      g.beginPath(); g.roundRect(cw / 2 - w / 2 - 10, y - 13, w + 20, 26, 8); g.fill();
+      g.fillStyle = '#fda4af'; g.fillText(text, cw / 2, y);
     }
     if (quip && s.dead) {
-      g.font = '800 26px system-ui, sans-serif'; g.lineWidth = 6; g.strokeStyle = 'rgba(15, 10, 32, .8)'; g.lineJoin = 'round';
-      g.strokeText(quip, SCREEN_W / 2, SCREEN_H / 2 - 30); g.fillStyle = '#fff'; g.fillText(quip, SCREEN_W / 2, SCREEN_H / 2 - 30);
+      const y = Math.max(big + 60, y0 - 10 + SCREEN_H * zoom * .3);
+      g.font = `800 ${Math.max(18, big * .8)}px system-ui, sans-serif`; g.lineWidth = 6; g.strokeStyle = 'rgba(15, 10, 32, .8)'; g.lineJoin = 'round';
+      g.strokeText(quip, cw / 2, y, cw - 20); g.fillStyle = '#fff'; g.fillText(quip, cw / 2, y, cw - 20);
     }
   }
 
@@ -366,12 +509,13 @@
   }
   const closeCards = () => { cards.innerHTML = ''; };
   function showStart() {
-    const going = save.reached > 0 || save.deaths > 0;
+    const going = save.reached > 0 || save.deaths > 0, touch = matchMedia('(pointer: coarse)').matches;
     const c = card(`<h1>Grave Mistake</h1>
       <p>Reach the door. The floor lies, the signs lie, and sometimes the door runs away. You will die a lot, and every grave marks something you've learned.</p>
-      <p><b>Move:</b> arrows or A D · <b>Jump:</b> space or up · <b>Retry:</b> R</p>
+      <p>${touch ? '<b>Move:</b> slide the joystick · <b>Jump:</b> tap anywhere else' : '<b>Move:</b> arrows or A D · <b>Jump:</b> space, up or click · <b>Retry:</b> R'}</p>
+      ${touch ? stickChooser() : ''}
       <div class="btns"><button class="btn primary" id="go">${going ? 'Continue' : 'Play'}</button>${going ? '<button class="btn" id="levels">Levels</button>' : ''}</div>`);
-    c.querySelector('#go').addEventListener('click', () => { wakeAudio(); closeCards(); loadLevel(Math.min(save.level, save.reached)); });
+    c.querySelector('#go').addEventListener('click', () => { wakeAudio(); closeCards(); started = true; loadLevel(Math.min(save.level, save.reached)); });
     c.querySelector('#levels')?.addEventListener('click', showLevels);
     c.querySelector('#go').focus();
   }
@@ -379,17 +523,18 @@
     const buttons = R.LEVELS.map((L, i) => `<button data-i="${i}" title="${L.name}" class="${i < save.reached || save.done ? 'done' : ''}" ${i > save.reached ? 'disabled' : ''}>${i + 1}</button>`).join('');
     const c = card(`<h1>Levels</h1><p>${save.deaths} deaths so far${save.best !== null ? ` · best full run: ${save.best}` : ''}</p>
       <div class="grid">${buttons}</div>
-      <div class="btns">${s ? '<button class="btn primary" id="back">Keep playing</button>' : ''}<button class="btn" id="wipe">Reset progress</button></div>`);
+      ${matchMedia('(pointer: coarse)').matches ? stickChooser() : ''}
+      <div class="btns">${started ? '<button class="btn primary" id="back">Keep playing</button>' : ''}<button class="btn" id="wipe">Reset progress</button></div>`);
     c.querySelector('.grid').addEventListener('click', (e) => {
       const i = e.target.dataset?.i;
-      if (i !== undefined && !e.target.disabled) { wakeAudio(); closeCards(); loadLevel(Number(i)); }
+      if (i !== undefined && !e.target.disabled) { wakeAudio(); closeCards(); started = true; loadLevel(Number(i)); }
     });
     c.querySelector('#back')?.addEventListener('click', closeCards);
     const wipe = c.querySelector('#wipe');
     wipe.addEventListener('click', () => {
       if (wipe.dataset.sure) {
         save = { reached: 0, deaths: 0, level: 0, best: null, done: 0 };
-        persist(); s = null; showStart();
+        persist(); started = false; loadLevel(0); showStart();
       } else { wipe.dataset.sure = '1'; wipe.textContent = 'Tap again to erase'; }
     });
   }
@@ -398,13 +543,14 @@
       <div class="btns"><button class="btn primary" id="again">Play again</button><a class="btn" href="../index.html" style="color:inherit;text-decoration:none">More games</a></div>`);
     c.querySelector('#again').addEventListener('click', () => { save.deaths = 0; finished = false; persist(); closeCards(); loadLevel(0); });
   }
-  $('#btnLevels').addEventListener('click', () => { if (cards.firstChild && s) closeCards(); else showLevels(); });
+  $('#btnLevels').addEventListener('click', () => { if (cards.firstChild && started) closeCards(); else showLevels(); });
 
   /* ----- sharp on every screen ----- */
   function fit() {
     const r = canvas.getBoundingClientRect(), dpr = Math.min(devicePixelRatio || 1, 2);
-    const w = Math.round(r.width * dpr), h = Math.round(r.height * dpr);
-    if (w && h && (canvas.width !== w || canvas.height !== h)) { canvas.width = w; canvas.height = h; }
+    if (!r.width || !r.height) return;
+    cw = r.width; ch = r.height;
+    canvas.width = Math.round(cw * dpr); canvas.height = Math.round(ch * dpr);
   }
   new ResizeObserver(fit).observe(canvas);
   fit();
@@ -419,6 +565,7 @@
     while (spare >= STEP) { tick(); spare -= STEP; }
     draw(now);
   }
+  loadLevel(Math.min(save.level, save.reached));
   showStart();
   hud();
   requestAnimationFrame((now) => { last = now; frame(now); });
