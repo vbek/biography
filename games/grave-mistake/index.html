@@ -1,0 +1,45 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1, user-scalable=no">
+<title>Grave Mistake — Bibek Koirala</title>
+<meta name="description" content="Grave Mistake: a free trap-filled platformer. The floor lies, the door runs away and the signs are not your friends. You will die. Try again. Progress is saved on your device.">
+<script>
+  try { if (localStorage.getItem('theme') !== 'dark') document.documentElement.setAttribute('data-theme', 'light'); } catch (e) { document.documentElement.setAttribute('data-theme', 'light'); }
+</script>
+<link rel="icon" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24'%3E%3Cpath d='M7 21V10a5 5 0 0 1 10 0v11z' fill='%232dd4bf'/%3E%3Cpath d='M12 8v7M9.5 10.5h5' stroke='%23134e4a' stroke-width='2' stroke-linecap='round'/%3E%3C/svg%3E">
+<link rel="stylesheet" href="game.css">
+</head>
+<body>
+<header class="bar">
+  <a class="brand" href="../index.html" title="Back to games">
+    <svg class="ic" viewBox="0 0 24 24"><path d="M15 6l-6 6 6 6"/></svg><span>Grave Mistake</span>
+  </a>
+  <div class="hud" aria-live="off"><span id="hudLevel">Level 1</span><span class="hud-deaths"><svg class="ic" viewBox="0 0 24 24"><path d="M7 21V10a5 5 0 0 1 10 0v11zM12 8v6M9.5 10.5h5"/></svg><b id="hudDeaths">0</b></span></div>
+  <div class="bar-right">
+    <button class="icon-btn" id="btnSound" title="Sound on/off (M)" aria-label="Toggle sound" aria-pressed="true">
+      <svg class="ic on" viewBox="0 0 24 24"><path d="M4 9v6h4l5 4V5L8 9zM16.5 8.5a5 5 0 0 1 0 7M19 6a8.5 8.5 0 0 1 0 12"/></svg>
+      <svg class="ic off" viewBox="0 0 24 24"><path d="M4 9v6h4l5 4V5L8 9zM17 9l5 6M22 9l-5 6"/></svg>
+    </button>
+    <button class="icon-btn" id="btnLevels" title="Levels" aria-label="Levels">
+      <svg class="ic" viewBox="0 0 24 24"><path d="M4 4h6v6H4zM14 4h6v6h-6zM4 14h6v6H4zM14 14h6v6h-6z"/></svg>
+    </button>
+  </div>
+</header>
+<main class="stage">
+  <div class="screen" id="screen">
+    <canvas id="game" width="960" height="520" aria-label="Grave Mistake game. Arrow keys or A and D to move, space to jump, R to restart."></canvas>
+    <div id="cards"></div>
+  </div>
+  <div class="pad" id="pad">
+    <button class="pad-btn" id="padLeft" aria-label="Move left"><svg class="ic" viewBox="0 0 24 24"><path d="M15 5l-7 7 7 7"/></svg></button>
+    <button class="pad-btn" id="padRight" aria-label="Move right"><svg class="ic" viewBox="0 0 24 24"><path d="M9 5l7 7-7 7"/></svg></button>
+    <span class="pad-gap"></span>
+    <button class="pad-btn pad-jump" id="padJump" aria-label="Jump"><svg class="ic" viewBox="0 0 24 24"><path d="M5 15l7-7 7 7"/></svg></button>
+  </div>
+</main>
+<script src="rules.js"></script>
+<script src="game.js"></script>
+</body>
+</html>

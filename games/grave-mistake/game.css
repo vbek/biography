@@ -1,0 +1,59 @@
+/* Grave Mistake: the page around the game. The dusk colours stay the same in light and dark themes. */
+:root { --bg: #17122b; --panel: #251d41; --line: rgba(255, 255, 255, .14); --fg: #f5f0ff; --mut: #b6abd6; --acc: #2dd4bf; --hot: #fb7185; }
+* { box-sizing: border-box; -webkit-tap-highlight-color: transparent; }
+html, body { height: 100%; margin: 0; }
+body { display: flex; flex-direction: column; height: 100dvh; overflow: hidden; background: var(--bg); color: var(--fg); font: 15px/1.45 system-ui, -apple-system, 'Segoe UI', Roboto, sans-serif; user-select: none; -webkit-user-select: none; overscroll-behavior: none; }
+button { font: inherit; color: inherit; }
+.ic { width: 20px; height: 20px; fill: none; stroke: currentColor; stroke-width: 2; stroke-linecap: round; stroke-linejoin: round; }
+[hidden] { display: none !important; }
+
+.bar { flex: none; display: flex; align-items: center; gap: 12px; height: 56px; padding: 0 12px; border-bottom: 1px solid var(--line); }
+.brand { display: flex; align-items: center; gap: 6px; color: inherit; font-weight: 800; text-decoration: none; white-space: nowrap; }
+.hud { display: flex; flex: 1; justify-content: center; align-items: center; gap: 14px; min-width: 0; font-weight: 600; color: var(--mut); font-variant-numeric: tabular-nums; white-space: nowrap; }
+.hud-deaths { display: flex; align-items: center; gap: 4px; color: var(--hot); }
+.hud-deaths b { min-width: 3ch; }
+.hud-deaths .ic { width: 16px; height: 16px; }
+.bar-right { display: flex; gap: 6px; }
+.icon-btn { display: grid; place-items: center; width: 38px; height: 38px; padding: 0; border: 1px solid var(--line); border-radius: 50%; background: transparent; cursor: pointer; }
+.icon-btn:hover { background: var(--panel); }
+.icon-btn .off, .icon-btn[aria-pressed="false"] .on { display: none; }
+.icon-btn[aria-pressed="false"] .off { display: block; }
+
+.stage { flex: 1; min-height: 0; display: flex; flex-direction: column; align-items: center; justify-content: center; gap: 10px; padding: 10px; }
+.screen { position: relative; width: min(100%, calc((100dvh - 76px) * 960 / 520)); aspect-ratio: 960 / 520; border-radius: 12px; overflow: hidden; box-shadow: 0 18px 50px rgba(0, 0, 0, .45); }
+#game { display: block; width: 100%; height: 100%; touch-action: none; }
+
+/* ---------- cards ---------- */
+#cards:empty { display: none; }
+#cards { position: absolute; inset: 0; display: grid; place-items: center; padding: 10px; background: rgba(15, 10, 32, .72); overflow-y: auto; }
+.card { width: min(100%, 460px); padding: 18px 20px; border: 1px solid var(--line); border-radius: 16px; background: var(--panel); text-align: center; }
+.card h1 { margin: 0 0 6px; font-size: clamp(22px, 5vw, 34px); line-height: 1.1; }
+.card p { margin: 0 0 12px; color: var(--mut); }
+.btn { padding: 10px 18px; border: 1px solid var(--line); border-radius: 999px; background: transparent; font-weight: 700; cursor: pointer; }
+.btn.primary { border-color: transparent; background: var(--acc); color: #06302b; }
+.btns { display: flex; flex-wrap: wrap; justify-content: center; gap: 8px; }
+.grid { display: grid; grid-template-columns: repeat(6, minmax(0, 1fr)); gap: 6px; margin-bottom: 12px; }
+.grid button { aspect-ratio: 1; padding: 0; border: 1px solid var(--line); border-radius: 10px; background: rgba(255, 255, 255, .06); font-weight: 800; cursor: pointer; }
+.grid button:disabled { opacity: .35; cursor: default; }
+.grid button.done { border-color: var(--acc); color: var(--acc); }
+
+/* ---------- touch controls ---------- */
+.pad { display: none; flex: none; width: 100%; max-width: 620px; align-items: center; gap: 12px; }
+.pad-gap { flex: 1; }
+.pad-btn { display: grid; place-items: center; width: 76px; height: 76px; padding: 0; border: 1px solid var(--line); border-radius: 50%; background: var(--panel); touch-action: none; }
+.pad-btn.held { background: var(--acc); color: #06302b; }
+.pad-btn .ic { width: 32px; height: 32px; }
+.pad-jump { width: 88px; height: 88px; }
+@media (pointer: coarse) {
+  .pad { display: flex; }
+  .screen { width: min(100%, calc((100dvh - 182px) * 960 / 520)); }
+}
+/* a phone on its side has no room below the game, so the buttons sit on top of it */
+@media (pointer: coarse) and (orientation: landscape) and (max-height: 500px) {
+  .bar { height: 44px; }
+  .stage { padding: 4px; }
+  .screen { width: min(100%, calc((100dvh - 54px) * 960 / 520)); }
+  .pad { position: fixed; left: 0; right: 0; bottom: 8px; max-width: none; padding: 0 12px; pointer-events: none; }
+  .pad-btn { width: 62px; height: 62px; background: rgba(37, 29, 65, .55); pointer-events: auto; }
+  .pad-jump { width: 70px; height: 70px; }
+}
