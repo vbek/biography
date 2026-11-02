@@ -28,16 +28,9 @@
   </div>
 </header>
 <main class="stage">
-  <div class="screen" id="screen">
-    <canvas id="game" width="960" height="520" aria-label="Grave Mistake game. Arrow keys or A and D to move, space to jump, R to restart."></canvas>
-    <div id="cards"></div>
-  </div>
-  <div class="pad" id="pad">
-    <button class="pad-btn" id="padLeft" aria-label="Move left"><svg class="ic" viewBox="0 0 24 24"><path d="M15 5l-7 7 7 7"/></svg></button>
-    <button class="pad-btn" id="padRight" aria-label="Move right"><svg class="ic" viewBox="0 0 24 24"><path d="M9 5l7 7-7 7"/></svg></button>
-    <span class="pad-gap"></span>
-    <button class="pad-btn pad-jump" id="padJump" aria-label="Jump"><svg class="ic" viewBox="0 0 24 24"><path d="M5 15l7-7 7 7"/></svg></button>
-  </div>
+  <canvas id="game" aria-label="Grave Mistake game. Arrow keys or A and D to move, space to jump, R to restart."></canvas>
+  <div class="stick" id="stick" role="slider" aria-label="Joystick: slide left or right to move"><span class="stick-arrows">‹&emsp;&emsp;›</span><div class="knob" id="knob"></div></div>
+  <div id="cards"></div>
 </main>
 <script src="rules.js"></script>
 <script src="game.js"></script>
