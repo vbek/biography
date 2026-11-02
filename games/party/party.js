@@ -163,74 +163,14 @@
         }
         return 1500;
       },
-      comets() {
-        for (let i = 0; i < 7; i++) {
-          const sx = rng() * W * 1.1, sy = -30 - rng() * H * .25, dx = -W * .55, dy = H * 1.05, c = pick(palette);
-          add(800 + rng() * 280, (g, k) => {
-            const x = sx + dx * k, y = sy + dy * k, tail = g.createLinearGradient(x, y, x - dx * .16, y - dy * .16);
-            tail.addColorStop(0, c); tail.addColorStop(1, 'transparent');
-            g.strokeStyle = tail; g.lineWidth = 5; g.lineCap = 'round';
-            g.beginPath(); g.moveTo(x, y); g.lineTo(x - dx * .16, y - dy * .16); g.stroke();
-            g.fillStyle = '#fff'; g.shadowColor = c; g.shadowBlur = 16;
-            g.beginPath(); g.arc(x, y, 4, 0, 6.283); g.fill();
-          }, i * 110);
-        }
-        sfx.whoosh();
-        return 1250;
-      },
-      storm() {
-        [0, 260, 560].forEach((d) => setTimeout(() => { lightning(W * (.15 + rng() * .7), H * (.45 + rng() * .4)); sfx.zap(); }, d / speed()));
-        return 1050;
-      },
-      aurora() {
-        for (let b = 0; b < 3; b++) {
-          const hue = 160 + b * 55 + rng() * 25, y0 = H * (.15 + b * .22);
-          add(1500, (g, k) => {
-            g.globalAlpha = Math.sin(k * Math.PI) * .42;
-            g.fillStyle = `hsl(${hue} 90% 62%)`;
-            g.filter = 'blur(26px)';
-            g.beginPath(); g.moveTo(0, y0);
-            for (let x = 0; x <= W; x += 40) g.lineTo(x, y0 + Math.sin(x * .012 + k * 7 + b) * 42);
-            g.lineTo(W, y0 + 90); g.lineTo(0, y0 + 90); g.closePath(); g.fill();
-          }, b * 110);
-        }
-        return 1500;
-      },
-      bubbles() {
-        for (let i = 0; i < 34; i++) {
-          const x = rng() * W, r = 6 + rng() * 18, sway = rng() * 6, c = pick(palette);
-          add(1100 + rng() * 500, (g, k) => {
-            const y = H + r - (H + r * 2) * ease.out(k);
-            g.globalAlpha = (1 - k) * .75; g.strokeStyle = c; g.lineWidth = 2; g.fillStyle = c + '22';
-            g.beginPath(); g.arc(x + Math.sin(k * 8 + sway) * 18, y, r, 0, 6.283); g.fill(); g.stroke();
-          }, rng() * 280);
-        }
-        sfx.pop();
-        return 1300;
-      },
       fireworks() {
         for (let i = 0; i < 4; i++) setTimeout(() => { firework(W * (.15 + rng() * .7), H * (.15 + rng() * .35)); sfx.pop(); }, i * 260 / speed());
         return 1500;
-      },
-      diceRain() {
-        for (let i = 0; i < 22; i++) {
-          const x = rng() * W, s = 14 + rng() * 16, spin = (rng() - .5) * 14, pips = 1 + Math.floor(rng() * 6);
-          add(900 + rng() * 500, (g, k) => {
-            g.translate(x, -30 + (H + 60) * ease.in(k)); g.rotate(spin * k);
-            g.globalAlpha = .92; g.fillStyle = '#fff';
-            g.beginPath(); g.roundRect(-s / 2, -s / 2, s, s, s * .2); g.fill();
-            g.fillStyle = '#0f172a';
-            for (let p = 0; p < pips; p++) { g.beginPath(); g.arc(-s * .25 + (p % 3) * s * .25, -s * .2 + Math.floor(p / 3) * s * .4, s * .07, 0, 6.283); g.fill(); }
-          }, rng() * 350);
-        }
-        sfx.rattle();
-        return 1300;
       },
     };
     return {
       palette, add, burst, ring, firework, lightning,
       init(el) { canvas = el; ctx = canvas.getContext('2d'); resize(); new ResizeObserver(resize).observe(canvas); },
-      pieces: Object.keys(pieces),
       run: (name) => (document.hidden ? 0 : pieces[name]()),
       get width() { return W; }, get height() { return H; },
     };
@@ -365,7 +305,17 @@
     let players = [];         // { id, name, online, lostAt }
     let mySeat = -1, state = null, shown = null, seq = 0, inGame = false;
     let queue = [], pumping = false, awaiting = false, awaitTimer = 0;
-    let boardSize = 0, chosenIp = null;
+    let boardSize = 0, chosenIp = null, note = '';
+    const PREFS_KEY = `party.${rules.id}.prefs`;
+    const defaultPrefs = () => Object.fromEntries(rules.options.map((o) => [o.key, o.choices[0].value]));
+    let prefs = (() => {
+      try { return { ...defaultPrefs(), ...JSON.parse(localStorage.getItem(PREFS_KEY)) }; } catch { return defaultPrefs(); }
+    })();
+    const savePrefs = () => { try { localStorage.setItem(PREFS_KEY, JSON.stringify(prefs)); } catch {} };
+    const seatRange = () => rules.seatRange?.(prefs) ?? [rules.minPlayers, rules.maxPlayers];
+    const minSeats = () => seatRange()[0];
+    const prefsSummary = () => rules.options.map((o) => o.choices.find((c) => c.value === prefs[o.key])?.label).filter(Boolean).join(' · ');
+    let hostPrefsText = '';
 
     /* ----- dice ----- */
     const PIPS = { 1: [4], 2: [0, 8], 3: [0, 4, 8], 4: [0, 2, 6, 8], 5: [0, 2, 4, 6, 8], 6: [0, 2, 3, 5, 6, 8] };
@@ -384,30 +334,18 @@
     function setDie(v, ms) {
       // full turns are added on top so the die always spins forwards into its face
       const [x, y] = SHOW[v];
-      const turnsX = ms ? 1 + Math.floor(rng() * 3) : 0, turnsY = ms ? 1 + Math.floor(rng() * 3) : 0;
+      const turnsX = ms ? 1 : 0, turnsY = ms ? 1 : 0;
       spinX = (Math.ceil(spinX / 360) + turnsX) * 360 + x;
       spinY = (Math.ceil(spinY / 360) + turnsY) * 360 + y;
       cube.style.transition = ms ? `transform ${ms / speed()}ms cubic-bezier(.2, .75, .3, 1)` : 'none';
       cube.style.transform = `rotateX(${spinX}deg) rotateY(${spinY}deg)`;
     }
     async function rollDice(ev) {
-      const cls = ['jump', 'spinout', 'drop'][ev.fx % 3];
-      diceBtn.classList.remove('ready', 'hot');
-      cubeWrap.classList.remove('jump', 'spinout', 'drop');
-      void cubeWrap.offsetWidth;
-      cubeWrap.classList.add(cls);
+      diceBtn.classList.remove('ready');
       sfx.rattle();
-      setDie(ev.value, 850);
-      await sleep(900);
-      cubeWrap.classList.remove(cls);
-      if (ev.value === 6) {
-        diceBtn.classList.add('hot');
-        const r = diceBtn.getBoundingClientRect(), s = stage.getBoundingClientRect();
-        const x = r.left - s.left + r.width / 2, y = r.top - s.top + r.height / 2;
-        Fx.burst(x, y, { colors: ['#fbbf24', '#f87171', '#fff'], n: 30, power: 130 });
-        Fx.ring(x, y, { color: '#fbbf24' });
-        sfx.six();
-      } else sfx.tick();
+      setDie(ev.value, 520);
+      await sleep(560);
+      sfx.tick();
     }
 
     /* ----- table rendering ----- */
@@ -437,9 +375,10 @@
       const who = `<b>${esc(seatName(shown.cur))}</b>`;
       if (pumping || shown.phase === 'over') return;
       const youTurn = mode === 'local' ? who + ':' : shown.cur === mySeat ? '<b>Your turn:</b>' : null;
-      turnEl.innerHTML = youTurn
-        ? `${youTurn} ${canPick ? 'pick a glowing token' : 'tap the dice'}`
-        : `Waiting for ${who}…`;
+      const lead = note ? `${esc(note)}<br>` : '';
+      turnEl.innerHTML = lead + (youTurn
+        ? `${youTurn} ${canPick ? 'pick a circled token' : 'tap the dice'}`
+        : `Waiting for ${who}…`);
     }
     function act(action) {
       if (!inGame || pumping || awaiting || !shown || !isMine(shown.cur)) return;
@@ -471,21 +410,15 @@
       return [b.left - s.left + x, b.top - s.top + y];
     };
     const shake = () => { wrap.classList.remove('shake'); void wrap.offsetWidth; wrap.classList.add('shake'); };
-    const api = { act, banner, shake, sfx, fx: Fx, tween, ease, sleep, rng, boardToStage, pickFrom: (arr, i) => arr[i % arr.length], esc };
+    const api = { act, banner, note: (t) => { note = t; }, shake, sfx, fx: Fx, tween, ease, sleep, rng, boardToStage, pickFrom: (arr, i) => arr[i % arr.length], esc };
 
     /* ----- event playback ----- */
     async function playEvent(ev) {
       if (ev.type === 'roll') { await rollDice(ev); return; }
-      if (ev.type === 'interlude') {
-        if (view.interlude?.(ev.fx, api)) { await sleep(1100); return; }
-        await sleep(Fx.run(ev.fx) * .9);
-        return;
-      }
       if (ev.type === 'turn') {
         if (ev.extra) {
-          const why = { six: 'Rolled a six', capture: 'Captured', home: 'Made it home' }[ev.why] || 'Bonus';
-          sfx.turn();
-          await banner(`${esc(why)}: <b>roll again!</b>`, 750);
+          const why = { six: 'Rolled a 6', capture: 'Captured', home: 'Made it home' }[ev.why] || 'Bonus';
+          note = `${why}: roll again`;
         } else if (isMine(ev.seat) && mode !== 'local') {
           sfx.turn();
           if (navigator.userActivation?.hasBeenActive) navigator.vibrate?.(60);
@@ -507,6 +440,7 @@
       while (queue.length) {
         const batch = queue.shift();
         backlog = queue.length;
+        note = '';
         if (batch.fresh) {
           shown = batch.state;
           view.setState(shown);
@@ -529,16 +463,11 @@
 
     /* ----- authority: applies actions, sends results ----- */
     function saveHost() {
-      store.set(SAVE_KEY, { mode, room, maxSeats, players: players.map((p) => ({ id: p.id, name: p.name })), state, seq, inGame });
-    }
-    function decorate(events) {
-      const i = events.findIndex((e) => e.type === 'turn' && !e.extra);
-      if (i >= 0 && rng() < .38) events.splice(i, 0, { type: 'interlude', fx: pick([...Fx.pieces.filter((n) => n !== 'fireworks'), ...(view.interludes || [])]) });
+      store.set(SAVE_KEY, { mode, room, maxSeats, prefs, players: players.map((p) => ({ id: p.id, name: p.name })), state, seq, inGame });
     }
     function hostApply(seat, action) {
       const r = rules.apply(state, { ...action, seat }, rng);
       if (!r) return;
-      decorate(r.events);
       state = r.state; seq++;
       saveHost();
       lastAuto = Date.now();
@@ -547,11 +476,11 @@
     }
     function beginGame() {
       const names = players.map((p) => p.name);
-      state = rules.newGame(names, rng);
+      state = rules.newGame(names, rng, prefs);
       seq++; inGame = true;
       saveHost();
       enterTable();
-      const events = [{ type: 'start' }];
+      const events = [];
       if (mode === 'host') net?.all({ t: 'start', seq, players: rosterMsg(), events, state });
       enqueue({ fresh: true, events, state });
     }
@@ -568,7 +497,7 @@
     const rosterMsg = () => players.map((p) => ({ name: p.name, online: p.online }));
     function pushRoster() {
       if (mode !== 'host') return;
-      net?.all({ t: 'roster', players: rosterMsg(), max: maxSeats, inGame });
+      net?.all({ t: 'roster', players: rosterMsg(), max: maxSeats, inGame, prefs: prefsSummary() });
       if (inGame) renderSeats(); else renderLobby();
     }
 
@@ -606,7 +535,7 @@
           if (!inGame) players[seat].name = name;
         }
         byConn.set(connId, id);
-        net.send(connId, { t: 'welcome', seat, room, max: maxSeats, players: rosterMsg(), inGame, seq, state: inGame ? state : null });
+        net.send(connId, { t: 'welcome', seat, room, prefs: prefsSummary(), max: maxSeats, players: rosterMsg(), inGame, seq, state: inGame ? state : null });
         saveHost();
         pushRoster();
       } else if (m.t === 'act') {
@@ -699,7 +628,7 @@
       }
       if (m.t === 'welcome') {
         welcomed = true; reconnecting = false;
-        mySeat = m.seat; maxSeats = m.max; room = m.room; players = m.players;
+        mySeat = m.seat; maxSeats = m.max; room = m.room; players = m.players; hostPrefsText = m.prefs || '';
         toast('');
         renderChip();
         if (m.inGame && m.state) {
@@ -712,7 +641,7 @@
         return;
       }
       if (m.t === 'roster') {
-        players = m.players; maxSeats = m.max;
+        players = m.players; maxSeats = m.max; hostPrefsText = m.prefs || '';
         if (inGame) renderSeats(); else renderLobby();
         return;
       }
@@ -739,15 +668,28 @@
       return parts.length > 1 ? `${esc(parts.slice(0, -1).join(' '))} <span>${esc(parts[parts.length - 1])}</span>` : `<span>${esc(rules.title)}</span>`;
     };
     function countPicker(el, value, onChange) {
-      const opts = [];
-      for (let n = rules.minPlayers; n <= rules.maxPlayers; n++) opts.push(n);
-      el.innerHTML = opts.map((n) => `<button type="button" data-n="${n}" aria-pressed="${n === value}" aria-label="${n} players">${n}</button>`).join('');
+      const draw = (current) => {
+        const [lo, hi] = seatRange(), opts = [];
+        for (let n = lo; n <= hi; n++) opts.push(n);
+        el.innerHTML = opts.map((n) => `<button type="button" data-n="${n}" aria-pressed="${n === current}" aria-label="${n} players">${n}</button>`).join('');
+      };
+      draw(value);
       el.addEventListener('click', (e) => {
         const b = e.target.closest('button');
         if (!b) return;
         el.querySelectorAll('button').forEach((x) => x.setAttribute('aria-pressed', x === b ? 'true' : 'false'));
         onChange(Number(b.dataset.n));
         sfx.tick();
+      });
+      return draw;
+    }
+    const clampCount = (n) => clamp(n, seatRange()[0], seatRange()[1]);
+    const prefsHtml = () => `<details class="prefs"><summary>Preferences</summary>${rules.options.map((o) =>
+      `<label class="field">${esc(o.label)}<select data-opt="${esc(o.key)}">${o.choices.map((c) =>
+        `<option value="${esc(c.value)}" ${prefs[o.key] === c.value ? 'selected' : ''}>${esc(c.label)}</option>`).join('')}</select></label>`).join('')}</details>`;
+    function bindPrefs(c, onChange) {
+      c.querySelectorAll('select[data-opt]').forEach((sel) => {
+        sel.onchange = () => { prefs[sel.dataset.opt] = sel.value; savePrefs(); onChange(); };
       });
     }
 
@@ -784,18 +726,19 @@
     }
 
     function showLocalSetup() {
-      let count = rules.defaultPlayers;
+      let count = clampCount(rules.defaultPlayers);
       const names = [];
       const c = show(`<h2>Who's playing?</h2><span class="label">Number of players</span><div class="count" id="cnt"></div>
-        <div id="names"></div><div class="btns"><button class="btn" id="bk">Back</button><button class="btn primary" id="go">Start game</button></div>`);
+        <div id="names"></div>${prefsHtml()}<div class="btns"><button class="btn" id="bk">Back</button><button class="btn primary" id="go">Start game</button></div>`);
       const box = $('#names', c);
       const draw = () => {
         box.querySelectorAll('input').forEach((inp, i) => { names[i] = inp.value; });
         box.innerHTML = Array.from({ length: count }, (_, i) =>
           `<label class="field">Player ${i + 1}<input maxlength="16" autocomplete="off" value="${esc(names[i] ?? `Player ${i + 1}`)}"></label>`).join('');
       };
-      countPicker($('#cnt', c), count, (n) => { count = n; draw(); });
+      const drawCount = countPicker($('#cnt', c), count, (n) => { count = n; draw(); });
       draw();
+      bindPrefs(c, () => { count = clampCount(count); drawCount(count); draw(); });
       $('#bk', c).onclick = () => showMenu();
       $('#go', c).onclick = () => {
         mode = 'local';
@@ -805,13 +748,15 @@
     }
 
     function showHostSetup() {
-      let count = rules.defaultPlayers;
+      let count = clampCount(rules.defaultPlayers);
       const c = show(`<h2>Host a room</h2>
         <label class="field">Your name<input id="nm" maxlength="16" autocomplete="off" value="${esc(myName())}" placeholder="Your name"></label>
         <span class="label">Room size</span><div class="count" id="cnt"></div>
+        ${prefsHtml()}
         <div class="btns"><button class="btn" id="bk">Back</button><button class="btn primary" id="go">Open room</button></div>
         <p class="note">${lan ? 'Running from your local host, so devices can join by IP with no internet.' : 'Devices join with a QR code or room code. Connecting needs internet for a moment, then play runs directly between devices.'}</p>`);
-      countPicker($('#cnt', c), count, (n) => { count = n; });
+      const drawCount = countPicker($('#cnt', c), count, (n) => { count = n; });
+      bindPrefs(c, () => { count = clampCount(count); drawCount(count); });
       $('#bk', c).onclick = () => showMenu();
       $('#go', c).onclick = () => {
         const name = $('#nm', c).value.trim().slice(0, 16) || 'Host';
@@ -882,25 +827,26 @@
           <div class="lobby">
             <div><p>Scan with a phone camera to join.</p>${shareBlock()}</div>
             <div>${rosterHtml()}
-              <div class="btns"><button class="btn" id="bk">Close room</button><button class="btn primary" id="go" disabled>Need ${rules.minPlayers} players</button></div>
+              <div class="btns"><button class="btn" id="bk">Close room</button><button class="btn primary" id="go" disabled>Need ${minSeats()} players</button></div>
               ${lan ? '' : '<p class="note">Joining by IP address needs the local host script, because a website can\'t accept connections itself. See the games README.</p>'}
             </div>
           </div>`);
         c.classList.add('wide');
         bindShare(c, () => { cards.innerHTML = ''; renderLobby(); });
         $('#bk', c).onclick = leaveToMenu;
-        $('#go', c).onclick = () => { if (players.length >= rules.minPlayers) beginGame(); };
+        $('#go', c).onclick = () => { if (players.length >= minSeats()) beginGame(); };
         refreshStartBtn();
       } else if (mode === 'client') {
         const c = show(`<h2>You're in!</h2><p>Room <b>${esc(room)}</b>. Waiting for the host to start.</p>${rosterHtml()}
+          ${hostPrefsText ? `<p class="note">${esc(hostPrefsText)}</p>` : ''}
           <div class="btns"><button class="btn" id="bk">Leave</button></div>`);
         $('#bk', c).onclick = leaveToMenu;
       }
     }
     function refreshStartBtn() {
       const go = $('#go');
-      go.disabled = players.length < rules.minPlayers;
-      go.textContent = players.length < rules.minPlayers ? `Need ${rules.minPlayers} players` : `Start with ${players.length} players`;
+      go.disabled = players.length < minSeats();
+      go.textContent = players.length < minSeats() ? `Need ${minSeats()} players` : `Start with ${players.length} players`;
     }
 
     function parseAddress(text) {
@@ -948,6 +894,7 @@
     }
 
     function resume(saved) {
+      if (saved.prefs) prefs = saved.prefs;
       mode = saved.mode; room = saved.room; maxSeats = saved.maxSeats; state = saved.state; seq = saved.seq; inGame = saved.inGame;
       players = saved.players.map((p, i) => ({ ...p, online: mode === 'local' || i === 0, lostAt: Date.now() }));
       mySeat = mode === 'host' ? 0 : -1;
@@ -974,9 +921,11 @@
     }
     function showWin() {
       const canRestart = mode !== 'client';
-      const rows = shown.ranks.map((seat, i) => `<li><span class="seat-dot" style="color:${view.colorOf(shown, seat)}">●</span>${esc(shown.players[seat].name)}<small>${i === 0 ? 'Winner' : '#' + (i + 1)}</small></li>`).join('');
-      const c = show(`<div class="trophy">🏆</div><h1><span>${esc(shown.players[shown.ranks[0]].name)}</span> wins!</h1>
-        <ol class="ranks">${rows}</ol>
+      const rows = () => shown.ranks.map((seat, i) => `<li><span class="seat-dot" style="color:${view.colorOf(shown, seat)}">●</span>${esc(shown.players[seat].name)}<small>${i < winners ? 'Winner' : '#' + (i + 1)}</small></li>`).join('');
+      const winner = rules.winnerLabel?.(shown) ?? shown.players[shown.ranks[0]].name;
+      const winners = rules.winnerCount?.(shown) ?? 1;
+      const c = show(`<div class="trophy">🏆</div><h1><span>${esc(winner)}</span> wins!</h1>
+        <ol class="ranks">${rows()}</ol>
         <div class="btns">${canRestart ? '<button class="btn primary" id="again">Play again</button>' : ''}<button class="btn" id="lv">${mode === 'local' ? 'Main menu' : 'Leave room'}</button></div>
         ${canRestart ? '' : '<p class="note">Waiting for the host to start another game…</p>'}`);
       const a = $('#again', c);

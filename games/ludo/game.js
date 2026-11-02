@@ -23,7 +23,7 @@
 
   let api, S = 0, cell = 0, dpr = 1, state = null, staticLayer = null;
   let tokens = [];       // on screen, per seat and token: { x, y, scale, rot, glow }
-  let pickable = null;
+  let pickable = null, starsOn = true, blockCells = [];
 
   // the centre of a position in grid units, before spreading out shared squares
   function basePoint(color, pos, tokenIdx) {
@@ -48,6 +48,11 @@
       if (!groups.has(key)) groups.set(key, []);
       groups.get(key).push([seat, ti]);
     }));
+    blockCells = state.opts.blocks !== 'on' ? [] : [...groups.values()].flatMap((group) => {
+      const [seat, ti] = group[0], pos = state.players[seat].tokens[ti];
+      return group.length >= 2 && pos >= 0 && pos <= R.LAST_TRACK && group.filter(([s]) => s === seat).length >= 2
+        ? [{ point: basePoint(state.players[seat].color, pos, ti), color: state.players[seat].color }] : [];
+    });
     tokens = state.players.map((p, seat) => p.tokens.map((pos, ti) => {
       const [bx, by] = basePoint(p.color, pos, ti);
       const group = groups.get([bx, by].join());
@@ -82,13 +87,13 @@
     TRACK.forEach(([x, y]) => box(x, y, '#fff'));
     R.START.forEach((idx, color) => { const [x, y] = TRACK[idx]; box(x, y, COLORS[color]); });
     for (let color = 0; color < 4; color++) for (let i = 0; i < 5; i++) { const [x, y] = HOME_COL[color](i); box(x, y, COLORS[color]); }
-    R.SAFE.forEach((idx) => {
+    if (starsOn) R.SAFE.forEach((idx) => {
       if (R.START.includes(idx)) return;
       const [x, y] = TRACK[idx];
       box(x, y, '#f1f5f9');
       star(g, (x + .5) * cell, (y + .5) * cell, cell * .34, '#94a3b8');
     });
-    R.START.forEach((idx) => { const [x, y] = TRACK[idx]; star(g, (x + .5) * cell, (y + .5) * cell, cell * .32, 'rgba(255, 255, 255, .9)'); });
+    if (starsOn) R.START.forEach((idx) => { const [x, y] = TRACK[idx]; star(g, (x + .5) * cell, (y + .5) * cell, cell * .32, 'rgba(255, 255, 255, .9)'); });
     YARD_AT.forEach(([ox, oy], color) => {
       g.fillStyle = COLORS[color]; g.fillRect(ox * cell, oy * cell, 6 * cell, 6 * cell);
       g.fillStyle = '#fff';
@@ -108,18 +113,15 @@
   }
 
   /* ---------- tokens ---------- */
-  function drawPawn(g, color, tk, t, selectable) {
+  function drawPawn(g, color, tk, selectable) {
     if (tk.scale <= .01) return;
     const x = tk.x * cell, y = tk.y * cell, r = cell * .38 * tk.scale;
     g.save();
     if (selectable) {
-      const pulse = .5 + .5 * Math.sin(t / 170);
-      g.strokeStyle = '#0f172a'; g.lineWidth = 2;
-      g.setLineDash([cell * .14, cell * .1]); g.lineDashOffset = -t / 45;
-      g.beginPath(); g.arc(x, y, r * (1.3 + pulse * .18), 0, 6.283); g.stroke();
-      g.setLineDash([]);
+      g.strokeStyle = '#0f172a'; g.lineWidth = Math.max(2, cell * .07);
+      g.beginPath(); g.arc(x, y, r * 1.3, 0, 6.283); g.stroke();
     }
-    g.translate(x, y - (selectable ? Math.abs(Math.sin(t / 240)) * cell * .1 : 0));
+    g.translate(x, y);
     g.fillStyle = 'rgba(0, 0, 0, .28)';
     g.beginPath(); g.ellipse(0, r * .75, r * .78, r * .28, 0, 0, 6.283); g.fill();
     g.rotate(tk.rot);
@@ -145,31 +147,16 @@
     else for (let p = ev.from + 1; p <= ev.to; p++) path.push(basePoint(color, p, ev.token));
 
     if (ev.from === R.YARD) {
-      // bursts out of the yard onto the start square
       const [x0, y0] = [tk.x, tk.y], [x1, y1] = path[0];
       api.sfx.pop();
-      await api.tween(460, (k) => { tk.x = lerp(x0, x1, k); tk.y = lerp(y0, y1, k) - Math.sin(k * Math.PI) * 1.5; tk.scale = 1 + Math.sin(k * Math.PI) * .55; });
-      const [px, py] = toStage(x1, y1);
-      api.fx.ring(px, py, { color: COLORS[color], radius: 56 });
-      api.fx.burst(px, py, { colors: [COLORS[color], '#fff'], n: 16, power: 90 });
+      await api.tween(260, (k) => { tk.x = lerp(x0, x1, k); tk.y = lerp(y0, y1, k); });
       return;
     }
-    const stepMs = ev.fx === 'dash' ? 58 : ev.fx === 'spin' ? 135 : 165;
     for (const [nx, ny] of path) {
       const [x0, y0] = [tk.x, tk.y];
-      await api.tween(stepMs, (k) => {
-        tk.x = lerp(x0, nx, k); tk.y = lerp(y0, ny, k);
-        if (ev.fx === 'hop') { tk.y -= Math.sin(k * Math.PI) * .42; tk.scale = 1 + Math.sin(k * Math.PI) * .22; }
-        if (ev.fx === 'spin') { tk.rot += .18; tk.y -= Math.sin(k * Math.PI) * .2; }
-        if (ev.fx === 'dash') {
-          tk.scale = 1.12;
-          const [px, py] = toStage(tk.x, tk.y);
-          api.fx.burst(px, py, { n: 1, power: 28, life: 300, gravity: 0, colors: [COLORS[color]] });
-        }
-      }, ev.fx === 'dash' ? api.ease.linear : api.ease.inOut);
+      await api.tween(120, (k) => { tk.x = lerp(x0, nx, k); tk.y = lerp(y0, ny, k); });
       api.sfx.tick();
     }
-    tk.rot = 0; tk.scale = 1;
   }
 
   async function capture(ev) {
@@ -210,6 +197,14 @@
     const color = state.players[ev.seat].color, tk = tokens[ev.seat][ev.token];
     await walkToken(tk, color, ev);
     if (ev.captured.length) await capture(ev);
+    if (ev.star) {
+      const [px, py] = toStage(tk.x, tk.y);
+      api.sfx.six();
+      api.fx.ring(px, py, { color: '#fbbf24', radius: cell * 1.5 });
+      api.fx.burst(px, py, { n: 14, power: 70, size: 3, gravity: 30, colors: ['#fbbf24', '#fde68a', '#fff'] });
+      await api.tween(420, (k) => { tk.scale = 1 + Math.sin(k * Math.PI) * .4; });
+      tk.scale = 1;
+    }
     if (ev.to === R.HOME) {
       const [px, py] = toStage(tk.x, tk.y);
       api.sfx.up();
@@ -219,48 +214,35 @@
     }
   }
 
-  // tokens march out of each yard and back again to open a new game
-  async function dealIn() {
-    api.banner('Game on!', 100);
-    api.sfx.up();
-    const anims = [];
-    tokens.forEach((list, seat) => list.forEach((tk, ti) => {
-      const [x, y] = [tk.x, tk.y];
-      tk.scale = 0;
-      anims.push(api.sleep((seat * 4 + ti) * 55).then(() => api.tween(380, (k) => { tk.scale = k; tk.y = y - Math.sin(k * Math.PI) * .7; tk.x = x; }, api.ease.back)));
-    }));
-    await Promise.all(anims);
-    tokens.forEach((list) => list.forEach((tk) => { tk.scale = 1; }));
-  }
-
   /* ---------- view ---------- */
   const view = {
-    interludes: ['parade'],
     colorOf: (s, i) => COLORS[s.players[i].color],
     resize(size, ratio) { S = size; dpr = ratio; cell = S / 15; buildStatic(); },
-    setState(next) { state = next; placeAll(); },
+    setState(next) {
+      state = next;
+      const stars = next.opts.safe === 'on';
+      if (stars !== starsOn) { starsOn = stars; buildStatic(); }
+      placeAll();
+    },
     setPick(moves) { pickable = moves; },
     async play(ev) {
-      if (ev.type === 'start') return dealIn();
       if (ev.type === 'move') return playMove(ev);
-      if (ev.type === 'noMove') { await api.banner('No moves', 520); return; }
-      if (ev.type === 'threeSixes') { api.sfx.down(); await api.banner('Three sixes: <b>turn lost!</b>', 900); }
-    },
-    // every token still on the board jumps for joy, in a wave
-    interlude(name) {
-      if (name !== 'parade') return false;
-      api.sfx.up();
-      tokens.forEach((list, seat) => list.forEach((tk, ti) => {
-        const y = tk.y, rot = tk.rot;
-        api.sleep((seat * 4 + ti) * 40).then(() => api.tween(460, (k) => {
-          tk.y = y - Math.sin(k * Math.PI) * .75; tk.rot = rot + k * 6.283;
-        }).then(() => { tk.y = y; tk.rot = rot; }));
-      }));
-      return true;
+      if (ev.type === 'noMove') { api.note('No moves with that roll'); return; }
+      if (ev.type === 'threeSixes') {
+        api.sfx.down();
+        if (ev.sentBack !== null) {
+          const tk = tokens[ev.seat][ev.sentBack], [x0, y0] = [tk.x, tk.y];
+          const [yx, yy] = basePoint(state.players[ev.seat].color, R.YARD, ev.sentBack);
+          api.banner('Three sixes: <b>token sent back!</b>', 100);
+          await api.tween(650, (k) => { tk.x = lerp(x0, yx, k); tk.y = lerp(y0, yy, k) - Math.sin(k * Math.PI) * 2.4; tk.rot = k * 12; });
+          tk.rot = 0;
+          await api.sleep(350);
+        } else await api.banner('Three sixes: <b>turn lost!</b>', 900);
+      }
     },
     click(px, py) {
       if (!pickable || !state) return;
-      const seat = state.cur, x = px / cell, y = py / cell;
+      const seat = state.mover, x = px / cell, y = py / cell;
       let best = -1, bestD = 1.15;
       pickable.forEach((ti) => {
         const tk = tokens[seat][ti], d = Math.hypot(tk.x - x, tk.y - y);
@@ -273,9 +255,13 @@
       if (!staticLayer || !state) return;
       g.drawImage(staticLayer, 0, 0, size, size);
       // the player to move goes on top so that their tokens can always be tapped
-      const order = state.players.map((_, i) => i).sort((a, b) => (a === state.cur ? 1 : b === state.cur ? -1 : 0));
+      const order = state.players.map((_, i) => i).sort((a, b) => (a === state.mover ? 1 : b === state.mover ? -1 : 0));
+      for (const { point: [bx, by], color } of blockCells) {
+        g.strokeStyle = COLORS[color]; g.lineWidth = Math.max(2.5, cell * .1);
+        g.strokeRect((bx - .46) * cell, (by - .46) * cell, cell * .92, cell * .92);
+      }
       for (const seat of order) {
-        tokens[seat]?.forEach((tk, ti) => drawPawn(g, state.players[seat].color, tk, t, seat === state.cur && pickable?.includes(ti)));
+        tokens[seat]?.forEach((tk, ti) => drawPawn(g, state.players[seat].color, tk, seat === state.mover && pickable?.includes(ti)));
       }
     },
     init(a) { api = a; },
@@ -284,7 +270,7 @@
   Party.start({
     rules: GameRules,
     view,
-    blurb: 'The classic race home for 2 to 4 players. Roll a 6 to leave the yard, capture your rivals and bring all four tokens home first.',
-    howTo: 'A 6, a capture or reaching home earns another roll. Star squares are safe. Three 6s in a row loses the turn.',
+    blurb: 'The classic race home for 2 to 4 players. Leave the yard, capture your rivals and get your tokens home first.',
+    howTo: 'A 6, a capture or reaching home earns another roll. Set your house rules and game mode when you start a game.',
   });
 })();
