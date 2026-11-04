@@ -651,7 +651,7 @@ const actions = {
     doc = null;
     $('#reader').hidden = true;
     $('#home').hidden = false;
-    document.title = 'Document Reader — Bibek Koirala';
+    document.title = 'Document Reader: Free Private Text-to-Speech for PDF, Word & EPUB';
     toggleSearch(false);
     $('#outline').hidden = true;
     renderLibrary();

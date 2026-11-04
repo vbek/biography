@@ -1072,10 +1072,10 @@ html[data-theme="light"] .image-slider-btn { background: rgba(255, 255, 255, 0.8
 }
 
 /* News background images (fallback gradient under each) */
-.bg-news-research { background-image: url('images/publication.png'); }
-.bg-news-conference { background-image: url('images/conference.png'); }
-.bg-news-update { background-image: url('images/news.png'); }
-.bg-news-carp { background-image: url('images/carp.png'), linear-gradient(135deg, #164e63, #312e81); }
+.bg-news-research { background-image: url('images/publication.webp'); }
+.bg-news-conference { background-image: url('images/conference.webp'); }
+.bg-news-update { background-image: url('images/news.webp'); }
+.bg-news-carp { background-image: url('images/carp.webp'), linear-gradient(135deg, #164e63, #312e81); }
 
 /* ---------- CTA ---------- */
 .cta-section {
