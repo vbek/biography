@@ -728,20 +728,36 @@ imageDrop.addEventListener('drop', (e) => {
     handleFiles(e.dataTransfer.files);
 });
 
+// Images are stored inline in data.json, which every visitor downloads,
+// so shrink them to at most 1600px wide WebP before keeping them
+async function compressImage(file) {
+    const bitmap = await createImageBitmap(file);
+    const scale = Math.min(1, 1600 / bitmap.width);
+    const canvas = document.createElement('canvas');
+    canvas.width = Math.round(bitmap.width * scale);
+    canvas.height = Math.round(bitmap.height * scale);
+    canvas.getContext('2d').drawImage(bitmap, 0, 0, canvas.width, canvas.height);
+    bitmap.close();
+    return canvas.toDataURL('image/webp', 0.8);
+}
+
 function handleFiles(files) {
-    Array.from(files).forEach(file => {
+    Array.from(files).forEach(async file => {
         if (!file.type.startsWith('image/')) return;
-        const reader = new FileReader();
-        reader.onload = (e) => {
-            // News only takes one image; replace
-            if (currentTab === 'news') {
-                pendingImages = [e.target.result];
-            } else {
-                pendingImages.push(e.target.result);
-            }
-            renderThumbs();
-        };
-        reader.readAsDataURL(file);
+        let src;
+        try {
+            src = await compressImage(file);
+        } catch (err) {
+            toast('Could not read that image', 'error');
+            return;
+        }
+        // News only takes one image; replace
+        if (currentTab === 'news') {
+            pendingImages = [src];
+        } else {
+            pendingImages.push(src);
+        }
+        renderThumbs();
     });
 }
 

@@ -34,6 +34,9 @@ jobs:
       # Scripts are cached for hours but pages for minutes, so without this a browser can mix files from two deploys
       - name: Version the game files
         run: sed -E -i "s#(src|href)=\"(\.\./party/[^\"]+|rules\.js|game\.js|game\.css)\"#\1=\"\2?v=${GITHUB_SHA::8}\"#" games/ludo/index.html games/snakes-ladders/index.html games/grave-mistake/index.html
+      # Notes for the repo, not pages for visitors or search engines
+      - name: Leave repo-only files out of the site
+        run: rm -rf README.md .vscode games/party/README.md
       - name: Setup Pages
         uses: actions/configure-pages@v5
       - name: Upload artifact

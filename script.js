@@ -310,6 +310,7 @@ class NewsSlider {
         for (let i = 0; i <= this.maxIdx(); i++) {
             const dot = document.createElement('button');
             dot.className = 'news-dot' + (i === 0 ? ' active' : '');
+            dot.setAttribute('aria-label', `Show news ${i + 1}`);
             dot.addEventListener('click', () => this.go(i));
             this.dotsEl.appendChild(dot);
         }
@@ -585,7 +586,9 @@ document.addEventListener('DOMContentLoaded', async () => {
 
     // 2. Dynamic UI features
     initThemeToggle();
-    initParticles();
+    // decorative, so start it once the page has finished loading
+    if (document.readyState === 'complete') initParticles();
+    else window.addEventListener('load', initParticles, { once: true });
     initTyping();
     initCounters();
     initScrollProgress();
@@ -676,8 +679,9 @@ style.textContent = `
 `;
 document.head.appendChild(style);
 
-// Image fade-in on load (skip slider images — they manage their own visibility)
-document.querySelectorAll('img:not(.slider-images img)').forEach(img => {
+// Image fade-in on load (skip slider images — they manage their own visibility — and
+// the hero portrait, which is the page's largest paint and should show the moment it arrives)
+document.querySelectorAll('img:not(.slider-images img):not(.portrait-frame img)').forEach(img => {
     if (img.complete) {
         img.style.opacity = '1';
     } else {

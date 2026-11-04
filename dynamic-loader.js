@@ -42,16 +42,16 @@ window.dynamicContentReady = (async function loadDynamicContent() {
 
             const imagesHtml = (item.images && item.images.length)
                 ? item.images.map((src, i) =>
-                    `<img src="${esc(src)}" alt="${esc(item.title)} ${i + 1}"${i === 0 ? ' class="active"' : ''}>`
+                    `<img src="${esc(src)}" alt="${esc(item.title)} ${i + 1}" loading="lazy" decoding="async"${i === 0 ? ' class="active"' : ''}>`
                   ).join('')
                 : '';
 
             const sliderHtml = imagesHtml ? `
                 <div class="project-image-slider">
                     <div class="image-slider-container">
-                        <button class="image-slider-btn prev-btn"><i class="fas fa-chevron-left"></i></button>
+                        <button class="image-slider-btn prev-btn" aria-label="Previous image"><i class="fas fa-chevron-left"></i></button>
                         <div class="slider-images">${imagesHtml}</div>
-                        <button class="image-slider-btn next-btn"><i class="fas fa-chevron-right"></i></button>
+                        <button class="image-slider-btn next-btn" aria-label="Next image"><i class="fas fa-chevron-right"></i></button>
                     </div>
                     <div class="slider-dots"></div>
                 </div>` : '';
