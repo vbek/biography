@@ -1,0 +1,269 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<!-- Projects stay on this device: the page may only talk to this site (to fetch the editor and the TeX engine). -->
+<meta http-equiv="Content-Security-Policy" content="default-src 'none'; script-src 'self' 'wasm-unsafe-eval'; worker-src 'self' blob:; style-src 'self' 'unsafe-inline'; img-src 'self' blob: data:; font-src 'self' data: blob:; connect-src 'self' blob: data:; manifest-src 'self'; base-uri 'none'; form-action 'none'">
+<meta name="referrer" content="no-referrer">
+<meta name="robots" content="index, follow">
+<meta name="theme-color" content="#0f1115">
+<title>Texlume: Free Private LaTeX Editor with Live PDF Preview</title>
+<meta name="description" content="A free LaTeX editor that runs entirely in your browser: side-by-side editor and PDF, live compilation with TeX Live, images and figures, BibTeX and two-way SyncTeX. Projects are saved on your device and never uploaded.">
+<link rel="canonical" href="https://bibek-koirala.com.np/tools/texlume/">
+<meta property="og:type" content="website">
+<meta property="og:site_name" content="Bibek Koirala">
+<meta property="og:title" content="Texlume: Free Private LaTeX Editor with Live PDF Preview">
+<meta property="og:description" content="Write LaTeX side by side with a live PDF. TeX Live runs in your browser, so projects never leave your device.">
+<meta property="og:url" content="https://bibek-koirala.com.np/tools/texlume/">
+<meta property="og:image" content="https://bibek-koirala.com.np/images/og-image.jpg">
+<meta name="twitter:card" content="summary_large_image">
+<meta name="twitter:creator" content="@_koire">
+<script type="application/ld+json">
+{
+  "@context": "https://schema.org",
+  "@type": "WebApplication",
+  "name": "Texlume",
+  "url": "https://bibek-koirala.com.np/tools/texlume/",
+  "applicationCategory": "DeveloperApplication",
+  "operatingSystem": "Any (web browser)",
+  "browserRequirements": "Requires a modern browser with WebAssembly",
+  "isAccessibleForFree": true,
+  "offers": { "@type": "Offer", "price": "0", "priceCurrency": "USD" },
+  "author": { "@type": "Person", "name": "Bibek Koirala", "url": "https://bibek-koirala.com.np/" },
+  "description": "A free, private LaTeX editor with live PDF preview, figures, BibTeX and SyncTeX. TeX Live runs in the browser; projects are stored locally."
+}
+</script>
+<link rel="icon" href="icon.svg" type="image/svg+xml">
+<link rel="manifest" href="manifest.webmanifest">
+<link rel="stylesheet" href="vendor/codemirror/codemirror.min.css">
+<link rel="stylesheet" href="vendor/codemirror/addon/show-hint.min.css">
+<link rel="stylesheet" href="vendor/codemirror/addon/dialog.min.css">
+<link rel="stylesheet" href="vendor/codemirror/addon/matchesonscrollbar.min.css">
+<link rel="stylesheet" href="css/app.css">
+</head>
+<body class="layout-split">
+  <div class="unsupported" id="unsupported" hidden>
+    <h1>Texlume needs a newer browser</h1>
+    <p>It uses WebAssembly, IndexedDB and compression streams. Please open it in a current version of Chrome, Edge, Firefox or Safari.</p>
+  </div>
+
+  <header class="topbar">
+    <button class="icon-btn" id="sidebarToggle" title="Toggle file panel" data-icon="sidebar"></button>
+    <a class="brand" href="../" title="Back to all tools"><span class="brand-mark">Tx</span><span class="brand-name">Texlume</span></a>
+    <div class="project-picker">
+      <select id="projectSelect" title="Switch project" aria-label="Project"></select>
+      <button class="icon-btn" id="newProjectBtn" title="New project" data-icon="plus"></button>
+      <button class="icon-btn" id="manageProjectsBtn" title="Manage projects (open, rename, delete)" data-icon="folders"></button>
+    </div>
+
+    <div class="spacer"></div>
+
+    <span class="private-pill" title="Projects are stored in this browser and compiled on this device. Nothing is uploaded."><span data-icon="lock"></span>Private · on-device</span>
+
+    <div class="compile-group">
+      <button class="btn primary" id="compileBtn" title="Recompile (Ctrl+Enter)"><span data-icon="play"></span><span class="label">Recompile</span></button>
+      <label class="auto-toggle" title="Recompile automatically as you type">
+        <input type="checkbox" id="autoCompile" checked>
+        <span class="switch"></span><span class="auto-label">Auto</span>
+      </label>
+      <label class="auto-toggle fast-toggle" title="Fast compile: images become placeholder boxes and LaTeX runs a single pass. Turn off for the final PDF.">
+        <input type="checkbox" id="fastMode">
+        <span class="switch"></span><span class="auto-label">Fast</span>
+      </label>
+    </div>
+    <select id="engineSelect" title="TeX engine" aria-label="TeX engine">
+      <option value="pdflatex">pdfLaTeX</option>
+      <option value="xelatex">XeLaTeX</option>
+    </select>
+
+    <div class="seg" role="group" aria-label="Layout">
+      <button data-layout="editor" title="Editor only" data-icon="code"></button>
+      <button data-layout="split" title="Side by side" data-icon="columns"></button>
+      <button data-layout="pdf" title="PDF only" data-icon="file"></button>
+    </div>
+    <button class="icon-btn" id="themeBtn" title="Toggle light / dark" data-icon="contrast"></button>
+    <div class="menu-wrap">
+      <button class="icon-btn" id="menuBtn" title="More" data-icon="more"></button>
+      <div class="menu" id="menu" hidden>
+        <button data-action="new-project"><span data-icon="plus"></span>New project…</button>
+        <button data-action="import"><span data-icon="import"></span>Import project (.zip)…</button>
+        <button data-action="manage-projects"><span data-icon="folders"></span>Manage projects…</button>
+        <hr>
+        <button data-action="download-pdf"><span data-icon="download"></span>Download PDF</button>
+        <button data-action="download-zip"><span data-icon="archive"></span>Download source (.zip)</button>
+        <button data-action="toggle-fast" id="fastMenuItem"><span data-icon="bolt"></span><span class="menu-label">Fast compile (no images)</span></button>
+        <button data-action="clean"><span data-icon="broom"></span>Clear build files &amp; recompile</button>
+        <hr>
+        <button data-action="rename-project"><span data-icon="edit"></span>Rename project…</button>
+        <button data-action="delete-project" class="danger"><span data-icon="trash"></span>Delete project…</button>
+        <hr>
+        <button data-action="shortcuts"><span data-icon="keyboard"></span>Keyboard shortcuts</button>
+        <button data-action="about"><span data-icon="lock"></span>Privacy &amp; storage</button>
+        <a href="../" class="menu-link"><span data-icon="back"></span>All tools</a>
+      </div>
+    </div>
+    <input type="file" id="importInput" accept=".zip,application/zip" hidden>
+  </header>
+
+  <main class="workspace" id="workspace">
+    <aside class="sidebar" id="sidebar">
+      <div class="pane-head">
+        <span class="pane-title">Files</span>
+        <div class="pane-actions">
+          <button class="icon-btn sm" id="newFileBtn" title="New file" data-icon="file-plus"></button>
+          <button class="icon-btn sm" id="newFolderBtn" title="New folder" data-icon="folder-plus"></button>
+          <button class="icon-btn sm" id="uploadBtn" title="Add files from this device (images, .bib, .tex…) — they stay in this browser" data-icon="upload"></button>
+          <input type="file" id="uploadInput" multiple hidden>
+        </div>
+      </div>
+      <div class="file-tree" id="fileTree" tabindex="0"></div>
+      <div class="drop-hint" id="dropHint">Drop files to add them</div>
+      <div class="pane-head outline-head">
+        <span class="pane-title">Outline</span>
+      </div>
+      <div class="outline" id="outline"></div>
+    </aside>
+
+    <section class="editor-pane" id="editorPane">
+      <div class="editor-bar">
+        <div class="crumb" id="crumb"><span class="muted">No file open</span></div>
+        <div class="fmt" id="fmtBar">
+          <button data-fmt="bold" title="Bold (Ctrl+B)"><b>B</b></button>
+          <button data-fmt="italic" title="Italic (Ctrl+I)"><i>I</i></button>
+          <span class="sep"></span>
+          <button data-fmt="section" title="Section">§</button>
+          <button data-fmt="itemize" title="Bulleted list" data-icon="list"></button>
+          <button data-fmt="enumerate" title="Numbered list" data-icon="list-ordered"></button>
+          <span class="sep"></span>
+          <button data-fmt="math" title="Inline math">$x$</button>
+          <button data-fmt="equation" title="Equation">∑</button>
+          <button data-fmt="figure" title="Insert figure (or drop / paste an image)" data-icon="image"></button>
+          <button data-fmt="table" title="Insert table" data-icon="table"></button>
+          <span class="sep"></span>
+          <button data-fmt="comment" title="Toggle comment (Ctrl+/)">%</button>
+        </div>
+      </div>
+      <div class="editor-host" id="editorHost"></div>
+      <div class="preview-host" id="previewHost" hidden></div>
+    </section>
+
+    <div class="splitter" id="splitter" role="separator" aria-orientation="vertical" title="Drag to resize"></div>
+
+    <section class="pdf-pane" id="pdfPane">
+      <div class="pdf-bar">
+        <div class="sync-group">
+          <button class="icon-btn" id="syncToPdfBtn" title="Show cursor position in PDF (Ctrl+Alt+J)" data-icon="arrow-right"></button>
+          <button class="icon-btn" id="syncToCodeBtn" title="Show PDF position in code — or double-click the PDF" data-icon="arrow-left"></button>
+        </div>
+        <div class="page-nav">
+          <input id="pageInput" type="text" inputmode="numeric" value="–" aria-label="Page" title="Go to page">
+          <span class="muted" id="pageCount">/ –</span>
+        </div>
+        <div class="zoom-group">
+          <button class="icon-btn" id="zoomOutBtn" title="Zoom out" data-icon="minus"></button>
+          <select id="zoomSelect" aria-label="Zoom">
+            <option value="fit">Fit width</option>
+            <option value="page">Fit page</option>
+            <option value="0.5">50%</option>
+            <option value="0.75">75%</option>
+            <option value="1">100%</option>
+            <option value="1.25">125%</option>
+            <option value="1.5">150%</option>
+            <option value="2">200%</option>
+            <option value="3">300%</option>
+          </select>
+          <button class="icon-btn" id="zoomInBtn" title="Zoom in" data-icon="plus"></button>
+        </div>
+        <div class="spacer"></div>
+        <button class="draft-badge" id="draftBadge" hidden title="This PDF was compiled in fast mode — images are placeholders. Click to compile the full PDF.">Fast · no images</button>
+        <button class="log-btn" id="logBtn" title="Logs and issues">
+          <span data-icon="alert"></span><span>Logs</span>
+          <span class="badge err" id="errBadge" hidden>0</span>
+          <span class="badge warn" id="warnBadge" hidden>0</span>
+        </button>
+        <button class="icon-btn" id="downloadPdfBtn" title="Download PDF" data-icon="download"></button>
+      </div>
+
+      <div class="pdf-viewport" id="pdfViewport" tabindex="0">
+        <div class="pdf-pages" id="pdfPages"></div>
+        <div class="pdf-empty" id="pdfEmpty">
+          <div class="empty-mark" data-icon="file"></div>
+          <p>Your PDF will appear here.</p>
+          <p class="muted">Press <kbd>Ctrl</kbd>+<kbd>Enter</kbd> to compile.</p>
+        </div>
+        <div class="compile-veil" id="compileVeil" hidden><span class="spinner"></span>Compiling…</div>
+      </div>
+
+      <div class="engine-box" id="engineBox" hidden role="status">
+        <div class="engine-title" id="engineLabel">Downloading TeX engine</div>
+        <div class="engine-track"><div class="engine-bar" id="engineBar"></div></div>
+        <div class="engine-detail muted" id="engineDetail"></div>
+      </div>
+
+      <div class="slow-box" id="slowBox" hidden role="alertdialog" aria-labelledby="slowTitle" aria-describedby="slowText">
+        <div class="slow-title" id="slowTitle">Still compiling… <span id="slowElapsed"></span></div>
+        <p class="slow-text muted" id="slowText">Large images, TikZ or many pages can take a while. Do you want to stop compiling?</p>
+        <div class="slow-actions">
+          <button class="btn" id="keepWaitingBtn">Keep waiting</button>
+          <button class="btn danger" id="stopCompileBtn">Stop compiling</button>
+        </div>
+      </div>
+
+      <div class="log-view" id="logView" hidden>
+        <div class="log-tabs">
+          <button class="active" data-logtab="issues">Issues</button>
+          <button data-logtab="raw">Raw log</button>
+          <div class="spacer"></div>
+          <label class="muted small"><input type="checkbox" id="showBoxes"> Show box warnings</label>
+          <button class="icon-btn sm" id="closeLogBtn" title="Back to PDF" data-icon="x"></button>
+        </div>
+        <div class="issues" id="issues"></div>
+        <pre class="raw-log" id="rawLog" hidden></pre>
+      </div>
+    </section>
+  </main>
+
+  <footer class="statusbar">
+    <span class="status" id="compileStatus"><span class="dot"></span><span class="text">Starting…</span></span>
+    <span class="status" id="saveStatus"></span>
+    <span class="spacer"></span>
+    <span class="status muted" id="wordCount"></span>
+    <span class="status muted" id="cursorPos"></span>
+    <button class="status muted tex-info" id="texInfo" title="TeX Live 2023 — the newest TeX distribution available as WebAssembly (via BusyTeX). LaTeX changes slowly, so documents written for newer TeX Live versions almost always compile the same. Click for privacy &amp; storage details.">TeX Live 2023 · in your browser</button>
+  </footer>
+
+  <dialog class="modal" id="modal">
+    <form method="dialog" id="modalForm">
+      <h2 id="modalTitle"></h2>
+      <div id="modalBody"></div>
+      <div class="modal-actions">
+        <button value="ok" class="btn primary" id="modalOk">OK</button>
+        <button value="cancel" class="btn" formnovalidate>Cancel</button>
+      </div>
+    </form>
+  </dialog>
+
+  <div class="toasts" id="toasts" aria-live="polite"></div>
+
+  <script src="vendor/codemirror/codemirror.min.js"></script>
+  <script src="vendor/codemirror/addon/stex.min.js"></script>
+  <script src="vendor/codemirror/addon/matchbrackets.min.js"></script>
+  <script src="vendor/codemirror/addon/closebrackets.min.js"></script>
+  <script src="vendor/codemirror/addon/active-line.min.js"></script>
+  <script src="vendor/codemirror/addon/show-hint.min.js"></script>
+  <script src="vendor/codemirror/addon/dialog.min.js"></script>
+  <script src="vendor/codemirror/addon/searchcursor.min.js"></script>
+  <script src="vendor/codemirror/addon/search.min.js"></script>
+  <script src="vendor/codemirror/addon/jump-to-line.min.js"></script>
+  <script src="vendor/codemirror/addon/annotatescrollbar.min.js"></script>
+  <script src="vendor/codemirror/addon/matchesonscrollbar.min.js"></script>
+  <script src="vendor/pdfjs/pdf.min.js"></script>
+  <script src="js/db.js"></script>
+  <script src="js/zip.js"></script>
+  <script src="js/synctex.js"></script>
+  <script src="js/logparse.js"></script>
+  <script src="js/engine.js"></script>
+  <script src="js/app.js"></script>
+</body>
+</html>
