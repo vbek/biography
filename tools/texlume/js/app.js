@@ -88,7 +88,26 @@
   const TEXT_RE = /\.(tex|bib|sty|cls|txt|md|bbx|cbx|lbx|cfg|def|dtx|ins|csv|dat|tsv|tikz|pgf|ltx|bst|json|ya?ml|py|r|m|lua|gp|clo|xml|html?|bbl)$/i;
   const IMG_RE = /\.(png|jpe?g|gif|webp|bmp|svg)$/i;
   const GRAPHIC_RE = /\.(png|jpe?g|pdf|eps|svg|gif|bmp|webp)$/i;
-  const isText = p => TEXT_RE.test(p) || !/\.[^/]+$/.test(basename(p));
+  // LaTeX auxiliary / generated files are plain text too, so they open in the editor
+  const AUX_RE = /\.(aux|toc|lof|lot|loa|lol|blg|log|out|idx|ind|ilg|glo|gls|glg|ist|xdy|acn|acr|alg|nav|snm|vrb|fls|fdb_latexmk|bcf|run\.xml|brf|thm|mtc\d*|maf|ptc|nlo|nls|tdo|spl|ent|cut|latexmkrc|ini|conf|toml|sh|bat|ps1|js|ts|css|c|h|cpp|hpp|java|rs|go|sql|gitignore|rc)$/i;
+  const BINARY_RE = /\.(png|jpe?g|gif|webp|bmp|pdf|eps|ps|tiff?|ico|zip|gz|tgz|xz|7z|rar|otf|ttf|woff2?|pfb|tfm|vf|fmt|dvi|xdv|docx?|xlsx?|pptx?|mp[34]|wav|ogg|webm|mov|exe|dll|so|wasm|bin)$/i;
+  /** Text if the extension says so, or if the file is stored as text (e.g. detected from its content). */
+  const isText = p => TEXT_RE.test(p) || AUX_RE.test(p) || !/\.[^/]+$/.test(basename(p))
+    || (state.files || []).some(f => f.path === p && f.kind === 'text');
+  /** Decode bytes as text when they look like text (valid UTF-8, no NUL bytes); otherwise null. */
+  function sniffText(bytes) {
+    const u8 = bytes instanceof Uint8Array ? bytes : new Uint8Array(bytes);
+    if (u8.length > 8e6) return null;
+    for (let i = 0, n = Math.min(u8.length, 65536); i < n; i++) if (u8[i] === 0) return null;
+    try { return new TextDecoder('utf-8', { fatal: true }).decode(u8); } catch { return null; }
+  }
+  /** A dropped or imported file as text when its name or its content says it is text; otherwise null. */
+  async function asTextIfText(name, data) {
+    const bytes = async () => (data instanceof Blob ? await data.arrayBuffer() : data);
+    if (TEXT_RE.test(name) || AUX_RE.test(name) || !/\.[^/]+$/.test(basename(name))) return new TextDecoder().decode(await bytes());
+    if (BINARY_RE.test(name) || IMG_RE.test(name)) return null;
+    return sniffText(await bytes());
+  }
 
   function toast(msg, type = '') {
     const t = document.createElement('div');
@@ -220,8 +239,17 @@
   });
 
   /* --------------------------------------------------------- open file */
-  async function openFile(p, line, { flash = false } = {}) {
+  async function openFile(p, line, { flash = false, asText = false } = {}) {
     if (!p) return;
+    if (asText || (!isText(p) && !BINARY_RE.test(p) && !IMG_RE.test(p))) {
+      // stored as binary but really text (e.g. an .aux from an older import): switch it to a text file once
+      const rec = await TFDB.getFile(pid(), p);
+      if (rec && rec.kind === 'blob') {
+        const bytes = new Uint8Array(await rec.blob.arrayBuffer());
+        const text = asText ? new TextDecoder().decode(bytes) : sniffText(bytes);
+        if (text !== null) { await TFDB.putFile(pid(), p, text); await refreshFiles(); }
+      }
+    }
     if (isText(p)) {
       let entry = state.docs.get(p);
       if (!entry) {
@@ -290,7 +318,14 @@
     meta.className = 'preview-meta';
     const graphic = GRAPHIC_RE.test(p);
     meta.innerHTML = `<div><b>${esc(p)}</b> <span class="muted size">${fmtSize(rec.size)}</span></div>` +
-      (graphic ? `<p><code>\\includegraphics[width=\\linewidth]{${esc(p)}}</code></p>` : '<p class="muted">Binary file — not editable here.</p>');
+      (graphic ? `<p><code>\\includegraphics[width=\\linewidth]{${esc(p)}}</code></p>` : '<p class="muted">Binary file. You can still open it as text; saving stores it as UTF-8 text.</p>');
+    if (!graphic && !IMG_RE.test(p)) {
+      const btn = document.createElement('button');
+      btn.className = 'btn';
+      btn.textContent = 'Edit as text';
+      btn.onclick = () => openFile(p, null, { asText: true });
+      meta.append(btn);
+    }
     if (graphic) {
       const btn = document.createElement('button');
       btn.className = 'btn primary';
@@ -464,8 +499,8 @@
       if (!f) continue;
       const p = (dir ? `${dir}/` : '') + safeName(f.name);
       try {
-        if (isText(p)) {
-          const text = await f.text();
+        const text = await asTextIfText(p, f);
+        if (text !== null) {
           await TFDB.putFile(pid(), p, text);
           const entry = state.docs.get(p);
           if (entry) { entry.doc.setValue(text); entry.savedGen = entry.doc.changeGeneration(); } else makeDoc(p, text);
@@ -1714,11 +1749,13 @@ Hello, world!
       // strip a single common top-level folder
       const tops = new Set(list.map(e => e.name.split('/')[0]));
       if (tops.size === 1 && list.every(e => e.name.includes('/'))) list = list.map(e => ({ ...e, name: e.name.slice(e.name.indexOf('/') + 1) }));
-      const dec = new TextDecoder();
-      const files = list.filter(e => cleanPath(e.name)).map(e => ({
-        path: cleanPath(e.name),
-        data: isText(e.name) ? dec.decode(e.data) : new Blob([e.data]),
-      }));
+      const files = [];
+      for (const e of list) {
+        const path = cleanPath(e.name);
+        if (!path) continue;
+        const text = await asTextIfText(path, e.data);
+        files.push({ path, data: text !== null ? text : new Blob([e.data]) });
+      }
       if (!files.length) throw new Error('The zip is empty');
       let main = files.find(f => f.path === 'main.tex')?.path;
       if (!main) main = files.find(f => typeof f.data === 'string' && /\.tex$/i.test(f.path) && /^[^%\n]*\\documentclass/m.test(f.data))?.path;
