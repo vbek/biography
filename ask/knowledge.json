@@ -1,0 +1,834 @@
+{
+ "version": 1,
+ "generated": "2026-11-08T20:26:44.699Z",
+ "owner": {
+  "name": "Bibek Koirala",
+  "email": "bibekkoirala2009@gmail.com",
+  "jobTitle": "Computer Vision and Machine Learning Engineer",
+  "links": [
+   "https://www.linkedin.com/in/bibek--koirala/",
+   "https://github.com/vbek",
+   "https://x.com/_koire",
+   "https://instagram.com/vbek_koirala"
+  ]
+ },
+ "chunks": [
+  {
+   "id": "about",
+   "section": "about",
+   "title": "About me",
+   "url": "#biography",
+   "text": "Hi, I'm Bibek Koirala. Computer vision and machine learning engineer completing an M.S. in Computer Science at Southern Illinois University Carbondale, with my thesis defended in September 2026. I build detection and segmentation systems for real-world images, which now spot E. coli and Salmonella after just 2 hours of incubation, and I've published at IEEE ICMLA, EMNLP and the Journal of Food Protection. I also build free AI tools and games that run entirely on your own device."
+  },
+  {
+   "id": "availability",
+   "section": "about",
+   "title": "Availability",
+   "url": "#biography",
+   "weight": 0.6,
+   "text": "Open to research collaboration."
+  },
+  {
+   "id": "stats",
+   "section": "stats",
+   "title": "At a glance",
+   "url": "#biography",
+   "text": "Projects: 11. Publications: 3. Years Leadership: 5."
+  },
+  {
+   "id": "focus-areas",
+   "section": "skills",
+   "title": "Focus areas",
+   "url": "#biography",
+   "text": "Focus areas: Computer Vision, Deep Learning, Applied AI."
+  },
+  {
+   "id": "edu-m-s-in-computer-science",
+   "section": "education",
+   "title": "M.S. in Computer Science",
+   "date": "Aug 2024 — Dec 2026",
+   "url": "#professional-path",
+   "text": "M.S. in Computer Science, Southern Illinois University Carbondale · GPA 4.0/4.0, Aug 2024 — Dec 2026. Thesis defended on September 30, 2026: Deep Learning Approaches for Early Detection and Identification of Escherichia coli and Salmonella Typhimurium in Time-Stamped Microscopy Images. Degree expected December 2026. Focus: Deep Learning, Machine Learning, Natural Language Processing, Parallel & Distributed Computing.",
+   "tags": [
+    "Deep Learning",
+    "Machine Learning",
+    "Natural Language Processing",
+    "Parallel & Distributed Computing"
+   ],
+   "links": [
+    {
+     "href": "raw/Thesis.pptx",
+     "label": "Thesis Slides (PPTX, 25 MB)"
+    }
+   ]
+  },
+  {
+   "id": "exp-graduate-research-assistant",
+   "section": "experience",
+   "title": "Graduate Research Assistant",
+   "date": "Feb 2025 — May 2026",
+   "url": "#professional-path",
+   "text": "Graduate Research Assistant, Southern Illinois University Carbondale, Feb 2025 — May 2026. USDA NIFA-funded computer vision research for food safety. Built an end-to-end instance segmentation pipeline for time-stamped microscopy, from data curation and annotation through training and inference, reaching mIoU of 0.91–0.98 and detection of both pathogens after 2 hours of incubation. Focus: PyTorch, Instance Segmentation, Mask R-CNN, YOLO, CVAT.",
+   "tags": [
+    "PyTorch",
+    "Instance Segmentation",
+    "Mask R-CNN",
+    "YOLO",
+    "CVAT"
+   ]
+  },
+  {
+   "id": "exp-nepal-govt-officer",
+   "section": "experience",
+   "title": "Nepal Govt Officer",
+   "date": "2018 — 2023",
+   "url": "#professional-path",
+   "text": "Nepal Govt Officer, Software Development and R&D · Kathmandu, Nepal, 2018 — 2023. Led the design and delivery of real-time numerical and data-driven software from requirements through deployment, as architect, developer and point of contact for users across multiple units. Focus: Leadership, R&D, Data-Driven Systems.",
+   "tags": [
+    "Leadership",
+    "R&D",
+    "Data-Driven Systems"
+   ]
+  },
+  {
+   "id": "pub-deep-learning-approaches-for-early-detection-and",
+   "section": "publications",
+   "title": "Deep Learning Approaches for Early Detection and Identification of Escherichia coli and Salmonella Typhimurium in Time-Stamped Microscopy Images",
+   "kind": "M.S. Thesis",
+   "date": "Defended Sep 30, 2026",
+   "url": "#publications",
+   "text": "Southern Illinois University Carbondale, School of Computing, 2026. Authors: Koirala, B.",
+   "links": [
+    {
+     "href": "raw/Thesis.pptx",
+     "label": "Thesis Slides (PPTX, 25 MB)"
+    }
+   ]
+  },
+  {
+   "id": "pub-rapid-detection-of-salmonella-typhimurium-microc",
+   "section": "publications",
+   "title": "Rapid Detection of Salmonella Typhimurium Microcolonies Using Phase-Contrast Imaging and Deep Learning",
+   "kind": "Journal",
+   "date": "Accepted Sep 28, 2026",
+   "url": "#publications",
+   "text": "Journal of Food Protection, p. 100934, 2026. Authors: Dhahir, N., Rababa, M., Koirala, B., AbuGhazaleh, A., and AlSobeh, A.",
+   "links": [
+    {
+     "href": "https://www.sciencedirect.com/science/article/pii/S0362028X26002395",
+     "label": "Read Paper"
+    }
+   ]
+  },
+  {
+   "id": "pub-edits-in-the-wild-a-multilingual-benchmark-for-l",
+   "section": "publications",
+   "title": "Edits in the Wild: A Multilingual Benchmark for Localizing On-Device Generative Image Edits on Consumer Platforms",
+   "kind": "Conference",
+   "date": "Accepted Aug 20, 2026",
+   "url": "#publications",
+   "text": "EMNLP 2026, Main Conference. Authors: Koirala, B., co-author.",
+   "links": [
+    {
+     "href": "https://aclanthology.org/2026.emnlp-main.1661/",
+     "label": "Read Paper"
+    }
+   ]
+  },
+  {
+   "id": "pub-background-aware-instance-segmentation-for-early",
+   "section": "publications",
+   "title": "Background-Aware Instance Segmentation for Early Detection of E. coli and Salmonella in Time-Stamped Microscopy Images",
+   "kind": "Conference · Oral · First author",
+   "date": "2025",
+   "url": "#publications",
+   "text": "IEEE ICMLA 2025, pp. 1354–1361. Authors: Koirala, B., Alsobeh, A. M., Dhahir, N., and AbuGhazaleh, A.",
+   "links": [
+    {
+     "href": "https://ieeexplore.ieee.org/document/11471447",
+     "label": "IEEE Xplore"
+    },
+    {
+     "href": "raw/bacteria_seg.pdf",
+     "label": "Read Paper"
+    },
+    {
+     "href": "https://github.com/vbek/bacteria-detection",
+     "label": "Code"
+    }
+   ]
+  },
+  {
+   "id": "pub-in-preparation",
+   "section": "publications",
+   "title": "In preparation",
+   "url": "#publications",
+   "text": "One further manuscript, comparing compact and foundation-model segmentation architectures, is in preparation."
+  },
+  {
+   "id": "project-instance-level-bacteria-detection-and-segmentati",
+   "section": "projects",
+   "title": "Instance-Level Bacteria Detection and Segmentation",
+   "url": "#research",
+   "text": "Deep learning for early detection of E. coli and Salmonella in time-stamped microscopy images, on plain agar and on an onion food matrix. A background-aware Mask R-CNN and FPN pipeline detects both species after 2 hours of incubation, against 18–24 hours for a plate count, at mAP@0.5 of about 0.95 and mIoU of 0.91–0.98. Published at IEEE ICMLA 2025 (oral) and extended in my M.S. thesis, where a compact ResNet-based model matched larger SAM and DINOv3 models at 8.1 ms per image, 22× faster than the SAM-based model.",
+   "links": [
+    {
+     "href": "https://github.com/vbek/bacteria-detection",
+     "label": "View on GitHub"
+    }
+   ]
+  },
+  {
+   "id": "project-on-device-ai-tools",
+   "section": "projects",
+   "title": "On-Device AI Tools",
+   "url": "#research",
+   "text": "A free suite of tools with no accounts and no uploads, because the work happens on your own device. LocalLabel annotates images and video for machine learning, with AI pre-labeling from any ONNX model. Document Reader reads files aloud offline in up to 31 languages. Media Studio edits images and video and makes Whisper subtitles. There is also a PDF Editor, a receipt-scanning Financial Planner and Vitrine, digital signage for your own PC. Built with ONNX Runtime Web, WebGPU, WebAssembly and Transformers.js.",
+   "links": [
+    {
+     "href": "tools/index.html",
+     "label": "Open the Tools"
+    }
+   ]
+  },
+  {
+   "id": "project-browser-games",
+   "section": "projects",
+   "title": "Browser Games",
+   "url": "#research",
+   "text": "Five free games that run in the browser on a phone or computer, with no sign-up. AR Survival is steered by your head through real-time MediaPipe face tracking. Ludo and Snakes & Ladders play on one device or across phones over peer-to-peer WebRTC, with house rules and an optional three.js 3D board. Grave Mistake is a 24-level trap platformer, and Stack Tower is a one-tap arcade game.",
+   "links": [
+    {
+     "href": "games/index.html",
+     "label": "Play the Games"
+    }
+   ]
+  },
+  {
+   "id": "project-seekbot-precision-retrieval-ai",
+   "section": "projects",
+   "title": "SeekBot - Precision Retrieval AI",
+   "url": "#research",
+   "text": "A full-stack RAG chatbot that lets you chat with your own documents. Upload PDFs, Word files, CSVs, or paste a URL - SeekBot indexes your content into a local FAISS vector store and answers questions using a 10-node LangGraph pipeline backed by HuggingFace LLMs (Llama 3.1 8B / Qwen 2.5 72B). Fully local embeddings, persistent sessions, and real-time model switching.",
+   "links": [
+    {
+     "href": "https://github.com/vbek/seekbot",
+     "label": "View on GitHub"
+    }
+   ]
+  },
+  {
+   "id": "project-plant-disease-detection-cnn-vs-resnet-vs-vit",
+   "section": "projects",
+   "title": "Plant Disease Detection: CNN vs. ResNet vs. ViT",
+   "url": "#research",
+   "text": "Benchmarked a custom CNN, a fine-tuned ResNet50, a vanilla ResNet and a Vision Transformer on PlantVillage, reaching 97.9% to 99.6% accuracy and weighing accuracy against model size for deployment.",
+   "links": [
+    {
+     "href": "https://github.com/vbek/Plant-Disease-Detection",
+     "label": "View on GitHub"
+    }
+   ]
+  },
+  {
+   "id": "project-inflation-dynamics-remittances-and-macroeconomic",
+   "section": "projects",
+   "title": "Inflation Dynamics, Remittances, and Macroeconomic Indicators",
+   "url": "#research",
+   "text": "Conducted an in-depth economic analysis of inflation trends in countries with high remittance-to-GDP ratios. Using cross-country macroeconomic data from 1960–2023, this project applied statistical and machine learning techniques — including regression models, random forests, neural networks, and clustering — to understand how remittances, real interest rates, and exchange rates interact with inflation.",
+   "links": [
+    {
+     "href": "https://github.com/vbek/Inflation-Dynamics",
+     "label": "View on GitHub"
+    }
+   ]
+  },
+  {
+   "id": "project-leave-and-training-records-dashboard",
+   "section": "projects",
+   "title": "Leave and Training Records Dashboard",
+   "url": "#research",
+   "text": "A full-stack application with a dashboard, application logic and a relational database for leave and training records, replacing paper workflows across multiple units."
+  },
+  {
+   "id": "project-news-credibility-detection",
+   "section": "projects",
+   "title": "News Credibility Detection",
+   "url": "#research",
+   "text": "An NLP and machine learning framework that classifies news articles using linguistic, semantic and source-based features, achieving 97% precision and 98% recall on benchmark datasets.",
+   "links": [
+    {
+     "href": "https://github.com/vbek/News-Credibility",
+     "label": "View on GitHub"
+    }
+   ]
+  },
+  {
+   "id": "project-multi-label-comment-classification",
+   "section": "projects",
+   "title": "Multi-Label Comment Classification",
+   "url": "#research",
+   "text": "Explored multi-label text classification methodologies for categorizing user comments across multiple thematic or sentiment dimensions. This repository applies techniques such as feature extraction, neural networks, and advanced evaluation metrics to handle overlapping or concurrent labels in textual data.",
+   "links": [
+    {
+     "href": "https://github.com/vbek/Multi-Label-Comment-Classification",
+     "label": "View on GitHub"
+    }
+   ]
+  },
+  {
+   "id": "project-real-time-face-and-emotion-detection",
+   "section": "projects",
+   "title": "Real Time Face and Emotion Detection",
+   "url": "#research",
+   "text": "This project implements a lightweight YOLOv8 model for real-time face detection and evaluates CNN, vanilla ResNet, and fine-tuned ResNet architectures for emotion recognition, achieving under 50 ms inference with fewer than 1.3 M parameters and model size below 5 MB for fast deployment.",
+   "links": [
+    {
+     "href": "https://github.com/vbek/Real-Time-Face-Emotion-Detection",
+     "label": "View on GitHub"
+    }
+   ]
+  },
+  {
+   "id": "project-victim-crime-perception-analysis",
+   "section": "projects",
+   "title": "Victim Crime Perception Analysis",
+   "url": "#research",
+   "text": "Conducted data-driven analysis of crime perception among victims, using statistical and machine learning tools to identify patterns, correlations, and key factors influencing perceptions of crime. This work blends sociological insight with computational analysis to better understand human responses and sentiment in crime-related datasets.",
+   "links": [
+    {
+     "href": "https://github.com/vbek/Victim-Crime-Perception",
+     "label": "View on GitHub"
+    }
+   ]
+  },
+  {
+   "id": "news-carp-forum-rapid-bacteria-detection-for-food-saf",
+   "section": "news",
+   "title": "CARP Forum: Rapid Bacteria Detection for Food Safety",
+   "kind": "Poster Presentation",
+   "date": "April 2026",
+   "url": "#news",
+   "text": "Presented USDA NIFA-funded research on rapid bacteria detection, receiving high appreciation and industry implementation insights from visiting guests.",
+   "links": [
+    {
+     "href": "https://www.linkedin.com/feed/update/urn:li:activity:7448179427743621120/",
+     "label": "View Post"
+    }
+   ]
+  },
+  {
+   "id": "news-background-aware-instance-segmentation-for-early",
+   "section": "news",
+   "title": "Background-Aware Instance Segmentation for Early Detection of E. coli and Salmonella",
+   "kind": "Publication",
+   "date": "Dec 2025",
+   "url": "#news",
+   "text": "First-author paper published at IEEE ICMLA 2025 on detecting both pathogens after 2 hours of incubation, across varying imaging backgrounds.",
+   "links": [
+    {
+     "href": "raw/bacteria_seg.pdf",
+     "label": "Read Paper"
+    }
+   ]
+  },
+  {
+   "id": "news-oral-presentation-advanced-vision-models-in-medi",
+   "section": "news",
+   "title": "Oral Presentation: Advanced Vision Models in Medical Imaging",
+   "kind": "Conference",
+   "date": "Dec 2025",
+   "url": "#news",
+   "text": "Delivered insights on combining Deep Learning and Machine Learning architectures for segmentation tasks at international conference.",
+   "links": [
+    {
+     "href": "https://drive.google.com/file/d/1DGtdYxJ98MXne5Vb0OSfBnTOaA3YuaHP/view",
+     "label": "View Presentation"
+    }
+   ]
+  },
+  {
+   "id": "news-leadership-in-ai-research",
+   "section": "news",
+   "title": "Leadership in AI Research",
+   "kind": "Research Update",
+   "date": "Nov 2025",
+   "url": "#news",
+   "text": "SIU Researchers Use AI and Microscopy to Rapidly Detect Salmonella in Onions — featured in university news.",
+   "links": [
+    {
+     "href": "https://soc.siu.edu/news/articles/enhancing-food-safety-salmonella.php",
+     "label": "Read Story"
+    }
+   ]
+  },
+  {
+   "id": "contact",
+   "section": "contact",
+   "title": "Contact",
+   "url": "#contact",
+   "text": "You can email me at bibekkoirala2009@gmail.com. I'm also on LinkedIn, GitHub, Instagram, X (Twitter). Let's collaborate on cutting-edge computer vision and machine learning projects.",
+   "links": [
+    {
+     "href": "mailto:bibekkoirala2009@gmail.com",
+     "label": "Email"
+    },
+    {
+     "href": "https://www.linkedin.com/in/bibek--koirala/",
+     "label": "LinkedIn"
+    },
+    {
+     "href": "https://github.com/vbek",
+     "label": "GitHub"
+    },
+    {
+     "href": "https://instagram.com/vbek_koirala",
+     "label": "Instagram"
+    },
+    {
+     "href": "https://x.com/_koire",
+     "label": "X (Twitter)"
+    }
+   ]
+  },
+  {
+   "id": "resume-download",
+   "section": "contact",
+   "title": "Résumé / CV",
+   "url": "raw/resume.pdf",
+   "text": "My résumé (CV) is available to download as a PDF.",
+   "links": [
+    {
+     "href": "raw/resume.pdf",
+     "label": "Download résumé"
+    }
+   ]
+  },
+  {
+   "id": "archive-nepal-election-dashboard",
+   "section": "projects",
+   "title": "Nepal Election Dashboard",
+   "url": "election/nepal_election_dashboard.html",
+   "weight": 0.6,
+   "text": "The site archive includes the Nepal Election Dashboard.",
+   "links": [
+    {
+     "href": "election/nepal_election_dashboard.html",
+     "label": "Nepal Election Dashboard"
+    }
+   ]
+  },
+  {
+   "id": "tools-overview",
+   "section": "tools",
+   "title": "Free tools",
+   "url": "tools/index.html",
+   "text": "Everything runs in your browser — your files never leave your device. 100% free, No account needed, Private — no uploads, Instant, No watermarks. Tools: PDF Editor, LocalLabel, Media Studio, Financial Planner, Vitrine, Document Reader, Texlume."
+  },
+  {
+   "id": "tools-pdf-editor",
+   "section": "tools",
+   "title": "PDF Editor",
+   "url": "tools/pdf-editor/index.html",
+   "text": "PDF Editor: Annotate, add text, sign, fill forms, redact, merge and reorder pages — then export to PDF, Word, images, HTML or Markdown.",
+   "links": [
+    {
+     "href": "tools/pdf-editor/index.html",
+     "label": "Open PDF Editor"
+    }
+   ]
+  },
+  {
+   "id": "tools-locallabel",
+   "section": "tools",
+   "title": "LocalLabel",
+   "url": "tools/locallabel/index.html",
+   "text": "LocalLabel: Annotate images and videos for ML — boxes, polygons, masks, keypoints, tracks and ONNX-powered AI assist. Export COCO, YOLO, CVAT or Pascal VOC.",
+   "links": [
+    {
+     "href": "tools/locallabel/index.html",
+     "label": "Open LocalLabel"
+    }
+   ]
+  },
+  {
+   "id": "tools-media-studio",
+   "section": "tools",
+   "title": "Media Studio",
+   "url": "tools/media-studio/index.html",
+   "text": "Media Studio: Images: resize, crop, convert to JPEG/PNG/WebP, compress, retouch, watermark — in batches. Video: compress to a target size, resize, convert MP4/WebM/MOV, trim, extract audio and make subtitles with on-device Whisper.",
+   "links": [
+    {
+     "href": "tools/media-studio/index.html",
+     "label": "Open Media Studio"
+    }
+   ]
+  },
+  {
+   "id": "tools-financial-planner",
+   "section": "tools",
+   "title": "Financial Planner",
+   "url": "tools/financial-planner/index.html",
+   "text": "Financial Planner: Track money, budgets and savings goals, scan receipts on your device, plan groceries from what you usually buy, and keep a calendar, to-do list and loan records. Your data stays in your browser.",
+   "links": [
+    {
+     "href": "tools/financial-planner/index.html",
+     "label": "Open Financial Planner"
+    }
+   ]
+  },
+  {
+   "id": "tools-vitrine",
+   "section": "tools",
+   "title": "Vitrine",
+   "url": "tools/vitrine/index.html",
+   "text": "Vitrine: Digital signage that runs on your own PC. Build playlists, schedule them, and show them on any screen with a browser. Windows download; your data stays on your PC.",
+   "links": [
+    {
+     "href": "tools/vitrine/index.html",
+     "label": "Open Vitrine"
+    }
+   ]
+  },
+  {
+   "id": "tools-document-reader",
+   "section": "tools",
+   "title": "Document Reader",
+   "url": "tools/document-reader/index.html",
+   "text": "Document Reader: Hear PDF, Word, EPUB, PowerPoint, Excel, text and scanned files read aloud at up to 3× speed. Choose from five open voice models, in up to 31 languages. A voice downloads once, then works offline.",
+   "links": [
+    {
+     "href": "tools/document-reader/index.html",
+     "label": "Open Document Reader"
+    }
+   ]
+  },
+  {
+   "id": "tools-texlume",
+   "section": "tools",
+   "title": "Texlume",
+   "url": "tools/texlume/index.html",
+   "text": "Texlume: A free LaTeX editor with a live PDF side by side. TeX Live compiles in your browser with figures, BibTeX, TikZ and two-way SyncTeX. Projects are saved on your device, never uploaded, and work offline after the first load.",
+   "links": [
+    {
+     "href": "tools/texlume/index.html",
+     "label": "Open Texlume"
+    }
+   ]
+  },
+  {
+   "id": "games-overview",
+   "section": "games",
+   "title": "Free games",
+   "url": "games/index.html",
+   "text": "Quick, lightweight games that run right in your browser. 100% free, No sign-up, Phone & desktop, Scores saved on your device. Games: Stack Tower, AR Survival, Ludo, Snakes & Ladders, Grave Mistake."
+  },
+  {
+   "id": "games-stack-tower",
+   "section": "games",
+   "title": "Stack Tower",
+   "url": "games/stack/index.html",
+   "text": "Stack Tower: A one-tap arcade game: drop the sliding blocks, nail perfect stacks to build combos and beat your best. Pick your own background — even your own photo — and block style.",
+   "links": [
+    {
+     "href": "games/stack/index.html",
+     "label": "Open Stack Tower"
+    }
+   ]
+  },
+  {
+   "id": "games-ar-survival",
+   "section": "games",
+   "title": "AR Survival",
+   "url": "games/ar-survival/index.html",
+   "text": "AR Survival: Your camera becomes the controller: dodge asteroids, missiles and torpedoes with your head shoot them down with your own missiles, and grab power-ups like shields and invisibility. Tracking runs only on your device, and keyboard or touch work too.",
+   "links": [
+    {
+     "href": "games/ar-survival/index.html",
+     "label": "Open AR Survival"
+    }
+   ]
+  },
+  {
+   "id": "games-ludo",
+   "section": "games",
+   "title": "Ludo",
+   "url": "games/ludo/index.html",
+   "text": "Ludo: The classic race home for 2 to 4 players, with your choice of house rules, Quick and 2 vs 2 Team modes. Share one device, or host a room and let friends join from their own phones by QR code, room code or IP address.",
+   "links": [
+    {
+     "href": "games/ludo/index.html",
+     "label": "Open Ludo"
+    }
+   ]
+  },
+  {
+   "id": "games-snakes-ladders",
+   "section": "games",
+   "title": "Snakes & Ladders",
+   "url": "games/snakes-ladders/index.html",
+   "text": "Snakes & Ladders: A new random board every game, in cardboard, wood or 3D style, with optional captures and house rules, and snakes that swallow, whip and slide you back down. For 2 to 6 players on one device, or across phones by QR code, room code or IP address.",
+   "links": [
+    {
+     "href": "games/snakes-ladders/index.html",
+     "label": "Open Snakes & Ladders"
+    }
+   ]
+  },
+  {
+   "id": "games-grave-mistake",
+   "section": "games",
+   "title": "Grave Mistake",
+   "url": "games/grave-mistake/index.html",
+   "text": "Grave Mistake: A trap-filled platformer with 24 levels. The floor lies, the signs lie and the door runs away. Every death leaves a grave behind, so you can see how far you've come. Plays with keys or touch.",
+   "links": [
+    {
+     "href": "games/grave-mistake/index.html",
+     "label": "Open Grave Mistake"
+    }
+   ]
+  },
+  {
+   "id": "data-1792800000001",
+   "section": "news",
+   "src": "data.json",
+   "title": "Smaller, Faster, Just as Accurate",
+   "kind": "Poster Presentation",
+   "date": "Oct 23, 2026",
+   "url": "#news",
+   "text": "Presented a poster at the IIN conference on a compact deep learning model that detects and identifies E. coli and Salmonella after 2 hours of incubation, 22× faster than a SAM-based model.",
+   "links": [
+    {
+     "href": "raw/IIN_Poster_48x36.pptx",
+     "label": "Poster Slides"
+    }
+   ]
+  },
+  {
+   "id": "data-1790800000002",
+   "section": "news",
+   "src": "data.json",
+   "title": "M.S. Thesis Defended",
+   "kind": "Milestone",
+   "date": "Sep 30, 2026",
+   "url": "#news",
+   "text": "Defended my thesis on deep learning for early detection and identification of E. coli and Salmonella Typhimurium in time-stamped microscopy images.",
+   "links": [
+    {
+     "href": "raw/Thesis.pptx",
+     "label": "Thesis Slides"
+    }
+   ]
+  },
+  {
+   "id": "data-1790600000003",
+   "section": "news",
+   "src": "data.json",
+   "title": "Accepted: Journal of Food Protection",
+   "kind": "Publication",
+   "date": "Sep 28, 2026",
+   "url": "#news",
+   "text": "Rapid Detection of Salmonella Typhimurium Microcolonies Using Phase-Contrast Imaging and Deep Learning was accepted for publication.",
+   "links": [
+    {
+     "href": "https://www.sciencedirect.com/science/article/pii/S0362028X26002395",
+     "label": "Read Paper"
+    }
+   ]
+  },
+  {
+   "id": "data-1787200000004",
+   "section": "news",
+   "src": "data.json",
+   "title": "Accepted: EMNLP 2026 Main Conference",
+   "kind": "Publication",
+   "date": "Aug 20, 2026",
+   "url": "#news",
+   "text": "Edits in the Wild: A Multilingual Benchmark for Localizing On-Device Generative Image Edits on Consumer Platforms was accepted to the EMNLP 2026 Main Conference.",
+   "links": [
+    {
+     "href": "https://aclanthology.org/2026.emnlp-main.1661/",
+     "label": "Read Paper"
+    }
+   ]
+  },
+  {
+   "id": "data-1778299447945",
+   "section": "news",
+   "src": "data.json",
+   "title": "SIUC Spotlight 🎉",
+   "kind": "Award",
+   "date": "April 2026",
+   "url": "#news",
+   "text": "Featured in SIUC Graduate Student Spotlight for my research on deep learning-based bacteria detection to improve food safety.",
+   "links": [
+    {
+     "href": "https://www.instagram.com/p/DXr2BozFGmp/?igsh=M2o0aWdkNXllZTU%3D&fbclid=PAZXh0bgNhZW0CMTEAc3J0YwZhcHBfaWQMMjU2MjgxMDQwNTU4AAGnjdaP6i6a0jmoLCROzwW8c2aFGW6fZ86cMrJcTAiHP2fGdn5bXJKehgnbBrc_aem_50oi2bBPBDKfFs44fZXi9g",
+     "label": "View Post"
+    }
+   ]
+  },
+  {
+   "id": "data-1778292948039",
+   "section": "news",
+   "src": "data.json",
+   "title": "Workshop",
+   "kind": "Talk",
+   "date": "April 2026",
+   "url": "#news",
+   "text": "Had the opportunity to present our research to students of Agricultural Sciences at SIUC"
+  },
+  {
+   "src": "resume",
+   "url": "raw/resume.pdf",
+   "id": "resume-location",
+   "section": "about",
+   "title": "Location",
+   "text": "I'm based in Carbondale, IL."
+  },
+  {
+   "src": "resume",
+   "url": "raw/resume.pdf",
+   "id": "resume-summary",
+   "section": "about",
+   "title": "Résumé summary",
+   "text": "Computer vision and machine learning engineer completing an M.S. in Computer Science (4.0 GPA, expected Dec 2026). Built end-to-end object detection and instance segmentation pipelines on real-world, custom-annotated image data, from dataset curation and annotation through training, evaluation, and inference (mIoU 0.91–0.98, mAP@0.5 ≈ 0.95). First-author paper at IEEE ICMLA 2025 (oral), plus EMNLP 2026 and Journal of Food Protection publications. Also builds privacy-first ML applications that run entirely on the user’s device, deploying detection, segmentation, speech recognition, and text-to-speech models in the browser with ONNX Runtime Web, WebGPU, and WebAssembly. Brings 5+ years of software R&D delivering real-time, mission-critical numerical software."
+  },
+  {
+   "src": "resume",
+   "url": "raw/resume.pdf",
+   "id": "resume-education-southern-illinois-university-carbondale-m-s-comp",
+   "section": "education",
+   "title": "Education",
+   "text": "Southern Illinois University Carbondale – M.S., Computer Science, GPA 4.0/4.0 Aug 2024 – Dec 2026. Coursework: Deep Learning, Machine Learning and Soft Computing, Artificial Intelligence, Data Mining, Natural Language Processing, Parallel and Distributed Computing, Advanced Database Systems."
+  },
+  {
+   "src": "resume",
+   "url": "raw/resume.pdf",
+   "id": "skills-computer-vision",
+   "section": "skills",
+   "title": "Skills: Computer Vision",
+   "text": "Computer Vision: Object Detection, Instance and Semantic Segmentation, Image Classification, Mask R-CNN, YOLO, CNNs, ResNet, Vision Transformers, Transfer Learning and Fine-Tuning, OpenCV, MediaPipe, OCR (Tesseract)."
+  },
+  {
+   "src": "resume",
+   "url": "raw/resume.pdf",
+   "id": "skills-deep-learning-ml",
+   "section": "skills",
+   "title": "Skills: Deep Learning & ML",
+   "text": "Deep Learning & ML: PyTorch, TensorFlow, scikit-learn, Transformers, Vision-Language Models, Speech Recognition, Text-to-Speech, Statistics, Convex Optimization, NumPy, SciPy, Pandas, Matplotlib."
+  },
+  {
+   "src": "resume",
+   "url": "raw/resume.pdf",
+   "id": "skills-on-device-web-ml",
+   "section": "skills",
+   "title": "Skills: On-Device & Web ML",
+   "text": "On-Device & Web ML: ONNX / ONNX Runtime Web, WebGPU, WebAssembly, Transformers.js, Model Quantization, Web Workers, Progressive Web Apps, IndexedDB, WebRTC."
+  },
+  {
+   "src": "resume",
+   "url": "raw/resume.pdf",
+   "id": "skills-data-mlops",
+   "section": "skills",
+   "title": "Skills: Data & MLOps",
+   "text": "Data & MLOps: Dataset Curation, Annotation with CVAT, Annotation Formats (COCO, YOLO, Pascal VOC), Training and Evaluation Pipelines, Experiment Tracking, Model Versioning, Docker, CI/CD (GitHub Actions), Git, Linux."
+  },
+  {
+   "src": "resume",
+   "url": "raw/resume.pdf",
+   "id": "skills-generative-agentic-ai",
+   "section": "skills",
+   "title": "Skills: Generative & Agentic AI",
+   "text": "Generative & Agentic AI: LangGraph, LangChain, Retrieval-Augmented Generation (RAG), FAISS and Vector Databases, HuggingFace, Vision Transformers, LLMs."
+  },
+  {
+   "src": "resume",
+   "url": "raw/resume.pdf",
+   "id": "skills-languages-databases",
+   "section": "skills",
+   "title": "Skills: Languages & Databases",
+   "text": "Languages & Databases: Python, C++, C, Java, JavaScript, Node.js, HTML/CSS, SQL, PostgreSQL."
+  },
+  {
+   "src": "resume",
+   "url": "raw/resume.pdf",
+   "id": "resume-exp-graduate-research-assistant",
+   "section": "experience",
+   "title": "Graduate Research Assistant",
+   "text": "Graduate Research Assistant, Computer Vision – Southern Illinois Univ. Carbondale, Aug 2024 – May 2026 Department of Computer Science, Carbondale, IL | Funded by USDA-NIFA Grant No. 2024-70001-43667. Built an end-to-end instance segmentation and classification pipeline in PyTorch for time-stamped microscopy images of bacterial cultures, covering data curation, CVAT annotation, training, evaluation, and inference; achieved mIoU of 0.91 to 0.98 across growth stages. Designed a background-aware approach that stays robust across varying imaging backgrounds, enabling detection of E. coli and Salmonella Typhimurium after 2 hours of incubation (previous best: 3 hours) at mAP@0.5 of approximately 0.95; first-author paper and oral presentation at IEEE ICMLA 2025. Contributed deep learning methods to a phase-contrast imaging study for rapid Salmonella detection, published in the Journal of Food Protection (2026). Co-authored an EMNLP 2026 multilingual benchmark for localizing generative image edits, working with vision-language and generative models. Released the framework as open source (github.com/vbek/bacteria-detection) and presented results to interdisciplinary computer science and food science audiences."
+  },
+  {
+   "src": "resume",
+   "url": "raw/resume.pdf",
+   "id": "resume-exp-officer",
+   "section": "experience",
+   "title": "Officer",
+   "text": "Officer – Software Development and R&D, Nepal Govt May 2018 – Dec 2023 Kathmandu, Nepal. Designed, built, and deployed a fire-control application (UI, computation engine, validation layer); reduced targeting error from 50 m to 10 m at 1000 m range and cut computation latency from minutes to microseconds by optimizing numerical computation pipelines. Led technical design and delivery of mission-critical software from requirements through deployment, acting as architect, developer, and point of contact for end users across multiple units. Delivered a full-stack application (dashboard, application logic, relational database) for leave and training records, replacing paper workflows across multiple units. Built decision-support software computing logistical requirements for Bailey bridge deployment under real-world constraints, with technical documentation and user guidance for each system."
+  },
+  {
+   "src": "resume",
+   "url": "raw/resume.pdf",
+   "id": "resume-pub-background-aware-instance-segmentation-for-early",
+   "section": "publications",
+   "title": "Background-aware instance segmentation for early detection of E. coli and Salmonella in time-stamped microscopy images",
+   "text": "Koirala, B., Alsobeh, A. M., Dhahir, N., and AbuGhazaleh, A., “Background-aware instance segmentation for early detection of E. coli and Salmonella in time-stamped microscopy images,” IEEE ICMLA 2025, pp. 1354–1361. Oral presentation. ieeexplore.ieee.org/document/11471447"
+  },
+  {
+   "src": "resume",
+   "url": "raw/resume.pdf",
+   "id": "resume-pub-edits-in-the-wild-a-multilingual-benchmark-for-l",
+   "section": "publications",
+   "title": "Edits in the Wild: A Multilingual Benchmark for Localizing On-Device Generative Image Edits on Consumer Platforms",
+   "text": "“Edits in the Wild: A Multilingual Benchmark for Localizing On-Device Generative Image Edits on Consumer Platforms,” EMNLP 2026, Main Conference. Co-author."
+  },
+  {
+   "src": "resume",
+   "url": "raw/resume.pdf",
+   "id": "resume-pub-rapid-detection-of-salmonella-typhimurium-microc",
+   "section": "publications",
+   "title": "Rapid detection of Salmonella Typhimurium microcolonies using phase-contrast imaging and deep learning",
+   "text": "Dhahir, N., Rababa, M., Koirala, B., AbuGhazaleh, A., and AlSobeh, A., “Rapid detection of Salmonella Typhimurium microcolonies using phase-contrast imaging and deep learning,” Journal of Food Protection, p. 100934, 2026."
+  },
+  {
+   "src": "resume",
+   "url": "raw/resume.pdf",
+   "id": "resume-project-locallabel-in-browser-ml-annotation-tool-with-ai",
+   "section": "projects",
+   "title": "LocalLabel: In-Browser ML Annotation Tool with AI Assist",
+   "text": "LocalLabel: In-Browser ML Annotation Tool with AI Assist – bibek-koirala.com.np/tools/locallabel. Built a fully client-side image and video annotation tool (boxes, polygons, masks, keypoints, keyframe-interpolated video tracks, TIFF/GeoTIFF support) as a private, install-free alternative to CVAT, exporting COCO, YOLO, CVAT, and Pascal VOC. Implemented model-agnostic AI pre-labeling: runs any user-supplied ONNX model on WebGPU with WebAssembly fallback in a Web Worker, and decodes YOLO, YOLO-seg, semantic, instance-mask, and Mask2Former-style outputs into editable annotations."
+  },
+  {
+   "src": "resume",
+   "url": "raw/resume.pdf",
+   "id": "resume-project-on-device-ai-tools-suite",
+   "section": "projects",
+   "title": "On-Device AI Tools Suite",
+   "text": "On-Device AI Tools Suite – bibek-koirala.com.np/tools. Document Reader: offline, multilingual text-to-speech for PDF, Word, EPUB, PowerPoint, Excel, and scanned files, serving 4 ONNX TTS model families (Kokoro-82M, Piper, KittenTTS, Supertonic) with custom grapheme-to-phoneme processing, up to 31 languages and 3× playback speed. Media Studio: on-device Whisper subtitle generation via Transformers.js (WebGPU with a 4-bit quantized decoder, or WebAssembly), plus batch image and video conversion, compression, and trimming. AR Survival: webcam-controlled game driven by real-time MediaPipe face tracking, with each vision model isolated in its own worker to keep tracking latency low. Also built a PDF editor (pdf.js, pdf-lib), a receipt-scanning finance planner (Tesseract OCR), and multiplayer board games over peer-to-peer WebRTC with three.js 3D rendering; all tools process data locally with no uploads."
+  },
+  {
+   "src": "resume",
+   "url": "raw/resume.pdf",
+   "id": "resume-project-plant-disease-detection-cnn-vs-resnet-vs-vit",
+   "section": "projects",
+   "title": "Plant Disease Detection: CNN vs. ResNet vs. ViT",
+   "text": "Plant Disease Detection: CNN vs. ResNet vs. ViT – github.com/vbek/Plant-Disease-Detection. Benchmarked a custom CNN (34.7M params), fine-tuned ResNet50 (9.9M trainable params), vanilla ResNet, and Vision Transformer on PlantVillage, reaching 97.9% to 99.6% accuracy and weighing accuracy against model size for deployment."
+  },
+  {
+   "src": "resume",
+   "url": "raw/resume.pdf",
+   "id": "resume-project-seekbot-agentic-rag-platform",
+   "section": "projects",
+   "title": "SEEKBOT: Agentic RAG Platform",
+   "text": "SEEKBOT: Agentic RAG Platform – github.com/vbek/SEEKBOT. Built a full-stack RAG application as a 10-node LangGraph agent workflow with a local FAISS vector store, local sentence-transformer embeddings, and HuggingFace Inference API access to Llama 3.1 8B and Qwen 2.5 72B; supports semantic search over PDF, DOCX, CSV, Markdown, and web content."
+  },
+  {
+   "src": "resume",
+   "url": "raw/resume.pdf",
+   "id": "resume-project-news-credibility-detection",
+   "section": "projects",
+   "title": "News Credibility Detection",
+   "text": "News Credibility Detection – github.com/vbek/News-Credibility. Built an NLP and ML framework classifying articles using linguistic, semantic, and source-based features; achieved 97% precision and 98% recall on benchmark datasets."
+  }
+ ]
+}
