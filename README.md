@@ -78,3 +78,10 @@ If you ever want to migrate hard-coded slides from `index.html` into the dashboa
 **Sliders look broken after adding items?**
 - Make sure both `script.js` (patched) and `dynamic-loader.js` are deployed.
 - Make sure `index.html` loads `dynamic-loader.js` BEFORE `script.js`.
+
+## "Ask About Me" chat widget
+
+A floating Q&A bubble (`ask/ask.js`, `ask/ask.css`) on the home, tools and games pages. It answers only with sentences copied from the site. When nothing matches, it says so and points to email. Everything runs in the browser and no question is sent anywhere.
+
+- **Knowledge base:** `ask/knowledge.json`, built by `node scripts/build-ask-index.mjs` from `index.html`, `tools/index.html`, `games/index.html`, `data.json` and `raw/resume.pdf` (the résumé needs `pdftotext` from poppler; the phone number is left out).
+- **Keeping it current:** the deploy workflow re-runs the indexer on every push to `main`, and the widget reads `data.json` live, so dashboard news shows up right away. After editing pages, run the script locally too if you want the committed index to match.
