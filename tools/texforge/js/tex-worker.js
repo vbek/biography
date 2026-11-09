@@ -318,9 +318,31 @@ function fontFilesFromRecorder(dir) {
 
 /* ----------------------------------------------------------- running */
 
+/** File descriptors open in the JS file system right now (stdin/stdout/stderr and anything else). */
+function openFds() {
+  const fds = new Set();
+  (Module.FS.streams || []).forEach((s, fd) => { if (s) fds.add(fd); });
+  return fds;
+}
+
+/**
+ * TeX exits without closing its files, and restoring the memory snapshot below wipes libc's record of
+ * them, but the JS file system keeps every one open. Over many recompiles they pile up until the next
+ * open() fails with EMFILE ("Too many open files"). Close whatever the run left behind.
+ */
+function closeLeakedFds(before) {
+  const streams = Module.FS.streams || [];
+  for (let fd = 0; fd < streams.length; fd++) {
+    const s = streams[fd];
+    if (!s || before.has(fd)) continue;
+    try { Module.FS.close(s); } catch { streams[fd] = null; }
+  }
+}
+
 function runTool(args) {
   Module.out = '';
   Module.err = '';
+  const fdsBefore = openFds();
   let code;
   try {
     code = Module.callMain(args.slice()); // callMain prepends argv[0] in place
@@ -329,6 +351,7 @@ function runTool(args) {
     if (code === -1) Module.err += `\n${e && e.message ? e.message : e}`;
   }
   try { Module._flush_streams && Module._flush_streams(); } catch { /* ignore */ }
+  closeLeakedFds(fdsBefore);
   // TeX programs aren't re-entrant: restore pristine memory for the next run.
   Module.HEAPU8.fill(0);
   Module.HEAPU8.set(memSnapshot);
