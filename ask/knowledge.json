@@ -1,6 +1,6 @@
 {
  "version": 1,
- "generated": "2026-11-08T20:26:44.699Z",
+ "generated": "2026-11-09T22:44:28.881Z",
  "owner": {
   "name": "Bibek Koirala",
   "email": "bibekkoirala2009@gmail.com",
@@ -81,9 +81,9 @@
    "id": "exp-nepal-govt-officer",
    "section": "experience",
    "title": "Nepal Govt Officer",
-   "date": "2018 — 2023",
+   "date": "May 2018 — Dec 2023",
    "url": "#professional-path",
-   "text": "Nepal Govt Officer, Software Development and R&D · Kathmandu, Nepal, 2018 — 2023. Led the design and delivery of real-time numerical and data-driven software from requirements through deployment, as architect, developer and point of contact for users across multiple units. Focus: Leadership, R&D, Data-Driven Systems.",
+   "text": "Nepal Govt Officer, Software Development and R&D · Kathmandu, Nepal, May 2018 — Dec 2023. Led the design and delivery of real-time numerical and data-driven software from requirements through deployment, as architect, developer and point of contact for users across multiple units. Focus: Leadership, R&D, Data-Driven Systems.",
    "tags": [
     "Leadership",
     "R&D",
@@ -102,6 +102,10 @@
     {
      "href": "raw/Thesis.pptx",
      "label": "Thesis Slides (PPTX, 25 MB)"
+    },
+    {
+     "href": "https://bacteria-detection.github.io",
+     "label": "Research Site"
     }
    ]
   },
@@ -155,6 +159,10 @@
     {
      "href": "https://github.com/vbek/bacteria-detection",
      "label": "Code"
+    },
+    {
+     "href": "https://bacteria-detection.github.io",
+     "label": "Research Site"
     }
    ]
   },
@@ -172,6 +180,10 @@
    "url": "#research",
    "text": "Deep learning for early detection of E. coli and Salmonella in time-stamped microscopy images, on plain agar and on an onion food matrix. A background-aware Mask R-CNN and FPN pipeline detects both species after 2 hours of incubation, against 18–24 hours for a plate count, at mAP@0.5 of about 0.95 and mIoU of 0.91–0.98. Published at IEEE ICMLA 2025 (oral) and extended in my M.S. thesis, where a compact ResNet-based model matched larger SAM and DINOv3 models at 8.1 ms per image, 22× faster than the SAM-based model.",
    "links": [
+    {
+     "href": "https://bacteria-detection.github.io",
+     "label": "Research Site"
+    },
     {
      "href": "https://github.com/vbek/bacteria-detection",
      "label": "View on GitHub"
