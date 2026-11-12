@@ -8,6 +8,8 @@ workers_dev = false
 routes = [
   { pattern = "bibek-koirala.com.np/api/ask-log*", zone_name = "bibek-koirala.com.np" },
   { pattern = "www.bibek-koirala.com.np/api/ask-log*", zone_name = "bibek-koirala.com.np" },
+  { pattern = "bibek-koirala.com.np/api/visit*", zone_name = "bibek-koirala.com.np" },
+  { pattern = "www.bibek-koirala.com.np/api/visit*", zone_name = "bibek-koirala.com.np" },
 ]
 
 [vars]
