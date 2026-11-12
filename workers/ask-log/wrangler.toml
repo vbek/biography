@@ -1,0 +1,23 @@
+name = "ask-log"
+main = "src/index.js"
+compatibility_date = "2025-06-01"
+# Only reachable through the site's domain, not on *.workers.dev
+workers_dev = false
+
+# Runs on the site's own domain, so the pages' CSP (connect-src 'self') already allows it.
+routes = [
+  { pattern = "bibek-koirala.com.np/api/ask-log*", zone_name = "bibek-koirala.com.np" },
+  { pattern = "www.bibek-koirala.com.np/api/ask-log*", zone_name = "bibek-koirala.com.np" },
+]
+
+[vars]
+RETENTION_DAYS = "180"
+
+[[d1_databases]]
+binding = "DB"
+database_name = "ask-log"
+database_id = "0fb5daea-fd22-499e-aa4e-a47eeedb0594"
+
+# Daily cleanup of entries older than RETENTION_DAYS
+[triggers]
+crons = ["17 3 * * *"]

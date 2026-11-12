@@ -2,3 +2,6 @@ folio-pdf-editor/
 locallabel-1.0.0/
 # the repo is published whole, and this original shows other people on the call
 images/thesis_presentation.png
+
+# wrangler local cache
+.wrangler/

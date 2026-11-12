@@ -653,7 +653,7 @@
     send.setAttribute('aria-label', 'Send');
     send.appendChild(svg(ICON_SEND, 18));
     form.appendChild(input); form.appendChild(send);
-    var foot = el('p', 'ask-foot', 'Replies quote this website. Your questions never leave your browser.');
+    var foot = el('p', 'ask-foot', 'Replies quote this website.');
 
     panel.appendChild(head); panel.appendChild(log); panel.appendChild(suggest); panel.appendChild(form); panel.appendChild(foot);
     root.appendChild(panel); root.appendChild(fab);
@@ -742,8 +742,40 @@
                 chips(a.followUps || []);
                 busy = false;
                 save();
+                report(q, a);
             }, wait);
         });
+    }
+
+    // --- question log (workers/ask-log): only on the live site, never blocks the chat ---
+    var LOG_HOSTS = ['bibek-koirala.com.np', 'www.bibek-koirala.com.np'];
+    function sessionId() {
+        try {
+            var id = sessionStorage.getItem(STORE + ':sid');
+            if (!id) {
+                id = Math.random().toString(36).slice(2, 10) + Date.now().toString(36);
+                sessionStorage.setItem(STORE + ':sid', id);
+            }
+            return id;
+        } catch (e) { return null; }
+    }
+    function report(q, a) {
+        if (LOG_HOSTS.indexOf(location.hostname) < 0 || !window.fetch) return;
+        try {
+            fetch('/api/ask-log', {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json' },
+                keepalive: true,
+                body: JSON.stringify({
+                    q: q,
+                    kind: a.kind || null,
+                    title: a.title || null,
+                    page: location.pathname,
+                    session: sessionId(),
+                    ref: document.referrer || null
+                })
+            }).catch(function () { /* logging is best-effort */ });
+        } catch (e) { /* ignore */ }
     }
 
     function chips(list) {
