@@ -51,6 +51,9 @@ jobs:
         with:
           # Upload entire repository
           path: '.'
+      # Give the artifact service time to make the finalized artifact visible to Pages.
+      - name: Wait for artifact availability
+        run: sleep 5
       - name: Deploy to GitHub Pages
         id: deployment
         uses: actions/deploy-pages@v4
