@@ -6,7 +6,7 @@
     if (HOSTS.indexOf(location.hostname) < 0 || !window.fetch) return;
 
     var m = location.pathname.match(/^\/(tools|games)\/([^\/]+)/);
-    var app = m ? m[1] + '/' + m[2] : location.pathname;
+    var app = m ? m[1] + '/' + m[2] : /^\/learn\//.test(location.pathname) ? 'learn' : location.pathname;
     var visit = Math.random().toString(36).slice(2, 10) + Date.now().toString(36);
     var interacted = false;
     var seen = 0, since = document.visibilityState === 'visible' ? Date.now() : 0;
