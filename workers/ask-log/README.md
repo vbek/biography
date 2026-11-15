@@ -2,7 +2,8 @@
 
 Stores, in a D1 database, with the visitor's IP and Cloudflare's location guess:
 - each question asked in the "Ask About Me" chat (sent by `ask/ask.js`)
-- each visit to a tool or game: opened, whether they interacted, seconds in view (sent by `/track.js`)
+- each visit to a tool, game or Learn lesson: opened, whether they interacted, seconds in view (sent by `/track.js`).
+  Learn shows up as `learn` (the overview) and `learn/ml/<lesson>` (e.g. `learn/ml/knn`), one visit per lesson opened.
 
 ## Setup / after changing schema.sql
 
