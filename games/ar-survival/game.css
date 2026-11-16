@@ -101,6 +101,10 @@ h2 { margin: 2px 0 10px; font: 800 24px var(--display); }
 .theme { display: flex; flex-direction: column; align-items: center; gap: 2px; padding: 8px 4px 7px; border-radius: 13px; border: 1.5px solid var(--line); background: rgba(255, 255, 255, .045); color: var(--ink); font: 600 13px var(--text); cursor: pointer; transition: border-color .15s, background .15s; }
 .theme img { width: 52px; height: 34px; object-fit: contain; }
 .themes.compact .theme img { display: none; }
+.themes.planes { grid-template-columns: repeat(5, 1fr); gap: 6px; }
+.themes.planes .theme { padding: 6px 2px; font-size: 12px; }
+.themes.planes .theme img { width: 100%; max-width: 64px; height: auto; aspect-ratio: 104 / 68; }
+@media (max-width: 380px) { .themes.planes { grid-template-columns: repeat(3, 1fr); } }
 .theme:hover { background: rgba(255, 255, 255, .1); }
 .theme[aria-checked="true"], .chip[aria-checked="true"] { border-color: var(--cyan); background: rgba(34, 211, 238, .18); box-shadow: 0 0 14px rgba(34, 211, 238, .28); }
 .chips { display: flex; flex-wrap: wrap; gap: 6px; }

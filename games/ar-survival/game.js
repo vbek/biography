@@ -4,7 +4,7 @@
   'use strict';
   const $ = (s) => document.querySelector(s);
   const canvas = $('#game'), ctx = canvas.getContext('2d', { alpha: true }), stage = $('#stage');
-  const Tracker = window.ARTracker, Sfx = window.ARAudio, { sprites: SPR, glows: GLOW, paintBackdrop } = window.ARArt;
+  const Tracker = window.ARTracker, Sfx = window.ARAudio, { sprites: SPR, glows: GLOW, paintBackdrop } = window.ARArt, Planes = window.ARPlanes;
   const KEY = 'arSurvival.v1';
   const reduceMotion = matchMedia('(prefers-reduced-motion: reduce)').matches;
   const clamp = (v, a, b) => Math.max(a, Math.min(b, v));
@@ -56,6 +56,10 @@
     life: { name: 'EXTRA LIFE', w: 1, color: '#fb4e5e' },
   };
   const VIEWS = [['ar', 'Camera'], ['blend', 'Blend'], ['scene', 'Scene']];
+  // head sensitivity: how much of the comfortable head range it takes to reach a screen edge
+  const SENS = [['low', 'Gentle', 0.75], ['normal', 'Normal', 1], ['high', 'Quick', 1.4]];
+  // head travel, in face widths, from rest to a screen edge at Normal: about a short lean or a small turn
+  const HEAD_REACH_X = 0.42, HEAD_REACH_Y = 0.3;
   const Z_FAR = 9, LEVEL_TIME = 18, LIVES = 3, MAX_LIVES = 5, ONE_UP_EVERY = 6000;
   const INVULN = 1.7, FACE_LOST_AFTER = 650, HAND_LOST_AFTER = 240, HAND_REACQUIRE = 600;
   const SWIPE_MIN = 0.38, SWIPE_HARD = 1.15, SWIPE_DECAY = 3, MAX_HAND_SPEED = 7; // hand speed in screen short-edges per second
@@ -64,11 +68,13 @@
   const POWER_FIRST = 5, POWER_GAP = [7, 11], POWER_ENDING = 1.5, SLOW_RATE = 0.45, REPEL_RANGE = 0.2;
 
   /* ---------- records and settings ---------- */
-  const blank = () => ({ best: 0, bestTime: 0, games: 0, dodges: 0, pushes: 0, byTheme: {}, theme: 'space', backdrop: {}, view: 'ar' });
+  const blank = () => ({ best: 0, bestTime: 0, games: 0, dodges: 0, pushes: 0, byTheme: {}, theme: 'space', backdrop: {}, view: 'ar', plane: 'falcon', sens: 'normal' });
   let rec = blank();
   try { rec = { ...rec, ...JSON.parse(localStorage.getItem(KEY) || '{}') }; } catch {}
   const save = () => { try { localStorage.setItem(KEY, JSON.stringify(rec)); } catch {} };
   if (!THEMES[rec.theme]) rec.theme = 'space';
+  if (!Planes.ids.includes(rec.plane)) rec.plane = Planes.ids[0];
+  if (!SENS.some((s) => s[0] === rec.sens)) rec.sens = 'normal';
   if (!VIEWS.some((v) => v[0] === rec.view)) rec.view = 'ar';
   const fmtTime = (s) => `${Math.floor(s / 60)}:${String(Math.floor(s % 60)).padStart(2, '0')}`;
 
@@ -80,7 +86,7 @@
   let missiles = [], ammo = MAX_AMMO, reload = 0, fireCooldown = 0, kills = 0;
   let powerups = [], effects = {}, waves = [], powerTimer = POWER_FIRST, worldTime = 0;
   let scoreCarry = 0, pushCooldown = 0, manualUntil = 0, lastFaceAt = -1e9, lastHandAt = -1e9, faceSeen = false, handSeen = false;
-  const player = { x: 0, y: 0, tx: 0, ty: 0, r: 40, tr: 40, ang: 0 };
+  const player = { x: 0, y: 0, px: 0, py: 0, tx: 0, ty: 0, r: 40, tr: 40, ang: 0, roll: 0, pitch: 0, yaw: 0 };
   const hands = [newHand(), newHand()];
   const keys = new Set();
   const floaters = [];
@@ -226,21 +232,53 @@
       return last;
     };
   }
-  const faceX = oneEuro(1.6, 0.012), faceY = oneEuro(1.6, 0.012);
+  // the steering is amplified, so the filter leans a little harder on steadiness than it did for 1:1 tracking
+  const faceX = oneEuro(1.1, 0.018), faceY = oneEuro(1.1, 0.018);
+
+  /* Head steering. The head is measured relative to a resting position that is calibrated during the countdown,
+     in units of the face's own width, so the same small movement steers the same way near or far from the camera,
+     on any camera, and that movement is stretched to reach every edge of the screen whatever its size or shape. */
+  const head = { x: 0, y: 0, fw: 0, recal: true };
+  const RECAL_AFTER = 3000; // a face that comes back after this long gets a fresh resting position
+  function headSens() { return (SENS.find((s) => s[0] === rec.sens) || SENS[1])[2]; }
+  function recenter() {
+    head.recal = true;
+    if (state === 'play') floater(W / 2, H * 0.3, 'CENTRED', '#a5f3fc', 20);
+  }
+  // gentle near the middle for fine dodging, quicker towards the edges, never past the screen
+  const steerCurve = (v) => clamp(v * (0.72 + 0.28 * Math.min(1, Math.abs(v))), -1, 1);
+  function headToScreen(cx, cy, fw, now) {
+    if (head.recal || now - lastFaceAt > RECAL_AFTER || !head.fw) {
+      head.x = cx; head.y = cy; head.fw = fw; head.recal = false;
+    }
+    head.fw += (fw - head.fw) * 0.12;
+    // before play starts, the resting position follows the head so the run begins wherever the player sits
+    if (state === 'menu' || state === 'countdown') {
+      head.x += (cx - head.x) * 0.2;
+      head.y += (cy - head.y) * 0.2;
+    }
+    const s = headSens();
+    const ox = steerCurve(((cx - head.x) / head.fw) * s / HEAD_REACH_X);
+    const oy = steerCurve(((cy - head.y) / head.fw) * s / HEAD_REACH_Y);
+    const restX = W / 2, restY = H * 0.55, mx = U * 0.05, my = U * 0.06;
+    return [
+      restX + ox * (ox < 0 ? restX - mx : W - mx - restX),
+      restY + oy * (oy < 0 ? restY - my : H - my - restY),
+    ];
+  }
 
   Tracker.onResult = (m) => {
     const now = performance.now();
     if (m.face) {
-      const [sx, sy] = camToScreen(m.face[0], m.face[1]);
-      const s = Math.max(W / (Tracker.videoW || 4), H / (Tracker.videoH || 3));
-      const fw = m.face[2] * (Tracker.videoW || 4) * s;
+      // camera pixels, mirrored like the on-screen video
+      const vw = Tracker.videoW || 4, vh = Tracker.videoH || 3;
+      const [sx, sy] = headToScreen((1 - m.face[0]) * vw, m.face[1] * vh, Math.max(1, m.face[2] * vw), now);
       lastFaceAt = now;
       faceSeen = true;
       if (now > manualUntil) {
         player.tx = clamp(faceX(sx, now), 0, W);
         player.ty = clamp(faceY(sy, now), 0, H);
       }
-      player.tr = clamp(fw * 0.58, U * 0.07, U * 0.13);
     }
     if (m.hands) updateHands(m.hands, now);
     updateChecks();
@@ -1041,27 +1079,42 @@
     player.r += (player.tr - player.r) * (1 - Math.exp(-dt * 6));
     player.ang += dt * 1.7;
     const { x, y, r } = player;
+    // the aircraft banks into sideways movement and pitches with climbs and dives, the way a real one turns
+    if (dt > 0) {
+      const vx = (x - player.px) / dt, vy = (y - player.py) / dt, ease = 1 - Math.exp(-dt * 7);
+      player.roll += (clamp(vx / (U * 2.2), -1, 1) * 0.85 - player.roll) * ease;
+      player.pitch += (clamp(-vy / (U * 2.6), -1, 1) * 0.32 - player.pitch) * ease;
+      player.yaw += (clamp(vx / (U * 3), -1, 1) * 0.16 - player.yaw) * ease;
+    }
+    player.px = x; player.py = y;
     const lost = usingCamera && now - lastFaceAt > FACE_LOST_AFTER;
     // a ghost is nearly see-through, and flickers back into view just before the power ends
     const ghostAlpha = !powered('ghost') ? 1 : effects.ghost < POWER_ENDING && Math.floor(now / 110) % 2 ? 0.7 : 0.18;
-    ctx.globalAlpha = ghostAlpha;
-    if (!usingCamera || viewMode() === 'scene') {
-      const sz = r * 1.75;
-      ctx.drawImage(SPR.pod, x - sz / 2, y - sz / 2, sz, sz);
+    const blink = invuln > 0 && Math.floor(now / 90) % 2 ? 0.35 : 1;
+    // the view is a chase camera: an aircraft off to one side, or low on the screen, is seen a little from that side
+    const F = Math.max(W, H) * 0.95;
+    const viewYaw = -Math.atan((x - W / 2) / F), viewElev = 0.42 + Math.atan((y - vpY) / F) * 0.7;
+    if (viewMode() === 'scene') {
+      ctx.globalAlpha = 0.32 * ghostAlpha;
+      const sw = r * 2.4, sh = r * 0.6;
+      ctx.drawImage(GLOW.dark, x - sw / 2 + r * 0.2, y + r * 0.75 - sh / 2, sw, sh);
     }
-    if (invuln > 0 && Math.floor(now / 90) % 2) ctx.globalAlpha = 0.28 * ghostAlpha;
+    ctx.globalAlpha = ghostAlpha * blink;
+    Planes.draw(ctx, rec.plane, x, y, r * 1.2, {
+      roll: player.roll, pitch: player.pitch, yaw: player.yaw + viewYaw, elev: viewElev,
+      t: now / 1000, throttle: clamp(0.55 + Math.max(0, -player.pitch) * 1.2 + (state === 'play' ? 0.15 : 0), 0, 1),
+    });
+    // a light ring marks the hit area; it turns amber when the camera has lost the face
     const col = lost ? '#fbbf24' : invuln > 0 ? '#fda4af' : '#22d3ee';
     ctx.strokeStyle = col;
-    ctx.lineWidth = Math.max(2, U * 0.005);
+    ctx.globalAlpha = (lost ? 0.9 : 0.32) * ghostAlpha * blink;
+    ctx.lineWidth = Math.max(1.5, U * 0.0035);
     ctx.beginPath(); ctx.arc(x, y, r, 0, TAU); ctx.stroke();
-    ctx.lineWidth = Math.max(3, U * 0.009);
+    ctx.lineWidth = Math.max(2, U * 0.006);
     for (let i = 0; i < 3; i++) {
       const a = player.ang + (i * TAU) / 3;
-      ctx.beginPath(); ctx.arc(x, y, r * 1.18, a, a + 0.8); ctx.stroke();
+      ctx.beginPath(); ctx.arc(x, y, r * 1.12, a, a + 0.55); ctx.stroke();
     }
-    ctx.globalAlpha = 0.16 * ghostAlpha;
-    ctx.fillStyle = col;
-    ctx.beginPath(); ctx.arc(x, y, r, 0, TAU); ctx.fill();
     ctx.globalAlpha = 1;
     drawPlayerPowers(now);
   }
@@ -1269,6 +1322,7 @@
       $('#chipHand').className = handOn ? 'on' : '';
       setBanner(state === 'play' && !faceOn && now > manualUntil && runTime > 0.5
         ? 'Face lost. Move back into view, or steer with the keys or a drag'
+        : state === 'countdown' ? 'Sit comfortably and look at the screen. Small head moves steer the plane'
         : '');
     } else setBanner('');
   }
@@ -1320,6 +1374,7 @@
     Sfx.unlock();
     goFullscreen();
     resetRun();
+    head.recal = true;
     showOnly(null);
     $('#hud').hidden = false;
     document.body.classList.add('playing');
@@ -1351,6 +1406,7 @@
     Sfx.music(null);
     showOnly('#pauseCard');
     renderPicks();
+    $('#btnRecenter').hidden = !usingCamera;
     $('#btnResume').focus({ preventScroll: true });
   }
   function resumeGame() {
@@ -1422,6 +1478,7 @@
       b.setAttribute('role', 'radio');
       b.setAttribute('aria-checked', String(it.id === current));
       if (it.disabled) b.disabled = true;
+      if (it.title) b.title = it.title;
       if (it.thumb) {
         const im = document.createElement('img');
         im.src = it.thumb;
@@ -1443,10 +1500,23 @@
     }
     return thumbs[name];
   }
+  function planeThumb(id) {
+    const key = 'plane:' + id;
+    if (!thumbs[key]) thumbs[key] = Planes.thumb(id, 104, 68).toDataURL();
+    return thumbs[key];
+  }
   function renderPicks() {
     const themeItems = Object.entries(THEMES).map(([id, t]) => ({ id, label: t.name, className: 'theme', thumb: thumbOf(t.thumb) }));
     const bgItems = THEMES[rec.theme].backdrops.map(([id, label]) => ({ id, label }));
     const viewItems = VIEWS.map(([id, label]) => ({ id, label, disabled: !usingCamera && id !== 'scene' }));
+    const planeItems = Planes.ids.map((id) => ({ id, label: Planes.info(id).name, className: 'theme', thumb: planeThumb(id), title: Planes.info(id).blurb }));
+    const sensItems = SENS.map(([id, label]) => ({ id, label }));
+    const pickPlane = (id) => { rec.plane = id; save(); renderPicks(); };
+    const pickSens = (id) => { rec.sens = id; save(); renderPicks(); };
+    radio($('#planePicks'), planeItems, rec.plane, pickPlane);
+    radio($('#planePicks2'), planeItems, rec.plane, pickPlane);
+    radio($('#sensPicks'), sensItems, rec.sens, pickSens);
+    radio($('#sensPicks2'), sensItems, rec.sens, pickSens);
     const pickTheme = (id) => {
       rec.theme = id;
       vpY = H * THEMES[id].vp;
@@ -1570,6 +1640,7 @@
     beginRun();
   };
   $('#btnResume').onclick = resumeGame;
+  $('#btnRecenter').onclick = () => { recenter(); resumeGame(); };
   $('#btnQuit').onclick = endRunEarly;
   $('#btnAgain').onclick = beginRun;
   $('#btnMenu').onclick = toMenu;
@@ -1645,6 +1716,7 @@
       case 'KeyQ': manualPush(-1); break;
       case 'KeyE': manualPush(1); break;
       case 'KeyM': toggleSound(); break;
+      case 'KeyC': if (usingCamera) recenter(); break;
       case 'KeyF': toggleFullscreen(); break;
       case 'KeyP': case 'Escape':
         if (state === 'play') pauseGame();
@@ -1694,7 +1766,7 @@
   syncSoundButtons();
   if (!Tracker.handsEnabled) $('#chipHand').hidden = $('#ckHand').hidden = true;
   resize();
-  player.x = player.tx; player.y = player.ty; player.r = player.tr;
+  player.x = player.px = player.tx; player.y = player.py = player.ty; player.r = player.tr;
   renderPicks();
   renderBest();
   applyView();

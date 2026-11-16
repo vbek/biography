@@ -92,10 +92,14 @@
 
     <div class="label">Battlefield</div>
     <div class="themes" id="themePicks" role="radiogroup" aria-label="Battlefield"></div>
+    <div class="label">Aircraft</div>
+    <div class="themes planes" id="planePicks" role="radiogroup" aria-label="Aircraft"></div>
     <div class="label">Backdrop</div>
     <div class="chips" id="bgPicks" role="radiogroup" aria-label="Backdrop"></div>
     <div class="label">View</div>
     <div class="chips" id="viewPicks" role="radiogroup" aria-label="View"></div>
+    <div class="label">Head sensitivity</div>
+    <div class="chips" id="sensPicks" role="radiogroup" aria-label="Head sensitivity"></div>
 
     <div id="setup">
       <div class="check-row" id="checks" hidden>
@@ -116,7 +120,7 @@
     <details class="how">
       <summary>How to play</summary>
       <ul>
-        <li><b>Camera:</b> move your head to dodge. A red <b>!</b> at the top of the screen and a dashed line show where something will fall.</li>
+        <li><b>Camera:</b> small head moves steer. Lean or turn a little and the plane crosses the whole screen. Your resting position is set during the countdown; press <kbd>C</kbd>, or use Pause, to recentre, and choose the head sensitivity that feels right. A red <b>!</b> at the top of the screen and a dashed line show where something will fall.</li>
         <li><b>Missiles:</b> you carry 3 and they reload over time. Each one homes in on its target, and warships and warplanes take two hits.</li>
         <li><b>Laptop:</b> <kbd>Space</kbd> fires at the target in the green brackets, or click any object. <kbd>←</kbd><kbd>↑</kbd><kbd>↓</kbd><kbd>→</kbd> or <kbd>W</kbd><kbd>A</kbd><kbd>S</kbd><kbd>D</kbd> move, <kbd>Q</kbd>/<kbd>E</kbd> push, <kbd>P</kbd> pause, <kbd>M</kbd> sound, <kbd>F</kbd> fullscreen.</li>
         <li><b>Phone:</b> tap an object or the FIRE button to shoot, drag to move, and use the arrow buttons to push.</li>
@@ -136,8 +140,13 @@
     <div class="chips" id="bgPicks2" role="radiogroup" aria-label="Backdrop"></div>
     <div class="label">View</div>
     <div class="chips" id="viewPicks2" role="radiogroup" aria-label="View"></div>
+    <div class="label">Aircraft</div>
+    <div class="themes planes compact" id="planePicks2" role="radiogroup" aria-label="Aircraft"></div>
+    <div class="label">Head sensitivity</div>
+    <div class="chips" id="sensPicks2" role="radiogroup" aria-label="Head sensitivity"></div>
     <div class="btns">
       <button class="btn primary lg" id="btnResume">Resume</button>
+      <button class="btn" id="btnRecenter" title="Recentre head steering (C)">Recentre head &amp; resume</button>
       <button class="btn" id="btnQuit">End run</button>
     </div>
   </section>
@@ -157,6 +166,7 @@
 <script src="tracker.js"></script>
 <script src="audio.js"></script>
 <script src="art.js"></script>
+<script src="planes.js"></script>
 <script src="game.js"></script>
 <script src="../../track.js" defer></script>
 </body>
