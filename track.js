@@ -1,4 +1,4 @@
-// Counts visits to the tools, games and Learn lessons (workers/ask-log). Sends only the page, whether the
+// Counts visits to the home page, tools, games and Learn lessons (workers/ask-log). Sends only the page, whether the
 // visitor interacted, and how long the tab was in view; never any file or content from the app.
 (function () {
     'use strict';
@@ -17,6 +17,7 @@
             var parts = location.hash.replace(/^#\/?/, '').split('/').filter(Boolean).slice(0, 2);
             return parts.length === 2 ? 'learn/' + parts.join('/') : 'learn';
         }
+        if (location.pathname === '/' || location.pathname === '/index.html') return 'home';
         return location.pathname;
     }
 
