@@ -1,0 +1,199 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<!-- The screen goes straight from one device to the other over WebRTC. The PeerJS broker only introduces the two devices; it never sees the picture. -->
+<meta http-equiv="Content-Security-Policy" content="default-src 'none'; script-src 'self'; style-src 'self' 'unsafe-inline'; img-src 'self' data:; media-src 'self' blob: mediastream:; connect-src 'self' https://0.peerjs.com wss://0.peerjs.com; manifest-src 'self'; base-uri 'none'; form-action 'none'">
+<meta name="referrer" content="no-referrer">
+<meta name="robots" content="index, follow">
+<meta name="theme-color" content="#0b1020">
+<meta name="mobile-web-app-capable" content="yes">
+<meta name="apple-mobile-web-app-capable" content="yes">
+<title>Sidescreen: Use a Tablet or Phone as a Second Screen, Free</title>
+<meta name="description" content="Turn an iPad, Android tablet, phone or another laptop into a screen for your Windows PC or Mac. Pair with a QR code and stream a screen or a single window. Nothing to install, and the picture goes straight between your devices.">
+<link rel="canonical" href="https://bibek-koirala.com.np/tools/sidescreen/">
+<meta property="og:type" content="website">
+<meta property="og:site_name" content="Bibek Koirala">
+<meta property="og:title" content="Sidescreen: Use a Tablet or Phone as a Second Screen, Free">
+<meta property="og:description" content="Turn an iPad, Android tablet, phone or another laptop into a screen for your Windows PC or Mac. Pair with a QR code. Nothing to install.">
+<meta property="og:url" content="https://bibek-koirala.com.np/tools/sidescreen/">
+<meta property="og:image" content="https://bibek-koirala.com.np/images/og-image.jpg">
+<meta name="twitter:card" content="summary_large_image">
+<meta name="twitter:creator" content="@_koire">
+<script type="application/ld+json">
+{
+  "@context": "https://schema.org",
+  "@type": "WebApplication",
+  "name": "Sidescreen",
+  "applicationCategory": "UtilitiesApplication",
+  "operatingSystem": "Windows, macOS, iPadOS, Android (web browser)",
+  "browserRequirements": "Requires a modern browser with WebRTC",
+  "isAccessibleForFree": true,
+  "offers": { "@type": "Offer", "price": "0", "priceCurrency": "USD" },
+  "featureList": "Stream a Windows or Mac screen or window to a tablet, phone or laptop; QR code pairing; several viewers at once; quality presets",
+  "author": { "@type": "Person", "@id": "https://bibek-koirala.com.np/#person", "name": "Bibek Koirala", "url": "https://bibek-koirala.com.np/" },
+  "url": "https://bibek-koirala.com.np/tools/sidescreen/",
+  "description": "Turn an iPad, Android tablet, phone or another laptop into a screen for your Windows PC or Mac. Pair with a QR code and stream a screen or a single window.",
+  "image": "https://bibek-koirala.com.np/images/og-image.jpg"
+}
+</script>
+<link rel="manifest" href="manifest.webmanifest">
+<link rel="icon" href="icon.svg" type="image/svg+xml">
+<link rel="stylesheet" href="app.css">
+<script src="js/theme.js"></script>
+</head>
+<body>
+
+<!-- Start: pick a role -->
+<main id="home" class="page">
+  <a href="../index.html" class="back">&larr; All tools</a>
+  <header class="hero">
+    <img src="icon.svg" alt="" width="56" height="56">
+    <h1>Sidescreen</h1>
+    <p class="muted">Use a tablet, phone or spare laptop as a screen for your Windows PC or Mac. Open this page on both devices. Nothing to install.</p>
+  </header>
+
+  <div class="roles">
+    <button class="role" id="pick-send" type="button">
+      <span class="role-art" aria-hidden="true">
+        <svg viewBox="0 0 48 48"><rect x="5" y="8" width="38" height="25" rx="3"/><path d="M17 40h14M24 33v7"/></svg>
+      </span>
+      <span class="role-title">Share this computer</span>
+      <span class="role-text muted">Send a screen or window from this Windows PC or Mac.</span>
+    </button>
+    <button class="role" id="pick-watch" type="button">
+      <span class="role-art" aria-hidden="true">
+        <svg viewBox="0 0 48 48"><rect x="10" y="5" width="28" height="38" rx="4"/><path d="M21 38h6"/></svg>
+      </span>
+      <span class="role-title">Use as a screen</span>
+      <span class="role-text muted">Show the computer's screen on this tablet, phone or laptop.</span>
+    </button>
+  </div>
+  <p id="no-share" class="note" hidden>This browser can't share its screen, so this device can only be used as a screen. To share, open this page on a Windows PC or Mac in Chrome, Edge, Firefox or Safari.</p>
+
+  <section class="how">
+    <h2>How it works</h2>
+    <ol>
+      <li>On your computer, choose <b>Share this computer</b> and pick a screen or window.</li>
+      <li>On the tablet or phone, scan the QR code or type the 6-letter code.</li>
+      <li>Tap the screen for full screen, fit or fill, sound and connection details.</li>
+    </ol>
+    <details>
+      <summary>Want a real extended display?</summary>
+      <p>A browser can show an existing screen or window, but it can't add a new monitor to your computer. Two ways around that:</p>
+      <ul>
+        <li><b>Share one window.</b> Share the app you want on the side, such as notes, chat or a reference PDF, and keep working on your main screen.</li>
+        <li><b>Add a virtual monitor first.</b> A virtual display driver (Windows) or a virtual screen app (macOS) adds an empty monitor that you can arrange like a real one. Share that screen here and the tablet becomes a true extended display. These are third-party apps, so check that you trust one before you install it.</li>
+      </ul>
+      <p>Taps on the tablet don't control the computer. Use the computer's own mouse and keyboard.</p>
+    </details>
+    <details>
+      <summary>Privacy and connection</summary>
+      <p>The picture travels directly between your devices over an encrypted WebRTC connection. The free PeerJS service only helps the two devices find each other and never sees the stream. For the lowest delay, keep both devices on the same Wi-Fi. Some office and school networks block direct connections.</p>
+    </details>
+  </section>
+</main>
+
+<!-- Computer: sharing -->
+<main id="send" class="page" hidden>
+  <button class="back" type="button" data-home>&larr; Back</button>
+  <h1 class="page-title">Share this computer</h1>
+
+  <section id="send-setup" class="card">
+    <label class="field">
+      <span>Quality</span>
+      <select id="quality">
+        <option value="text">Sharp text: 1080p, 30 fps (documents, code, slides)</option>
+        <option value="smooth">Smooth motion: 1080p, 60 fps (video, scrolling)</option>
+        <option value="saver">Data saver: 720p, 20 fps (slow Wi-Fi)</option>
+      </select>
+    </label>
+    <label class="check"><input type="checkbox" id="audio"> Include sound, where the browser allows it</label>
+    <button class="btn primary big" id="start" type="button">Choose a screen or window</button>
+    <p id="send-error" class="error" role="alert" hidden></p>
+  </section>
+
+  <section id="send-live" hidden>
+    <div class="live-grid">
+      <div class="card pair">
+        <p class="muted small">Scan on your tablet or phone</p>
+        <img id="qr" alt="QR code that opens this page as a screen" width="216" height="216">
+        <p class="muted small">or open this page there and enter</p>
+        <p class="code" id="code" aria-live="polite">------</p>
+        <div class="row">
+          <button class="btn" id="copy-link" type="button">Copy link</button>
+          <button class="btn" id="new-code" type="button">New code</button>
+        </div>
+        <p id="broker" class="muted small" aria-live="polite">Connecting to the pairing service…</p>
+      </div>
+      <div class="card">
+        <div class="preview-wrap">
+          <video id="preview" muted playsinline autoplay></video>
+          <span id="paused-badge" class="badge" hidden>Paused</span>
+        </div>
+        <p id="source-name" class="muted small"></p>
+        <div class="row">
+          <button class="btn" id="change" type="button">Change what's shared</button>
+          <button class="btn" id="pause" type="button" aria-pressed="false">Pause</button>
+          <button class="btn danger" id="stop" type="button">Stop sharing</button>
+        </div>
+        <label class="field compact">
+          <span>Quality</span>
+          <select id="quality-live">
+            <option value="text">Sharp text</option>
+            <option value="smooth">Smooth motion</option>
+            <option value="saver">Data saver</option>
+          </select>
+        </label>
+        <h2 class="sub">Connected screens</h2>
+        <ul id="viewers" class="viewers"><li class="muted">None yet</li></ul>
+      </div>
+    </div>
+  </section>
+</main>
+
+<!-- Tablet / phone: join -->
+<main id="join" class="page" hidden>
+  <button class="back" type="button" data-home>&larr; Back</button>
+  <h1 class="page-title">Use as a screen</h1>
+  <form id="join-form" class="card" autocomplete="off">
+    <label class="field">
+      <span>Code shown on the computer</span>
+      <input id="code-input" type="text" inputmode="text" autocapitalize="characters" spellcheck="false" maxlength="6" placeholder="ABC234" aria-describedby="join-hint">
+    </label>
+    <p id="join-hint" class="muted small">Or scan the QR code on the computer with this device's camera.</p>
+    <button class="btn primary big" type="submit">Connect</button>
+    <p id="join-error" class="error" role="alert" hidden></p>
+  </form>
+</main>
+
+<!-- Tablet / phone: the screen itself -->
+<div id="screen" hidden>
+  <video id="remote" playsinline autoplay muted></video>
+  <div id="status" class="status" aria-live="polite">
+    <div class="spinner" aria-hidden="true"></div>
+    <p id="status-text">Connecting…</p>
+    <div class="row">
+      <button class="btn" id="status-retry" type="button" hidden>Try again</button>
+      <button class="btn" id="status-leave" type="button">Leave</button>
+    </div>
+  </div>
+  <div id="bar" class="bar" hidden>
+    <button class="btn" id="fs" type="button">Full screen</button>
+    <button class="btn" id="fit" type="button">Fill</button>
+    <button class="btn" id="sound" type="button" hidden>Sound on</button>
+    <button class="btn" id="stats-btn" type="button" aria-pressed="false">Details</button>
+    <button class="btn danger" id="leave" type="button">Leave</button>
+  </div>
+  <pre id="stats" class="stats" hidden></pre>
+</div>
+
+<div id="toast" class="toast" role="status" hidden></div>
+
+<script src="../../games/party/vendor/peerjs.min.js"></script>
+<script src="../../games/party/vendor/qrcode.js"></script>
+<script src="js/app.js"></script>
+<script src="../../track.js" defer></script>
+</body>
+</html>
