@@ -110,6 +110,98 @@
     }
   }
 
+  /* ---------- ZIP ----------
+     Received files are stored as-is ("stored", no compression): most big files are already compressed, and it
+     means the ZIP is just small headers around the files we already hold, so it's ready instantly at any size.
+     The CRC each entry needs is worked out while the file arrives. ZIP64 kicks in past 4 GB or 65,535 files. */
+  const CRC_T = (() => {
+    const t = new Int32Array(256 * 8);
+    for (let n = 0; n < 256; n++) { let c = n; for (let k = 0; k < 8; k++) c = c & 1 ? 0xedb88320 ^ (c >>> 1) : c >>> 1; t[n] = c; }
+    for (let n = 0; n < 256; n++) { let c = t[n]; for (let k = 1; k < 8; k++) { c = t[c & 0xff] ^ (c >>> 8); t[k * 256 + n] = c; } }
+    return t;
+  })();
+  function crc32(u8, crc = 0) {
+    const T = CRC_T, n = u8.length;
+    let c = ~crc, i = 0;
+    for (; i + 8 <= n; i += 8) { // slicing-by-8: eight bytes per step
+      const a = (u8[i] | (u8[i + 1] << 8) | (u8[i + 2] << 16) | (u8[i + 3] << 24)) ^ c;
+      c = T[1792 + (a & 0xff)] ^ T[1536 + ((a >>> 8) & 0xff)] ^ T[1280 + ((a >>> 16) & 0xff)] ^ T[1024 + (a >>> 24)]
+        ^ T[768 + u8[i + 4]] ^ T[512 + u8[i + 5]] ^ T[256 + u8[i + 6]] ^ T[u8[i + 7]];
+    }
+    for (; i < n; i++) c = T[(c ^ u8[i]) & 0xff] ^ (c >>> 8);
+    return ~c >>> 0;
+  }
+
+  function dosTime(ms) {
+    const d = new Date(ms || Date.now()), y = d.getFullYear();
+    if (y < 1980) return [0, (1 << 5) | 1];
+    return [(d.getHours() << 11) | (d.getMinutes() << 5) | (d.getSeconds() >> 1), ((y - 1980) << 9) | ((d.getMonth() + 1) << 5) | d.getDate()];
+  }
+  const setU64 = (v, o, n) => { v.setUint32(o, n % 4294967296, true); v.setUint32(o + 4, Math.floor(n / 4294967296), true); };
+
+  // entries: [{ path, file, crc }] -> a ZIP Blob that references the files rather than copying them
+  function makeZip(entries) {
+    const enc = new TextEncoder(), parts = [], central = [], BIG = 0xffffffff;
+    const used = new Set();
+    let off = 0;
+    for (const e of entries) {
+      let path = e.path.replace(/^\/+/, '') || 'file';
+      if (used.has(path.toLowerCase())) { // same name twice: "photo (2).jpg"
+        const m = /^(.*?)(\.[^./]*)?$/.exec(path);
+        let k = 2; while (used.has(`${m[1]} (${k})${m[2] || ''}`.toLowerCase())) k++;
+        path = `${m[1]} (${k})${m[2] || ''}`;
+      }
+      used.add(path.toLowerCase());
+      const name = enc.encode(path), size = e.file.size, z64 = size >= BIG || off >= BIG;
+      const [tm, dt] = dosTime(e.file.lastModified);
+      const v = new DataView(new ArrayBuffer(30 + name.length + (z64 ? 20 : 0)));
+      v.setUint32(0, 0x04034b50, true); v.setUint16(4, z64 ? 45 : 20, true); v.setUint16(6, 0x0800, true); // UTF-8 names
+      v.setUint16(8, 0, true); v.setUint16(10, tm, true); v.setUint16(12, dt, true); v.setUint32(14, e.crc >>> 0, true);
+      v.setUint32(18, z64 ? BIG : size, true); v.setUint32(22, z64 ? BIG : size, true);
+      v.setUint16(26, name.length, true); v.setUint16(28, z64 ? 20 : 0, true);
+      new Uint8Array(v.buffer).set(name, 30);
+      if (z64) { const x = 30 + name.length; v.setUint16(x, 1, true); v.setUint16(x + 2, 16, true); setU64(v, x + 4, size); setU64(v, x + 12, size); }
+      parts.push(v.buffer, e.file);
+      central.push({ name, size, crc: e.crc >>> 0, tm, dt, off, z64 });
+      off += v.byteLength + size;
+    }
+    const cdStart = off;
+    for (const c of central) {
+      const v = new DataView(new ArrayBuffer(46 + c.name.length + (c.z64 ? 28 : 0)));
+      v.setUint32(0, 0x02014b50, true); v.setUint16(4, c.z64 ? 45 : 20, true); v.setUint16(6, c.z64 ? 45 : 20, true);
+      v.setUint16(8, 0x0800, true); v.setUint16(10, 0, true); v.setUint16(12, c.tm, true); v.setUint16(14, c.dt, true);
+      v.setUint32(16, c.crc, true); v.setUint32(20, c.z64 ? BIG : c.size, true); v.setUint32(24, c.z64 ? BIG : c.size, true);
+      v.setUint16(28, c.name.length, true); v.setUint16(30, c.z64 ? 28 : 0, true);
+      v.setUint32(42, c.z64 ? BIG : c.off, true);
+      new Uint8Array(v.buffer).set(c.name, 46);
+      if (c.z64) { const x = 46 + c.name.length; v.setUint16(x, 1, true); v.setUint16(x + 2, 24, true); setU64(v, x + 4, c.size); setU64(v, x + 12, c.size); setU64(v, x + 20, c.off); }
+      parts.push(v.buffer);
+      off += v.byteLength;
+    }
+    const cdSize = off - cdStart, n = central.length;
+    const z64 = n >= 0xffff || cdStart >= BIG || cdSize >= BIG;
+    if (z64) {
+      const r = new DataView(new ArrayBuffer(56 + 20));
+      r.setUint32(0, 0x06064b50, true); setU64(r, 4, 44); r.setUint16(12, 45, true); r.setUint16(14, 45, true);
+      setU64(r, 24, n); setU64(r, 32, n); setU64(r, 40, cdSize); setU64(r, 48, cdStart);
+      r.setUint32(56, 0x07064b50, true); setU64(r, 64, off); r.setUint32(72, 1, true);
+      parts.push(r.buffer);
+    }
+    const end = new DataView(new ArrayBuffer(22));
+    end.setUint32(0, 0x06054b50, true);
+    end.setUint16(8, Math.min(n, 0xffff), true); end.setUint16(10, Math.min(n, 0xffff), true);
+    end.setUint32(12, z64 ? BIG : cdSize, true); end.setUint32(16, z64 ? BIG : cdStart, true);
+    parts.push(end.buffer);
+    return new Blob(parts, { type: 'application/zip' });
+  }
+
+  function downloadBlob(blob, name) {
+    const url = URL.createObjectURL(blob), a = document.createElement('a');
+    a.href = url; a.download = name;
+    document.body.appendChild(a); a.click(); a.remove();
+    setTimeout(() => URL.revokeObjectURL(url), 10 * 60 * 1000);
+  }
+
   const ICONS = {
     phone: '<svg viewBox="0 0 48 48"><rect x="14" y="5" width="20" height="38" rx="4"/><path d="M21 37h6"/></svg>',
     tablet: '<svg viewBox="0 0 48 48"><rect x="8" y="6" width="32" height="36" rx="4"/><path d="M21 36h6"/></svg>',
@@ -388,6 +480,7 @@
     try { p.conn.close(); } catch {}
     for (const tr of items) if (tr.peer === p && !FINAL.has(tr.state)) failItem(tr, 'Device disconnected');
     p.queue.length = 0;
+    for (const b of batches.values()) if (b.peer === p) renderBatch(b);
     if (!quiet && p.greeted) toast(`${p.name} left`);
     if (p.door) maybeTakeDoor();
     renderDevices();
@@ -455,6 +548,7 @@
       case 'ack': { const tr = tx.get(key); if (tr && Number.isFinite(m.bytes)) { tr.bytes = Math.max(tr.bytes, Math.min(tr.size, m.bytes)); if (tr.wake) tr.wake(); } break; }
       case 'done': { const tr = tx.get(key); if (tr) { tx.delete(key); tr.bytes = tr.size; finishItem(tr); } break; }
       case 'end': onEnd(p, key); break;
+      case 'batchend': { const b = batches.get(`${p.id}:${m.batch}`); if (b) { b.ended = true; renderBatch(b); } break; }
       case 'cancel': {
         // side says which end the sender of this message was on for that transfer
         const tr = m.side === 'tx' ? rx.get(key) : tx.get(key);
@@ -491,9 +585,14 @@
   function queueFiles(list, targets) {
     if (!list.length) return;
     if (!targets.length) { toast(peers.size ? 'Choose a device to send to' : 'Connect a device first. Scan the QR code on another device.'); return; }
+    // Several files sent together form a batch: one group in Activity, and one ZIP on the other side.
+    const tops = new Set(list.map((x) => (x.path && x.path.includes('/') ? x.path.split('/')[0] : '')));
+    const label = tops.size === 1 && !tops.has('') ? [...tops][0] : '';
+    const total = list.reduce((n, x) => n + x.file.size, 0);
     for (const p of targets) {
+      const b = list.length > 1 ? newBatch({ dir: 'out', peer: p, bid: txSeq++, count: list.length, label, total }) : null;
       for (const { file, path } of list) {
-        const tr = newItem({ dir: 'out', kind: 'file', peer: p, file, name: file.name || 'file', path: path && path !== file.name ? path : '', size: file.size, type: file.type || '', state: 'queued' });
+        const tr = newItem({ dir: 'out', kind: 'file', peer: p, batch: b, file, name: file.name || 'file', path: path && path !== file.name ? path : '', size: file.size, type: file.type || '', state: 'queued' });
         p.queue.push(tr);
       }
       pump(p);
@@ -523,12 +622,17 @@
     try {
       while (p.queue.length && peers.get(p.id) === p) {
         const tr = p.queue.shift();
-        if (FINAL.has(tr.state)) continue;
-        try { await sendOne(p, tr); } catch (e) {
-          if (FINAL.has(tr.state)) continue;
-          sendCtl(p, { t: 'cancel', side: 'tx', id: tr.id });
-          failItem(tr, e && e.message === 'closed' ? 'Device disconnected' : "Couldn't read the file");
+        if (!FINAL.has(tr.state)) {
+          try { await sendOne(p, tr); } catch (e) {
+            if (!FINAL.has(tr.state)) {
+              sendCtl(p, { t: 'cancel', side: 'tx', id: tr.id });
+              failItem(tr, e && e.message === 'closed' ? 'Device disconnected' : "Couldn't read the file");
+            }
+          }
         }
+        // Tell the other device when a batch has nothing more coming, even if some files were cancelled before they started.
+        const b = tr.batch;
+        if (b && !b.ended && !p.queue.some((q) => q.batch === b)) { b.ended = true; sendCtl(p, { t: 'batchend', batch: b.bid }); }
       }
     } finally { p.busy = false; }
   }
@@ -543,7 +647,8 @@
     tx.set(key, tr);
     setState(tr, 'waiting');
     const accepted = new Promise((res) => { tr.answer = (v) => { tr.answer = null; res(v); }; });
-    if (!sendCtl(p, { t: 'offer', id: tr.id, name: tr.name, path: tr.path, size: tr.size, type: tr.type, lastModified: tr.file.lastModified })) throw new Error('closed');
+    if (!sendCtl(p, { t: 'offer', id: tr.id, name: tr.name, path: tr.path, size: tr.size, type: tr.type, lastModified: tr.file.lastModified,
+      ...(tr.batch ? { batch: tr.batch.bid, count: tr.batch.count, label: tr.batch.label, total: tr.batch.total } : {}) })) throw new Error('closed');
     if (!(await accepted) || tr.state !== 'waiting') return;
 
     setState(tr, 'sending');
@@ -583,7 +688,12 @@
     const size = Number(m.size);
     if (!Number.isSafeInteger(m.id) || rx.has(key) || !Number.isSafeInteger(size) || size < 0) return;
     const name = cleanFileName(m.name);
-    const tr = newItem({ dir: 'in', kind: 'file', peer: p, rid: m.id, name, path: m.path ? cleanPath(m.path) : '', size, type: typeof m.type === 'string' ? m.type.slice(0, 100) : '', state: 'receiving' });
+    let b = null;
+    if (Number.isSafeInteger(m.batch) && Number.isSafeInteger(m.count) && m.count > 1) {
+      const bkey = `${p.id}:${m.batch}`;
+      b = batches.get(bkey) || newBatch({ dir: 'in', peer: p, bid: m.batch, count: Math.min(m.count, 1e6), label: m.label ? cleanFileName(m.label) : '', total: Number(m.total) > 0 ? Number(m.total) : 0 });
+    }
+    const tr = newItem({ dir: 'in', kind: 'file', peer: p, batch: b, crc: 0, rid: m.id, name, path: m.path ? cleanPath(m.path) : '', size, type: typeof m.type === 'string' ? m.type.slice(0, 100) : '', state: 'receiving' });
     rx.set(key, tr);
     if (hasOPFS && size > DISK_OVER && navigator.storage.estimate) {
       try {
@@ -610,6 +720,7 @@
     const body = buf.subarray(4);
     if (tr.bytes + body.length > tr.size) { cancelItem(tr, true, 'Received more data than expected'); return; }
     try { tr.sink.push(body); } catch { cancelItem(tr, true, "Couldn't store the file"); return; }
+    tr.crc = crc32(body, tr.crc); // for the ZIP, so it can be made instantly later
     tr.bytes += body.length;
   }
 
@@ -622,7 +733,7 @@
     if (tr.state !== 'receiving') return;
     sendCtl(p, { t: 'done', id: tr.rid });
     finishItem(tr);
-    if ($('#autosave').checked) saveItem(tr);
+    if ($('#autosave').checked && !tr.batch) saveItem(tr); // batches are saved as one ZIP when they complete
   }
 
   /* =====================================================================
@@ -635,8 +746,10 @@
   function newItem(o) {
     const tr = Object.assign({ id: txSeq++, uid: itemSeq++, bytes: 0, rate: 0, lastBytes: 0, t0: 0, t1: 0, note: '', url: null, file: null, saved: false }, o);
     items.unshift(tr);
+    if (tr.batch) tr.batch.items.push(tr);
     buildItem(tr);
     renderItem(tr);
+    if (tr.batch) renderBatch(tr.batch);
     syncActivity();
     return tr;
   }
@@ -645,6 +758,7 @@
     tr.state = s;
     if ((s === 'sending' || s === 'receiving') && !tr.t0) { tr.t0 = performance.now(); tr.lastBytes = tr.bytes; }
     renderItem(tr);
+    if (tr.batch) renderBatch(tr.batch);
     syncActivity();
   }
 
@@ -652,7 +766,7 @@
     tr.t1 = performance.now();
     tr.bytes = tr.size;
     setState(tr, 'done');
-    if (tr.dir === 'in' && tr.kind === 'file') toast(`Received ${tr.name}`);
+    if (tr.dir === 'in' && tr.kind === 'file' && !tr.batch) toast(`Received ${tr.name}`);
   }
 
   function failItem(tr, why) {
@@ -693,7 +807,116 @@
     document.body.appendChild(a); a.click(); a.remove();
     tr.saved = true;
     renderItem(tr);
+    if (tr.batch) renderBatch(tr.batch);
     syncActivity();
+  }
+
+  const zipStamp = () => { const d = new Date(), z = (n) => String(n).padStart(2, '0'); return `${d.getFullYear()}-${z(d.getMonth() + 1)}-${z(d.getDate())} ${z(d.getHours())}.${z(d.getMinutes())}`; };
+  const zipName = (s) => cleanFileName(s).replace(/\//g, '-');
+  const receivedFiles = (list) => list.filter((t) => t.dir === 'in' && t.kind === 'file' && t.state === 'done' && t.file);
+
+  function saveZip(list, filename, prefix) {
+    if (!list.length) return;
+    const entries = list.map((t) => ({ path: (prefix ? prefix(t) : '') + (t.path || t.name), file: t.file, crc: t.crc || 0 }));
+    downloadBlob(makeZip(entries), filename);
+    for (const t of list) { t.saved = true; renderItem(t); }
+    for (const b of new Set(list.map((t) => t.batch).filter(Boolean))) renderBatch(b);
+    syncActivity();
+  }
+
+  function saveBatchZip(b) {
+    const files = receivedFiles(b.items);
+    // A folder keeps its own name; loose files get a name that says where they came from.
+    saveZip(files, zipName(b.label ? `${b.label}.zip` : `Beam from ${b.peer.name} ${zipStamp()}.zip`));
+  }
+
+  /* ---------- batches: several files sent together ---------- */
+  const batches = new Map(); // `${peerId}:${bid}` -> batch
+
+  function newBatch(o) {
+    const b = Object.assign({ items: [], ended: false, open: false, done: false, actKey: '' }, o);
+    b.key = `${b.peer.id}:${b.bid}`;
+    if (b.dir === 'in') batches.set(b.key, b);
+    const li = el('li', `xfer batch ${b.dir}`);
+    const head = el('div', 'batch-head');
+    const icon = el('div', 'x-icon folder');
+    icon.innerHTML = '<svg viewBox="0 0 48 48" aria-hidden="true"><path d="M6 14a3 3 0 0 1 3-3h10l4 5h16a3 3 0 0 1 3 3v17a3 3 0 0 1-3 3H9a3 3 0 0 1-3-3z"/></svg>';
+    const main = el('div', 'x-main');
+    const top = el('div', 'x-top');
+    const name = el('span', 'x-name'), size = el('span', 'x-size');
+    top.append(name, size);
+    const meta = el('span', 'x-meta');
+    const prog = el('div', 'progress'); const bar = el('span'); prog.append(bar);
+    main.append(top, meta, prog);
+    const actions = el('div', 'x-actions');
+    head.append(icon, main, actions);
+    const list = el('ul', 'batch-list'); list.hidden = true;
+    li.append(head, list);
+    b.el = { li, name, size, meta, prog, bar, actions, list };
+    $('#xfers').prepend(li);
+    return b;
+  }
+
+  function renderBatch(b) {
+    const { name, size, meta, prog, bar, actions, list } = b.el;
+    const out = b.dir === 'out';
+    const its = b.items;
+    const ok = its.filter((t) => t.state === 'done').length;
+    const bad = its.filter((t) => t.state === 'failed' || t.state === 'cancelled').length;
+    const active = its.filter((t) => !FINAL.has(t.state));
+    const peerGone = peers.get(b.peer.id) !== b.peer;
+    const complete = !active.length && (its.length >= b.count || b.ended || peerGone || out);
+    const total = b.total || its.reduce((n, t) => n + t.size, 0);
+    const got = its.reduce((n, t) => n + (t.state === 'done' ? t.size : t.bytes), 0);
+    const rate = active.reduce((n, t) => n + (t.rate || 0), 0);
+
+    name.textContent = b.label ? `${b.label}/` : `${b.count} files`;
+    name.title = name.textContent;
+    size.textContent = fmtBytes(total);
+    meta.textContent = '';
+    meta.append(el('span', `dir ${b.dir}`, out ? '↑ ' : '↓ '), document.createTextNode(`${out ? 'To' : 'From'} ${b.peer.name}`));
+    const add = (txt, cls) => { meta.append(document.createTextNode(' · ')); meta.append(cls ? el('span', cls, txt) : document.createTextNode(txt)); };
+    if (!complete) {
+      add(`${ok} of ${b.count} files`);
+      if (total) add(`${Math.floor(Math.min(100, (got / total) * 100))}%`);
+      if (rate > 0) { add(fmtRate(rate)); const left = (total - got) / rate; if (left > 1) add(`${fmtTime(left)} left`); }
+    } else {
+      const allSaved = ok && receivedFiles(its).every((t) => t.saved);
+      add(`${ok} ${ok === 1 ? 'file' : 'files'} ${out ? 'delivered' : allSaved ? 'saved' : 'received'}`, ok ? 'good' : '');
+      if (bad) add(`${bad} failed`, 'bad');
+    }
+    prog.hidden = complete;
+    bar.style.width = `${total ? Math.min(100, (got / total) * 100) : 0}%`;
+    list.hidden = !b.open;
+
+    if (complete && !b.done) {
+      b.done = true;
+      if (!out && ok) {
+        toast(`Received ${ok} ${ok === 1 ? 'file' : 'files'} from ${b.peer.name}`);
+        if ($('#autosave').checked) { saveBatchZip(b); return; }
+      }
+    }
+
+    const files = receivedFiles(its);
+    const actKey = `${complete}|${b.open}|${files.length}|${files.every((t) => t.saved)}|${its.length}`;
+    if (b.actKey === actKey) return;
+    b.actKey = actKey;
+    actions.textContent = '';
+    const btn = (label, fn, cls = '') => { const x = el('button', `btn small-btn ${cls}`, label); x.type = 'button'; x.addEventListener('click', fn); actions.append(x); return x; };
+    if (!complete) btn('Cancel all', () => { for (const t of [...its]) if (!FINAL.has(t.state)) cancelItem(t, true); renderBatch(b); }, 'danger');
+    if (complete && !out && files.length) {
+      const saved = files.every((t) => t.saved);
+      btn(saved ? 'Download ZIP again' : 'Download ZIP', () => saveBatchZip(b), saved ? '' : 'primary');
+    }
+    const t = btn(b.open ? 'Hide files' : 'Show files', () => { b.open = !b.open; renderBatch(b); });
+    t.setAttribute('aria-expanded', String(b.open));
+    if (complete) { const x = btn('×', () => { for (const it of [...its]) removeItem(it); }, 'icon'); x.setAttribute('aria-label', 'Remove from list'); }
+  }
+
+  function removeBatchIfEmpty(b) {
+    if (b.items.length) { renderBatch(b); return; }
+    b.el.li.remove();
+    batches.delete(b.key);
   }
 
   function removeItem(tr) {
@@ -704,6 +927,7 @@
     if (tr.thumb) URL.revokeObjectURL(tr.thumb);
     removeStored(tr.opfsName);
     tr.el.li.remove();
+    if (tr.batch) { const b = tr.batch, j = b.items.indexOf(tr); if (j >= 0) b.items.splice(j, 1); removeBatchIfEmpty(b); }
     syncActivity();
   }
 
@@ -733,7 +957,7 @@
     const actions = el('div', 'x-actions');
     li.append(icon, main, actions);
     tr.el = { li, icon, meta, prog, bar, actions };
-    $('#xfers').prepend(li);
+    if (tr.batch) tr.batch.el.list.append(li); else $('#xfers').prepend(li);
     if (tr.kind === 'file' && tr.dir === 'out' && /^image\//.test(tr.type) && tr.size < 30e6) setThumb(tr, tr.file);
   }
 
@@ -809,18 +1033,24 @@
       x.setAttribute('aria-label', 'Remove from list');
     }
   }
-  function renderAllItems() { for (const tr of items) renderItem(tr); }
+  function renderAllItems() {
+    for (const tr of items) renderItem(tr);
+    for (const b of new Set(items.map((t) => t.batch).filter(Boolean))) { b.actKey = ''; renderBatch(b); }
+  }
 
   function syncActivity() {
     $('#xfers-empty').hidden = items.length > 0;
     $('#clear-done').hidden = !items.some((t) => FINAL.has(t.state));
-    $('#save-all').hidden = items.filter((t) => t.dir === 'in' && t.kind === 'file' && t.state === 'done' && !t.saved).length < 2;
+    $('#save-all').hidden = receivedFiles(items).length < 2;
   }
 
-  $('#clear-done').addEventListener('click', () => { for (const tr of items.filter((t) => FINAL.has(t.state))) removeItem(tr); });
-  $('#save-all').addEventListener('click', async () => {
-    const list = items.filter((t) => t.dir === 'in' && t.kind === 'file' && t.state === 'done' && !t.saved).reverse();
-    for (const tr of list) { saveItem(tr); await new Promise((r) => setTimeout(r, 350)); } // browsers drop downloads fired all at once
+  // Finished files leave the list, but a group still in progress keeps all of its files together.
+  $('#clear-done').addEventListener('click', () => { for (const tr of items.filter((t) => FINAL.has(t.state) && (!t.batch || t.batch.done))) removeItem(tr); });
+  // Everything received, in one ZIP. Files from different devices go in a folder per device.
+  $('#save-all').addEventListener('click', () => {
+    const list = receivedFiles(items).reverse();
+    const devices = new Set(list.map((t) => t.peer.name));
+    saveZip(list, `Beam ${zipStamp()}.zip`, devices.size > 1 ? (t) => `${zipName(t.peer.name)}/` : null);
   });
 
   /* =====================================================================
@@ -1013,6 +1243,7 @@
      ===================================================================== */
   let totalSent = 0, totalRecv = 0, upNow = 0, downNow = 0, lastTick = performance.now(), wake = null, wakeBusy = false;
   const history_ = [];
+  const liveBatches = new Set();
   const HIST = 60;
 
   setInterval(() => {
@@ -1030,8 +1261,11 @@
         if (tr.dir === 'out') up += inst; else down += inst;
         active++; done += tr.bytes; total += tr.size;
         renderItem(tr);
+        if (tr.batch) liveBatches.add(tr.batch);
       } else if (tr.state === 'waiting' || tr.state === 'queued') active++;
     }
+    for (const b of liveBatches) renderBatch(b);
+    liveBatches.clear();
     upNow = upNow * 0.5 + up * 0.5; downNow = downNow * 0.5 + down * 0.5;
     if (up === 0 && upNow < 1024) upNow = 0;
     if (down === 0 && downNow < 1024) downNow = 0;
