@@ -132,6 +132,23 @@ td.q{min-width:220px;max-width:480px}
 .delta-up{color:var(--good)}.delta-down{color:var(--bad)}
 .empty{color:var(--muted);padding:12px 0}
 .tip{position:fixed;z-index:10;pointer-events:none;background:var(--tip-bg);color:var(--tip-ink);padding:6px 9px;border-radius:6px;font-size:12px;line-height:1.4;white-space:pre-line;max-width:320px;box-shadow:0 4px 14px rgba(0,0,0,.18)}
+.qdot{stroke:var(--surface);stroke-width:1.5}
+.qdot:hover{stroke:var(--ink)}
+.nodot{fill:var(--surface);background:var(--surface);stroke:var(--muted);box-shadow:inset 0 0 0 2px var(--muted)}
+circle.nodot{stroke:var(--muted);stroke-width:2}
+.ratio{display:flex;gap:2px;height:8px;margin:6px 0 12px}
+.ratio .bf{border-radius:4px;height:8px}
+.qtable{max-height:none}
+.small{font-size:12px}
+.muted{color:var(--muted)}
+.filters:empty{display:none}
+.ratiorow{display:flex;align-items:center;gap:10px;margin:6px 0 12px}
+.ratiorow .ratio{flex:1;margin:0}
+.ratiorow span.lbl2{font-size:12px;color:var(--ink2);white-space:nowrap}
+.vbadge{display:inline-block;min-width:28px;text-align:center;padding:1px 6px;border-radius:999px;background:var(--wash);color:var(--ink2);font-size:12px;font-variant-numeric:tabular-nums}
+.status{display:inline-flex;align-items:center;gap:6px}
+.status.no{color:var(--bad)}
+.cc{display:inline-block;font-size:11px;padding:0 4px;border-radius:3px;border:1px solid var(--border);color:var(--ink2);font-weight:600}
 .tip[hidden]{display:none}
 @media (max-width:600px){.kv{font-size:22px}.wrap{padding:12px 16px}}
 @media (forced-colors:active){.bf,.sw{forced-color-adjust:none}}
@@ -496,58 +513,61 @@ function fillTable(id) {
 }
 
 // ---------- views ----------
+// Ask About Me gets few questions, so it is one compact card: a timeline of dots and a table.
 function questionsView(rows, prev) {
   const sessions = (rs) => uniq(rs, (r) => r.session);
   let h = kpis([
     { label: 'Questions', val: (rs) => rs.length, fmt: fmtN },
-    { label: 'Chat sessions', val: sessions, fmt: fmtN },
-    { label: 'Visitors (IPs)', val: (rs) => uniq(rs, (r) => r.ip), fmt: fmtN },
+    { label: 'Visitors', val: sessions, fmt: fmtN },
     { label: 'Answered', val: (rs) => rs.length ? rs.filter((r) => r.answered).length / rs.length : null, fmt: (v) => v == null ? '–' : Math.round(100 * v) + '%', type: 'rate' },
-    { label: 'Questions / session', val: (rs) => sessions(rs) ? rs.length / sessions(rs) : null, fmt: (v) => v == null ? '–' : v.toFixed(1) },
     { label: 'Countries', val: (rs) => uniq(rs, (r) => r.country), fmt: fmtN },
   ], rows, prev);
-  if (!rows.length) return h + '<p class="empty">No questions in this range' + (Object.keys(state.f).length ? ' with these filters.' : '.') + '</p>';
-  h += '<div class="grid">';
-  const names = ['Answered', 'No answer found'];
-  h += card('Questions per day', null, legend([{ cls: 's1', label: names[0] }, { cls: 'rest', label: names[1] }]) +
-    slot((w) => columns(w, dayCats(rows, [(r) => r.answered, (r) => !r.answered], names, 'question'), ['s1', 'rest'], { label: 'Questions per day' })), 'wide');
-  h += mapCard(rows, 'question');
+  if (!rows.length) return h + '<p class="empty">No questions in this range.</p>';
 
-  const asked = [...groupBy(rows, (r) => r.q)].map(([k, rs]) => ({ key: k, label: rs[0].question, vals: [rs.filter((r) => r.answered).length, rs.filter((r) => !r.answered).length],
-    tip: ['asked by ' + plural(uniq(rs, (r) => r.ip), 'visitor'), 'last ' + ago(rs[0].t)] })).sort((a, b) => sum(b.vals) - sum(a.vals));
-  h += card('Most asked', 'Same wording grouped (case and end punctuation ignored)', legend([{ cls: 's1', label: 'Answered' }, { cls: 'rest', label: 'No answer' }]) +
-    bars(asked, { series: ['s1', 'rest'], top: 12, unit: 'time' }));
+  // Number visitors (chat sessions) in the order they first appeared, so a visitor's questions read as a group.
+  const vno = new Map();
+  rows.slice().reverse().forEach((r) => { const k = r.session || r.ip; if (!vno.has(k)) vno.set(k, vno.size + 1); });
+  const who = (r) => vno.get(r.session || r.ip);
 
-  const missed = [...groupBy(rows.filter((r) => !r.answered), (r) => r.q)].map(([, rs]) => rs).sort((a, b) => b.length - a.length || b[0].t - a[0].t);
-  h += card('Unanswered questions', missed.length ? 'What the bot could not answer: ideas for new content' : null, missed.length ?
-    `<div class="tablewrap"><table><thead><tr><th>Question</th><th class="num">Times</th><th>Last asked</th></tr></thead><tbody>${missed.slice(0, 60).map((rs) =>
-      `<tr><td class="q" title="${esc('Last from ' + rs[0].place)}">${esc(rs[0].question)}</td><td class="num">${fmtN(rs.length)}</td><td class="nowrap" title="${esc(dfTime.format(rs[0].t))}">${esc(ago(rs[0].t))}</td></tr>`).join('')}</tbody></table></div>` :
-    '<p class="empty">Every question got an answer.</p>');
+  const timeline = (w) => {
+    const ml = 8, mr = 8, H = 64, y0 = 30, span = nowMs - startCur;
+    const xOf = (t) => ml + ((t - startCur) / span) * (w - ml - mr);
+    let s = `<svg width="${w}" height="${H}" role="img" aria-label="Questions over time"><line class="base" x1="${ml}" x2="${w - mr}" y1="${y0}" y2="${y0}"/>`;
+    const n = Math.min(6, D.days);
+    for (let i = 0; i <= n; i++) {
+      const t = startCur + (span * i) / n, x = xOf(t);
+      s += `<line class="gridl" x1="${x}" x2="${x}" y1="${y0 - 4}" y2="${y0 + 4}"/><text x="${x}" y="${H - 6}" text-anchor="${i === 0 ? 'start' : i === n ? 'end' : 'middle'}">${esc(dfDay.format(new Date(t)))}</text>`;
+    }
+    // Stack dots that would overlap so every question stays visible.
+    const lanes = [];
+    for (const r of rows.slice().sort((a, b) => a.t - b.t)) {
+      const x = xOf(r.t);
+      let lane = 0;
+      while (lanes[lane] != null && x - lanes[lane] < 11) lane++;
+      lanes[lane] = x;
+      const y = y0 - 10 - (lane % 3) * 9;
+      s += `<circle class="qdot ${r.answered ? 's1' : 'nodot'}" cx="${x.toFixed(1)}" cy="${y}" r="4.5" ${tipAttr([dfTime.format(r.t), '“' + r.question + '”', r.answered ? 'Answered' + (r.title ? ': ' + r.title : '') : 'No answer found', r.place])}/>`;
+    }
+    return s + '</svg>';
+  };
 
-  h += card('Answered with', 'The item the bot replied with', bars(simpleItems(countBy(rows, (r) => r.topic)), { field: 'topic', series: ['s1'], unit: 'question' }));
-  h += card('Answer type', '“fallback” = no answer found', bars(simpleItems(countBy(rows, (r) => r.kind)), { field: 'kind', series: ['s1'], unit: 'question' }));
+  const answered = rows.filter((r) => r.answered).length;
+  const ratio = `<div class="ratio" ${tipAttr([fmtN(answered) + ' answered', fmtN(rows.length - answered) + ' not answered'])}>` +
+    (answered ? `<span class="bf s1" style="flex:${answered}"></span>` : '') +
+    (rows.length - answered ? `<span class="bf rest" style="flex:${rows.length - answered}"></span>` : '') + '</div>';
 
-  const perSession = [...groupBy(rows, (r) => r.session)].map(([, rs]) => rs.length);
-  const B = [[1, 1, '1'], [2, 2, '2'], [3, 3, '3'], [4, 5, '4–5'], [6, 9, '6–9'], [10, 1e9, '10+']];
-  h += card('Questions per session', 'How far people go in one chat', slot((w) => columns(w, B.map(([a, b, l]) => {
-    const n = perSession.filter((x) => x >= a && x <= b).length;
-    return { label: l, vals: [n], tip: [l + ' question' + (l === '1' ? '' : 's'), plural(n, 'session')] };
-  }), ['s1'], { every: 1, label: 'Sessions by number of questions' })));
-  h += card('When', 'Day and hour, your local time', slot((w) => heatmap(w, rows, 'question')) + heatLegend());
-  h += placeCards(rows, 'question');
-  h += card('Chat opened on', 'Page the question was asked from', bars(simpleItems(countBy(rows, (r) => r.pageL)), { field: 'pageL', series: ['s1'], unit: 'question' }));
-  h += card('Traffic sources', 'Referrer of the page', bars(simpleItems(countBy(rows, (r) => r.ref)), { field: 'ref', series: ['s1'], unit: 'question' }));
-  h += techCard(rows, 'question');
-  h += recentCard('All questions', rows, [
-    { h: 'When', v: (r) => dfTime.format(r.t), cls: 'nowrap' },
-    { h: 'Question', v: (r) => r.question, cls: 'q' },
-    { h: 'Answer', v: (r) => r.kind + (r.title ? ': ' + r.title : ''), html: (r) => `<span class="tag${r.answered ? '' : ' no'}">${esc(r.kind)}</span> ${esc(r.title || '')}` },
-    { h: 'From', v: (r) => r.place + ' · ' + r.network, cls: 'muted' },
-    { h: 'IP', v: (r) => r.ip || '', cls: 'muted nowrap' },
-    { h: 'Device', v: (r) => r.device + ' · ' + r.browser + ' · ' + r.os, cls: 'muted nowrap' },
-    { h: 'Session', v: (r) => (r.session || '').slice(0, 8), cls: 'muted nowrap', title: (r) => r.session || '' },
-  ]);
-  return h + '</div>';
+  const body = legend([{ cls: 's1 dotsw', label: 'Answered' }, { cls: 'nodot dotsw', label: 'No answer found' }]) + slot(timeline) +
+    `<div class="ratiorow">${ratio}<span class="lbl2">${fmtN(answered)} of ${fmtN(rows.length)} answered</span></div>` +
+    `<div class="tablewrap qtable"><table><thead><tr><th>When</th><th>Visitor</th><th>Question</th><th>Bot's answer</th><th>From</th><th>Device</th></tr></thead><tbody>` +
+    rows.slice(0, 500).map((r) => `<tr>` +
+      `<td class="nowrap" title="${esc(dfTime.format(r.t))}">${esc(dfDay.format(r.t))}<div class="muted small">${esc(ago(r.t))}</div></td>` +
+      `<td><span class="vbadge" title="${esc('Chat session ' + (r.session || ''))}">#${who(r)}</span></td>` +
+      `<td class="q">${esc(r.question)}</td>` +
+      `<td>${r.answered ? `<span class="status ok"><i class="sw dotsw s1"></i>${esc(r.title || r.kind)}</span>` : '<span class="status no"><i class="sw dotsw nodot"></i>No answer</span>'}</td>` +
+      `<td><b class="cc">${esc(r.country || '??')}</b> ${esc(r.city || r.countryName)}<div class="muted small">${esc(r.network)}</div></td>` +
+      `<td class="nowrap muted">${esc(r.device)}<div class="small">${esc(r.browser + ' · ' + r.os)}</div></td></tr>`).join('') +
+    '</tbody></table></div>';
+  return h + '<div class="grid">' + card('Questions', 'Newest first. Hover a dot for the question.', body, 'wide') + '</div>';
 }
 
 const SECTION_CLS = { tools: 's1', games: 's2', learn: 's3', home: 's4' };
@@ -667,7 +687,7 @@ function renderFilters() {
   document.getElementById('filters').innerHTML = fs.length
     ? '<span class="lbl">Filtered by</span>' + fs.map(([k, o]) => `<span class="chip">${esc(FIELD[k] || k)}: <b>${esc(o.label)}</b><button type="button" data-clear="${esc(k)}" aria-label="Remove filter">×</button></span>`).join('') +
       (fs.length > 1 ? '<button type="button" class="linkbtn" data-clear="*">Clear all</button>' : '')
-    : '<span class="lbl">Click any country, city, app, bar or list row to filter the whole page.</span>';
+    : D.view === 'questions' ? '' : '<span class="lbl">Click any country, city, app, bar or list row to filter the whole page.</span>';
 }
 function drawCharts() {
   for (const c of charts) {

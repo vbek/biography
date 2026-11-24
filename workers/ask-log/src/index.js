@@ -200,7 +200,7 @@ async function view(url, env) {
         view: name, days, ranges: RANGES, app: url.searchParams.get('app') || null,
         now: new Date().toISOString(), capped: rows.length >= DASH_MAX_ROWS,
         retentionDays: Number(env.RETENTION_DAYS) || 180, cols, rows,
-        world: name === 'apps' ? null : WORLD,
+        world: name === 'visits' ? WORLD : null,
     };
     const nonce = crypto.randomUUID().replace(/-/g, '');
     const html = PAGE.split('__NONCE__').join(nonce)
