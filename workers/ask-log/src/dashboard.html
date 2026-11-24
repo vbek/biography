@@ -1,0 +1,737 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<meta name="robots" content="noindex">
+<title>Site analytics</title>
+<style>
+:root{
+  color-scheme:light;
+  --page:#f9f9f7;--surface:#fcfcfb;--ink:#0b0b0b;--ink2:#52514e;--muted:#898781;
+  --grid:#e1e0d9;--axis:#c3c2b7;--border:rgba(11,11,11,.10);--wash:rgba(11,11,11,.05);
+  --link:#256abf;--good:#006300;--bad:#d03b3b;
+  --s1:#2a78d6;--s2:#eb6834;--s3:#1baf7a;--s4:#eda100;--rest:#c3c2b7;
+  --empty:#ecebe6;--q1:#b7d3f6;--q2:#86b6ef;--q3:#5598e7;--q4:#2a78d6;--q5:#184f95;
+  --tip-bg:#0b0b0b;--tip-ink:#f0efec;
+}
+@media (prefers-color-scheme:dark){
+  :root:not([data-theme="light"]){
+    color-scheme:dark;
+    --page:#0d0d0d;--surface:#1a1a19;--ink:#f0efec;--ink2:#c3c2b7;--muted:#898781;
+    --grid:#2c2c2a;--axis:#383835;--border:rgba(255,255,255,.10);--wash:rgba(255,255,255,.06);
+    --link:#6da7ec;--good:#0ca30c;--bad:#e66767;
+    --s1:#3987e5;--s2:#d95926;--s3:#199e70;--s4:#c98500;--rest:#4a4a46;
+    --empty:#2a2a28;--q1:#104281;--q2:#1c5cab;--q3:#2a78d6;--q4:#5598e7;--q5:#9ec5f4;
+    --tip-bg:#f0efec;--tip-ink:#0b0b0b;
+  }
+}
+:root[data-theme="dark"]{
+  color-scheme:dark;
+  --page:#0d0d0d;--surface:#1a1a19;--ink:#f0efec;--ink2:#c3c2b7;--muted:#898781;
+  --grid:#2c2c2a;--axis:#383835;--border:rgba(255,255,255,.10);--wash:rgba(255,255,255,.06);
+  --link:#6da7ec;--good:#0ca30c;--bad:#e66767;
+  --s1:#3987e5;--s2:#d95926;--s3:#199e70;--s4:#c98500;--rest:#4a4a46;
+  --empty:#2a2a28;--q1:#104281;--q2:#1c5cab;--q3:#2a78d6;--q4:#5598e7;--q5:#9ec5f4;
+  --tip-bg:#f0efec;--tip-ink:#0b0b0b;
+}
+*{box-sizing:border-box}
+body{margin:0;background:var(--page);color:var(--ink);font:14px/1.45 system-ui,-apple-system,"Segoe UI",sans-serif}
+a{color:var(--link)}
+.wrap{max-width:1280px;margin:0 auto;padding:16px}
+.top{display:flex;flex-wrap:wrap;gap:12px;align-items:center;justify-content:space-between;margin-bottom:12px}
+.tabs,.seg{display:flex;flex-wrap:wrap;gap:4px}
+.tabs a,.seg a{padding:6px 12px;border-radius:8px;text-decoration:none;color:var(--ink2);border:1px solid transparent}
+.tabs a:hover,.seg a:hover{background:var(--wash)}
+.tabs a[aria-current],.seg a[aria-current]{background:var(--surface);color:var(--ink);border-color:var(--border);font-weight:600}
+.seg{background:var(--wash);border-radius:10px;padding:3px}
+.seg a{padding:4px 10px}
+h1{font-size:20px;margin:4px 0 2px}
+.meta{color:var(--muted);font-size:12px;margin:0 0 12px}
+.meta a{color:inherit}
+.note{background:var(--surface);border:1px solid var(--border);border-left:3px solid var(--s4);border-radius:8px;padding:8px 12px;margin:0 0 12px;color:var(--ink2)}
+.filters{display:flex;flex-wrap:wrap;gap:8px;align-items:center;margin:0 0 12px;min-height:30px}
+.filters .lbl{color:var(--muted);font-size:12px}
+.chip{display:inline-flex;align-items:center;gap:6px;padding:4px 6px 4px 10px;border-radius:999px;background:var(--surface);border:1px solid var(--border);font-size:13px}
+.chip button,.linkbtn{border:0;background:none;color:var(--ink2);cursor:pointer;font:inherit;padding:0 4px;border-radius:4px}
+.chip button:hover,.linkbtn:hover{background:var(--wash)}
+.linkbtn{color:var(--link);font-size:13px}
+.kpis{display:grid;grid-template-columns:repeat(auto-fit,minmax(150px,1fr));gap:12px;margin-bottom:16px}
+.kpi{background:var(--surface);border:1px solid var(--border);border-radius:12px;padding:12px 14px}
+.kl{color:var(--ink2);font-size:12px}
+.kv{font-size:26px;font-weight:600;line-height:1.2;margin:2px 0}
+.kd{font-size:12px;color:var(--muted)}
+.kd b{font-weight:600}
+.kd .up{color:var(--good)}.kd .down{color:var(--bad)}
+.grid{display:grid;grid-template-columns:repeat(auto-fit,minmax(min(100%,380px),1fr));gap:16px}
+.card{background:var(--surface);border:1px solid var(--border);border-radius:12px;padding:14px 16px;min-width:0}
+.card.wide{grid-column:1/-1}
+.card h2{font-size:15px;margin:0}
+.card .sub{color:var(--muted);font-size:12px;margin:2px 0 0}
+.card header{margin-bottom:10px}
+.chart{width:100%;min-height:40px}
+.chart svg{display:block;overflow:visible}
+.chart svg.map{overflow:hidden}
+.legend{display:flex;flex-wrap:wrap;gap:4px 14px;font-size:12px;color:var(--ink2);margin:0 0 8px}
+.legend span{display:inline-flex;align-items:center;gap:6px}
+.sw{display:inline-block;width:10px;height:10px;border-radius:3px}
+.sw.dotsw{border-radius:50%}
+.s1{fill:var(--s1);background:var(--s1)}.s2{fill:var(--s2);background:var(--s2)}
+.s3{fill:var(--s3);background:var(--s3)}.s4{fill:var(--s4);background:var(--s4)}
+.rest{fill:var(--rest);background:var(--rest)}
+.q0{fill:var(--empty);background:var(--empty)}.q1{fill:var(--q1);background:var(--q1)}.q2{fill:var(--q2);background:var(--q2)}
+.q3{fill:var(--q3);background:var(--q3)}.q4{fill:var(--q4);background:var(--q4)}.q5{fill:var(--q5);background:var(--q5)}
+svg text{font:11px system-ui,-apple-system,"Segoe UI",sans-serif;fill:var(--muted);font-variant-numeric:tabular-nums}
+.gridl{stroke:var(--grid);stroke-width:1}
+.base{stroke:var(--axis);stroke-width:1}
+.hit{fill:transparent;cursor:default}
+.hit:hover{fill:var(--wash)}
+.land{stroke:var(--surface);stroke-width:.6;cursor:pointer}
+.land.nocode{cursor:default}
+.land:hover,.land.on{stroke:var(--ink);stroke-width:1.2}
+.dot{fill:var(--s2);fill-opacity:.85;stroke:var(--surface);stroke-width:1.5;cursor:pointer}
+.dot:hover{fill-opacity:1;stroke:var(--ink)}
+.cell{cursor:default}
+.cell:hover{stroke:var(--ink);stroke-width:1}
+.spark{fill:none;stroke:var(--s1);stroke-width:2;stroke-linejoin:round;stroke-linecap:round}
+.sparkdot{fill:var(--s1)}
+.maplegend{display:flex;flex-wrap:wrap;gap:4px 14px;align-items:center;font-size:12px;color:var(--ink2);margin-top:8px}
+.ramp{display:inline-flex;gap:2px;align-items:center}
+.ramp .sw{width:22px;height:10px;border-radius:2px}
+.missing{font-size:12px;color:var(--muted);margin:6px 0 0}
+ol.bars{list-style:none;margin:0;padding:0}
+.bar-row{display:grid;grid-template-columns:minmax(0,40%) 1fr auto;gap:10px;align-items:center;padding:3px 4px;border-radius:6px}
+.bar-row[data-f]{cursor:pointer}
+.bar-row:hover{background:var(--wash)}
+.bar-row.on{background:var(--wash);box-shadow:inset 3px 0 0 var(--ink)}
+.bl{overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
+.bt{display:flex;gap:2px;height:10px}
+.bf{display:block;height:10px;border-radius:0 4px 4px 0;min-width:2px}
+.bt .bf:not(:last-child){border-radius:0}
+.bv{font-variant-numeric:tabular-nums;color:var(--ink2);min-width:3ch;text-align:right}
+details.more>summary{cursor:pointer;color:var(--link);font-size:13px;margin:6px 4px 0;list-style:none}
+details.more>summary::-webkit-details-marker{display:none}
+.trio{display:grid;grid-template-columns:repeat(auto-fit,minmax(150px,1fr));gap:12px}
+.trio h3{font-size:12px;color:var(--ink2);font-weight:600;margin:0 0 4px}
+.trio .bar-row{grid-template-columns:minmax(0,45%) 1fr auto}
+.tablewrap{overflow-x:auto;max-height:640px;overflow-y:auto;border-top:1px solid var(--grid)}
+table{border-collapse:collapse;width:100%;font-size:13px}
+th,td{padding:6px 8px;text-align:left;vertical-align:top;border-bottom:1px solid var(--grid)}
+th{position:sticky;top:0;background:var(--surface);color:var(--ink2);font-weight:600;white-space:nowrap;z-index:1}
+th[data-sort]{cursor:pointer}
+th[data-sort]:hover{color:var(--ink)}
+td.num,th.num{text-align:right;font-variant-numeric:tabular-nums}
+td.nowrap{white-space:nowrap}
+td.muted{color:var(--muted)}
+td.q{min-width:220px;max-width:480px}
+.tag{display:inline-block;padding:0 6px;border-radius:4px;background:var(--wash);color:var(--ink2);font-size:12px}
+.tag.no{color:var(--bad)}
+.tools{display:flex;flex-wrap:wrap;gap:8px;align-items:center;margin-bottom:8px}
+.tools input{flex:1 1 220px;padding:6px 10px;border-radius:8px;border:1px solid var(--border);background:var(--page);color:var(--ink);font:inherit}
+.tools .count{color:var(--muted);font-size:12px}
+.delta-up{color:var(--good)}.delta-down{color:var(--bad)}
+.empty{color:var(--muted);padding:12px 0}
+.tip{position:fixed;z-index:10;pointer-events:none;background:var(--tip-bg);color:var(--tip-ink);padding:6px 9px;border-radius:6px;font-size:12px;line-height:1.4;white-space:pre-line;max-width:320px;box-shadow:0 4px 14px rgba(0,0,0,.18)}
+.tip[hidden]{display:none}
+@media (max-width:600px){.kv{font-size:22px}.wrap{padding:12px 16px}}
+@media (forced-colors:active){.bf,.sw{forced-color-adjust:none}}
+</style>
+</head>
+<body>
+<div class="wrap">
+  <div class="top">
+    <nav class="tabs" id="tabs" aria-label="Views"></nav>
+    <nav class="seg" id="ranges" aria-label="Date range"></nav>
+  </div>
+  <h1 id="title"></h1>
+  <p class="meta" id="meta"></p>
+  <div id="notes"></div>
+  <div class="filters" id="filters"></div>
+  <main id="main"></main>
+</div>
+<div class="tip" id="tip" role="tooltip" hidden></div>
+<script id="data" type="application/json">__DATA__</script>
+<script nonce="__NONCE__">
+(() => {
+'use strict';
+const D = JSON.parse(document.getElementById('data').textContent);
+const NL = String.fromCharCode(10);
+const DAY = 864e5;
+const SITE_HOSTS = ['bibek-koirala.com.np', 'www.bibek-koirala.com.np'];
+const params = new URLSearchParams(location.search);
+const KEY = params.get('key') || '';
+const TZ = (() => { try { return Intl.DateTimeFormat().resolvedOptions().timeZone; } catch (e) { return 'local'; } })();
+
+// ---------- helpers ----------
+const esc = (v) => String(v == null ? '' : v).replace(/[&<>"']/g, (c) => ({ '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;', "'": '&#39;' }[c]));
+const nf = new Intl.NumberFormat('en');
+const fmtN = (n) => nf.format(Math.round(n));
+const fmtShort = (n) => n >= 1e6 ? (n / 1e6).toFixed(n >= 1e7 ? 0 : 1) + 'M' : n >= 1e4 ? Math.round(n / 1e3) + 'k' : n >= 1e3 ? (n / 1e3).toFixed(1) + 'k' : String(n);
+const pct = (a, b) => b ? Math.round(100 * a / b) + '%' : '–';
+const sum = (a) => a.reduce((x, y) => x + y, 0);
+const plural = (n, one, many) => fmtN(n) + ' ' + (n === 1 ? one : (many || one + 's'));
+function fmtDur(s) {
+  if (s == null || !isFinite(s)) return '–';
+  s = Math.round(s);
+  if (s < 60) return s + 's';
+  if (s < 3600) return Math.floor(s / 60) + 'm' + (s % 60 ? ' ' + (s % 60) + 's' : '');
+  return Math.floor(s / 3600) + 'h ' + Math.round((s % 3600) / 60) + 'm';
+}
+function median(a) {
+  if (!a.length) return null;
+  const s = a.slice().sort((x, y) => x - y), m = s.length >> 1;
+  return s.length % 2 ? s[m] : (s[m - 1] + s[m]) / 2;
+}
+const pad = (n) => String(n).padStart(2, '0');
+const dayKey = (d) => d.getFullYear() + '-' + pad(d.getMonth() + 1) + '-' + pad(d.getDate());
+const dfDay = new Intl.DateTimeFormat('en', { month: 'short', day: 'numeric' });
+const dfDayW = new Intl.DateTimeFormat('en', { weekday: 'short', month: 'short', day: 'numeric' });
+const dfTime = new Intl.DateTimeFormat('en', { month: 'short', day: 'numeric', hour: '2-digit', minute: '2-digit', hour12: false });
+function ago(t) {
+  const s = (Date.now() - t) / 1000;
+  if (s < 90) return 'just now';
+  if (s < 5400) return Math.round(s / 60) + ' min ago';
+  if (s < 129600) return Math.round(s / 3600) + ' h ago';
+  return Math.round(s / 86400) + ' days ago';
+}
+let regionNames = null;
+try { regionNames = new Intl.DisplayNames(['en'], { type: 'region' }); } catch (e) { /* old browser */ }
+const nameCache = {};
+function cname(code) {
+  if (!code) return 'Unknown';
+  if (code in nameCache) return nameCache[code];
+  let n = code;
+  if (code === 'T1') n = 'Tor network';
+  else if (code === 'XX') n = 'Unknown';
+  else { try { n = (regionNames && regionNames.of(code)) || code; } catch (e) { n = code; } }
+  return (nameCache[code] = n);
+}
+function countBy(rows, fn) {
+  const m = new Map();
+  for (const r of rows) { const k = fn(r); if (k == null || k === '') continue; m.set(k, (m.get(k) || 0) + 1); }
+  return [...m].sort((a, b) => b[1] - a[1] || String(a[0]).localeCompare(String(b[0])));
+}
+function groupBy(rows, fn) {
+  const m = new Map();
+  for (const r of rows) { const k = fn(r); if (k == null || k === '') continue; if (!m.has(k)) m.set(k, []); m.get(k).push(r); }
+  return m;
+}
+const uniq = (rows, fn) => new Set(rows.map(fn).filter((v) => v != null && v !== '')).size;
+function refLabel(ref) {
+  if (!ref) return 'Direct / none';
+  try {
+    const u = new URL(ref);
+    if (SITE_HOSTS.includes(u.hostname)) return 'This site ' + (u.pathname || '/');
+    return u.hostname.replace(/^www[.]/, '');
+  } catch (e) { return 'Other'; }
+}
+function pagePath(p) {
+  if (!p) return 'Unknown';
+  try { const u = new URL(p, 'https://' + SITE_HOSTS[0]); return u.pathname || '/'; } catch (e) { return p; }
+}
+const normQ = (q) => String(q || '').toLowerCase().replace(/[?!.,;:]+$/g, '').replace(/[ ]+/g, ' ').trim();
+
+// ---------- rows ----------
+const nowMs = Date.parse(D.now);
+const startCur = nowMs - D.days * DAY, startPrev = nowMs - 2 * D.days * DAY;
+const hasPrev = 2 * D.days <= D.retentionDays;
+const all = D.rows.map((a) => {
+  const r = {};
+  D.cols.forEach((c, i) => { r[c] = a[i]; });
+  r.t = new Date(String(r.ts).replace(' ', 'T') + 'Z');
+  r.countryName = cname(r.country);
+  r.place = r.city ? r.city + ', ' + r.countryName : r.countryName + ' (city unknown)';
+  r.ref = refLabel(r.referrer);
+  r.network = r.network || 'Unknown';
+  r.day = dayKey(r.t);
+  r.dow = (r.t.getDay() + 6) % 7;
+  r.hour = r.t.getHours();
+  if (D.view === 'questions') {
+    r.kind = r.kind || 'unknown';
+    r.answered = r.kind !== 'fallback';
+    r.q = normQ(r.question);
+    r.topic = r.title || (r.answered ? '(no title)' : null);
+    r.pageL = pagePath(r.page);
+  } else {
+    r.used = !!r.used;
+    r.seconds = Number(r.seconds) || 0;
+    r.section = String(r.app || '').split('/')[0] || 'other';
+  }
+  return r;
+});
+const curAll = all.filter((r) => r.t >= startCur);
+const prevAll = all.filter((r) => r.t >= startPrev && r.t < startCur);
+
+// ---------- filters ----------
+const FIELD = { country: 'Country', place: 'City', app: 'App', section: 'Section', kind: 'Answer type', topic: 'Answered with',
+  device: 'Device', browser: 'Browser', os: 'OS', network: 'Network', ref: 'Source', pageL: 'Page' };
+const state = { f: {}, search: '', sort: { key: 'opens', dir: -1 } };
+if (D.app) state.f.app = { v: D.app, label: D.app };
+const applyF = (rows) => {
+  const fs = Object.entries(state.f);
+  return fs.length ? rows.filter((r) => fs.every(([k, o]) => String(r[k]) === o.v)) : rows;
+};
+const isOn = (f, v) => state.f[f] && state.f[f].v === String(v);
+
+// ---------- chrome ----------
+const VIEWS = { questions: 'Ask About Me', visits: 'Tools & games visits', apps: 'Per app' };
+function link(over) {
+  const p = new URLSearchParams({ key: KEY, view: D.view, days: String(D.days) });
+  for (const [k, v] of Object.entries(over)) { if (v == null) p.delete(k); else p.set(k, v); }
+  return '?' + p.toString();
+}
+document.getElementById('tabs').innerHTML = Object.entries(VIEWS).map(([v, t]) =>
+  `<a href="${esc(link({ view: v, app: null }))}"${v === D.view ? ' aria-current="page"' : ''}>${esc(t)}</a>`).join('');
+document.getElementById('ranges').innerHTML = D.ranges.map((d) =>
+  `<a href="${esc(link({ days: String(d), app: D.app }))}"${d === D.days ? ' aria-current="true"' : ''}>${d}d</a>`).join('');
+document.getElementById('title').textContent = VIEWS[D.view];
+document.getElementById('meta').innerHTML =
+  `Last ${D.days} days · ${esc(plural(curAll.length, D.view === 'questions' ? 'question' : 'open'))} · times in your local time (${esc(TZ)}) · ` +
+  `<a href="${esc(link({ format: 'json', limit: '1000', days: null }))}">raw JSON</a>`;
+const notes = [];
+if (D.capped) notes.push(`Showing the newest ${fmtN(D.rows.length)} rows only; older rows in this range are left out. Pick a shorter range for exact numbers.`);
+document.getElementById('notes').innerHTML = notes.map((n) => `<p class="note">${esc(n)}</p>`).join('');
+
+// ---------- components ----------
+let charts = [];
+let chartN = 0;
+function slot(draw) { const id = 'ch' + (++chartN); charts.push({ id, draw }); return `<div class="chart" id="${id}"></div>`; }
+const card = (title, sub, body, cls) =>
+  `<section class="card ${cls || ''}"><header><h2>${esc(title)}</h2>${sub ? `<p class="sub">${esc(sub)}</p>` : ''}</header>${body}</section>`;
+const legend = (items) => `<div class="legend">${items.map((i) => `<span><i class="sw ${i.cls}"></i>${esc(i.label)}</span>`).join('')}</div>`;
+const tipAttr = (lines) => `data-tip="${esc(lines.filter((l) => l != null && l !== '').join(NL))}"`;
+const fAttr = (f, v, label) => f ? ` data-f="${esc(f)}" data-v="${esc(v)}" data-l="${esc(label)}" tabindex="0"` : '';
+
+function kpis(defs, rows, prev) {
+  return `<div class="kpis">${defs.map((k) => {
+    const v = k.val(rows);
+    let d = '';
+    if (hasPrev && prev.length) {
+      const p = k.val(prev);
+      if (v != null && p != null && isFinite(v) && isFinite(p)) {
+        let txt, dir;
+        if (k.type === 'rate') { const pts = Math.round(100 * (v - p)); dir = Math.sign(pts); txt = Math.abs(pts) + ' pts'; }
+        else if (p === 0) { dir = v > 0 ? 1 : 0; txt = v > 0 ? 'new' : '0%'; }
+        else { const ch = Math.round(100 * (v - p) / p); dir = Math.sign(ch); txt = Math.abs(ch) + '%'; }
+        const cls = dir === 0 ? '' : (dir > 0) === (k.upGood !== false) ? 'up' : 'down';
+        d = `<b class="${cls}">${dir > 0 ? '▲' : dir < 0 ? '▼' : '='} ${esc(txt)}</b> vs previous ${D.days}d`;
+      }
+    } else if (!hasPrev) d = 'no earlier data kept';
+    return `<div class="kpi"><div class="kl">${esc(k.label)}</div><div class="kv">${esc(k.fmt(v))}</div><div class="kd">${d || '&nbsp;'}</div></div>`;
+  }).join('')}</div>`;
+}
+
+// Ranked horizontal bars. items: [{key, label, vals:[...], tip:[...]}], vals stack in series order.
+function bars(items, { field, series, top = 10, unit = 'row', totalText } = {}) {
+  if (!items.length) return '<p class="empty">Nothing yet.</p>';
+  const max = Math.max(...items.map((i) => sum(i.vals)), 1);
+  const row = (i) => {
+    const total = sum(i.vals);
+    const segs = i.vals.map((v, j) => v > 0 ? `<span class="bf ${series[j]}" style="width:${(100 * v / max).toFixed(2)}%"></span>` : '').join('');
+    return `<li class="bar-row${field && isOn(field, i.key) ? ' on' : ''}"${fAttr(field, i.key, i.label)} ${tipAttr([i.label, totalText ? totalText(total) : plural(total, unit)].concat(i.tip || []))}>` +
+      `<span class="bl">${esc(i.label)}</span><span class="bt">${segs}</span><span class="bv">${fmtN(total)}</span></li>`;
+  };
+  let h = `<ol class="bars">${items.slice(0, top).map(row).join('')}</ol>`;
+  if (items.length > top) h += `<details class="more"><summary>Show all ${items.length}</summary><ol class="bars">${items.slice(top).map(row).join('')}</ol></details>`;
+  return h;
+}
+const simpleItems = (entries, labelFn) => entries.map(([k, n]) => ({ key: k, label: labelFn ? labelFn(k) : String(k), vals: [n] }));
+
+function niceTicks(max) {
+  if (max <= 0) return [0, 1];
+  const raw = max / 4, p = Math.pow(10, Math.floor(Math.log10(raw))), n = raw / p;
+  const step = Math.max(1, (n <= 1 ? 1 : n <= 2 ? 2 : n <= 5 ? 5 : 10) * p);
+  const t = [];
+  for (let v = 0; v < max + step * 0.999; v += step) t.push(Math.round(v));
+  if (t.length < 2) t.push(step);
+  return t;
+}
+function topRound(x, y, w, h, r) {
+  r = Math.min(r, w / 2, h);
+  return `M${x},${y + h}V${y + r}Q${x},${y} ${x + r},${y}H${x + w - r}Q${x + w},${y} ${x + w},${y + r}V${y + h}Z`;
+}
+// Stacked columns. cats: [{label, tip, vals:[...]}]; series: class per stack slot, bottom first.
+function columns(w, cats, series, { h = 190, every, label = '' } = {}) {
+  const ml = 34, mr = 6, mt = 8, mb = 22, iw = Math.max(20, w - ml - mr), ih = h - mt - mb;
+  const ticks = niceTicks(Math.max(1, ...cats.map((c) => sum(c.vals))));
+  const top = ticks[ticks.length - 1];
+  const step = iw / cats.length, gap = step > 8 ? 2 : step > 3 ? 1 : 0, bw = Math.max(1, step - gap);
+  const yOf = (v) => mt + ih - (v / top) * ih;
+  let s = `<svg width="${w}" height="${h}" role="img" aria-label="${esc(label)}">`;
+  for (const t of ticks) {
+    const y = yOf(t);
+    s += `<line class="${t === 0 ? 'base' : 'gridl'}" x1="${ml}" x2="${w - mr}" y1="${y}" y2="${y}"/><text x="${ml - 6}" y="${y + 4}" text-anchor="end">${fmtShort(t)}</text>`;
+  }
+  every = every || Math.max(1, Math.ceil(cats.length / Math.max(1, Math.floor(iw / 64))));
+  cats.forEach((c, i) => {
+    const x = ml + i * step + gap / 2;
+    let base = yOf(0);
+    const nz = c.vals.map((v, j) => [v, j]).filter((p) => p[0] > 0);
+    nz.forEach(([v, j], k) => {
+      const hh = (v / top) * ih, y = base - hh, last = k === nz.length - 1;
+      const bottomGap = k > 0 ? Math.min(2, hh / 2) : 0;
+      const segH = Math.max(0.5, hh - bottomGap);
+      s += last ? `<path class="${series[j]}" d="${topRound(x, y, bw, segH, 4)}"/>` : `<rect class="${series[j]}" x="${x}" y="${y}" width="${bw}" height="${segH}"/>`;
+      base = y;
+    });
+    s += `<rect class="hit" x="${ml + i * step}" y="${mt}" width="${step}" height="${ih}" ${tipAttr(c.tip)}/>`;
+    if (i % every === 0) {
+      const cx = x + bw / 2;
+      const anchor = cats.length > 1 && i === 0 && step < 30 ? 'start' : 'middle';
+      s += `<text x="${anchor === 'start' ? ml + i * step : cx}" y="${h - 6}" text-anchor="${anchor}">${esc(c.label)}</text>`;
+    }
+  });
+  return s + '</svg>';
+}
+function dayCats(rows, series, names, unit) {
+  const by = groupBy(rows, (r) => r.day);
+  const cats = [];
+  const d = new Date(startCur); d.setHours(0, 0, 0, 0);
+  for (; d.getTime() <= nowMs; d.setDate(d.getDate() + 1)) {
+    const k = dayKey(d), rs = by.get(k) || [];
+    const vals = series.map((test) => rs.filter(test).length);
+    cats.push({ label: dfDay.format(d), vals,
+      tip: [dfDayW.format(d), plural(rs.length, unit)].concat(vals.map((v, i) => names[i] + ': ' + fmtN(v))) });
+  }
+  return cats;
+}
+function heatmap(w, rows, unit) {
+  const grid = Array.from({ length: 7 }, () => new Array(24).fill(0));
+  for (const r of rows) grid[r.dow][r.hour]++;
+  const max = Math.max(1, ...grid.flat());
+  const ml = 34, mt = 4, cw = (w - ml) / 24, ch = Math.min(26, Math.max(14, cw)), h = mt + 7 * ch + 20;
+  const DAYS = ['Mon', 'Tue', 'Wed', 'Thu', 'Fri', 'Sat', 'Sun'];
+  let s = `<svg width="${w}" height="${h}" role="img" aria-label="Activity by weekday and hour">`;
+  grid.forEach((row, d) => {
+    s += `<text x="${ml - 6}" y="${mt + d * ch + ch / 2 + 4}" text-anchor="end">${DAYS[d]}</text>`;
+    row.forEach((v, hr) => {
+      const lvl = v ? Math.max(1, Math.ceil(5 * v / max)) : 0;
+      s += `<rect class="cell q${lvl}" x="${ml + hr * cw + 1}" y="${mt + d * ch + 1}" width="${Math.max(1, cw - 2)}" height="${ch - 2}" rx="2" ${tipAttr([DAYS[d] + ' ' + pad(hr) + ':00–' + pad(hr) + ':59', plural(v, unit)])}/>`;
+    });
+  });
+  for (let hr = 0; hr < 24; hr += 3) s += `<text x="${ml + hr * cw + cw / 2}" y="${h - 4}" text-anchor="middle">${pad(hr)}</text>`;
+  return s + '</svg>';
+}
+const heatLegend = () => `<div class="maplegend"><span>Fewer</span><span class="ramp">${[0, 1, 2, 3, 4, 5].map((i) => `<i class="sw q${i}"></i>`).join('')}</span><span>More</span></div>`;
+
+function project(lon, lat) {
+  const l = lon * Math.PI / 180, p = lat * Math.PI / 180, p2 = p * p, p4 = p2 * p2;
+  const x = l * (0.8707 - 0.131979 * p2 + p4 * (-0.013791 + p4 * (0.003971 * p2 - 0.001529 * p4)));
+  const y = p * (1.007226 + p2 * (0.015085 + p4 * (-0.044475 + 0.028874 * p2 - 0.005916 * p4)));
+  return [D.world.w / 2 + x * D.world.scale, D.world.h / 2 - y * D.world.scale + 18];
+}
+function breaks(max) {
+  const k = Math.min(5, max), b = [];
+  for (let i = 1; i <= k; i++) { const v = Math.round(Math.pow(max, i / k)); if (!b.length || v > b[b.length - 1]) b.push(v); }
+  if (b[b.length - 1] !== max) b.push(max);
+  return b;
+}
+function mapCard(rows, unit, sub) {
+  if (!D.world) return '';
+  const byC = groupBy(rows, (r) => r.country);
+  const counts = new Map([...byC].map(([c, rs]) => [c, rs.length]));
+  const max = Math.max(0, ...counts.values());
+  const b = max ? breaks(max) : [];
+  const level = (v) => { if (!v) return 0; const i = b.findIndex((x) => v <= x); return Math.round((i + 1) * 5 / b.length); };
+  const onMap = new Set(D.world.countries.map((c) => c[0]));
+  const missing = [...counts].filter(([c]) => !onMap.has(c)).sort((x, y) => y[1] - x[1]);
+  const pts = [...groupBy(rows.filter((r) => r.lat != null && r.lon != null), (r) => r.lat + ',' + r.lon)]
+    .map(([, rs]) => ({ lat: rs[0].lat, lon: rs[0].lon, n: rs.length, place: rs[0].place, ips: uniq(rs, (r) => r.ip) }))
+    .sort((x, y) => y.n - x.n);
+  const maxP = pts.length ? pts[0].n : 1;
+  const draw = (w) => {
+    const vb = [0, 22, D.world.w, 410];
+    let s = `<svg class="map" width="${w}" height="${Math.round(w * vb[3] / vb[2])}" viewBox="${vb.join(' ')}" role="img" aria-label="Map of ${esc(unit)}s by country">`;
+    for (const [code, name, d] of D.world.countries) {
+      const rs = byC.get(code) || [];
+      const n = rs.length;
+      const tip = code ? [name, plural(n, unit), n ? plural(uniq(rs, (r) => r.ip), 'visitor') : null] : [name];
+      s += `<path class="land q${level(n)}${code ? '' : ' nocode'}${code && isOn('country', code) ? ' on' : ''}" d="${d}"${code && n ? fAttr('country', code, cname(code)) : ''} ${tipAttr(tip)}/>`;
+    }
+    for (const p of pts.slice().reverse()) {
+      const [x, y] = project(p.lon, p.lat);
+      const r = 2.5 + 9 * Math.sqrt(p.n / maxP);
+      s += `<circle class="dot" cx="${x.toFixed(1)}" cy="${y.toFixed(1)}" r="${r.toFixed(1)}"${fAttr('place', p.place, p.place)} ${tipAttr([p.place, plural(p.n, unit), plural(p.ips, 'visitor')])}/>`;
+    }
+    return s + '</svg>';
+  };
+  let lo = 1;
+  const rampItems = b.map((hi, i) => { const t = lo === hi ? String(hi) : lo + '–' + hi; lo = hi + 1; return `<span><i class="sw q${Math.round((i + 1) * 5 / b.length)}"></i> ${t}</span>`; });
+  const leg = `<div class="maplegend"><span class="ramp"><i class="sw q0"></i></span> none ${rampItems.join('')}` +
+    (pts.length ? `<span><i class="sw dotsw s2"></i> city (size = ${esc(unit)}s)</span>` : '') + '</div>';
+  const miss = missing.length ? `<p class="missing">Too small to draw at this scale: ${missing.map(([c, n]) => esc(cname(c)) + ' (' + fmtN(n) + ')').join(', ')}</p>` : '';
+  const noDots = !pts.length && rows.length ? `<p class="missing">City dots appear for entries logged after the lat/lon columns were added.</p>` : '';
+  return card('Where from', sub || 'Shade = ' + unit + 's per country. Click a country or city to filter everything.', slot(draw) + leg + miss + noDots, 'wide');
+}
+
+function techCard(rows, unit) {
+  const block = (t, f) => `<div><h3>${t}</h3>${bars(simpleItems(countBy(rows, (r) => r[f])), { field: f, series: ['s1'], top: 6, unit })}</div>`;
+  return card('Devices & browsers', 'Guessed from the user agent', `<div class="trio">${block('Device', 'device')}${block('Browser', 'browser')}${block('OS', 'os')}</div>`);
+}
+function placeCards(rows, unit) {
+  const ipTip = (f) => (k) => { const rs = rows.filter((r) => r[f] === k); return ['from ' + plural(uniq(rs, (r) => r.ip), 'visitor')]; };
+  const items = (f, labelFn) => countBy(rows, (r) => r[f]).map(([k, n]) => ({ key: k, label: labelFn ? labelFn(k) : k, vals: [n], tip: ipTip(f)(k) }));
+  return card('Countries', null, bars(items('country', cname), { field: 'country', series: ['s1'], unit })) +
+    card('Cities', 'Cloudflare\'s guess; rough outside big cities', bars(items('place'), { field: 'place', series: ['s1'], unit })) +
+    card('Networks', 'ISP or organisation owning the IP', bars(items('network'), { field: 'network', series: ['s1'], unit }));
+}
+
+// Searchable table of the newest rows.
+function recentCard(title, rows, cols) {
+  const id = 'rt' + (++chartN);
+  const body = `<div class="tools"><input type="search" placeholder="Search…" data-search="${id}" value="${esc(state.search)}" aria-label="Search rows"><span class="count" id="${id}c"></span></div>` +
+    `<div class="tablewrap"><table><thead><tr>${cols.map((c) => `<th class="${c.cls || ''}">${esc(c.h)}</th>`).join('')}</tr></thead><tbody id="${id}"></tbody></table></div>`;
+  tables[id] = { rows, cols };
+  return card(title, 'Newest first', body, 'wide');
+}
+let tables = {};
+function fillTable(id) {
+  const t = tables[id];
+  const q = state.search.trim().toLowerCase();
+  const match = q ? t.rows.filter((r) => t.cols.some((c) => String(c.v(r)).toLowerCase().includes(q))) : t.rows;
+  const shown = match.slice(0, 300);
+  document.getElementById(id).innerHTML = shown.map((r) => `<tr>${t.cols.map((c) => `<td class="${c.cls || ''}"${c.title ? ` title="${esc(c.title(r))}"` : ''}>${c.html ? c.html(r) : esc(c.v(r))}</td>`).join('')}</tr>`).join('') ||
+    `<tr><td colspan="${t.cols.length}" class="muted">No matching rows.</td></tr>`;
+  document.getElementById(id + 'c').textContent = (match.length > shown.length ? 'first ' + shown.length + ' of ' : '') + plural(match.length, 'row');
+}
+
+// ---------- views ----------
+function questionsView(rows, prev) {
+  const sessions = (rs) => uniq(rs, (r) => r.session);
+  let h = kpis([
+    { label: 'Questions', val: (rs) => rs.length, fmt: fmtN },
+    { label: 'Chat sessions', val: sessions, fmt: fmtN },
+    { label: 'Visitors (IPs)', val: (rs) => uniq(rs, (r) => r.ip), fmt: fmtN },
+    { label: 'Answered', val: (rs) => rs.length ? rs.filter((r) => r.answered).length / rs.length : null, fmt: (v) => v == null ? '–' : Math.round(100 * v) + '%', type: 'rate' },
+    { label: 'Questions / session', val: (rs) => sessions(rs) ? rs.length / sessions(rs) : null, fmt: (v) => v == null ? '–' : v.toFixed(1) },
+    { label: 'Countries', val: (rs) => uniq(rs, (r) => r.country), fmt: fmtN },
+  ], rows, prev);
+  if (!rows.length) return h + '<p class="empty">No questions in this range' + (Object.keys(state.f).length ? ' with these filters.' : '.') + '</p>';
+  h += '<div class="grid">';
+  const names = ['Answered', 'No answer found'];
+  h += card('Questions per day', null, legend([{ cls: 's1', label: names[0] }, { cls: 'rest', label: names[1] }]) +
+    slot((w) => columns(w, dayCats(rows, [(r) => r.answered, (r) => !r.answered], names, 'question'), ['s1', 'rest'], { label: 'Questions per day' })), 'wide');
+  h += mapCard(rows, 'question');
+
+  const asked = [...groupBy(rows, (r) => r.q)].map(([k, rs]) => ({ key: k, label: rs[0].question, vals: [rs.filter((r) => r.answered).length, rs.filter((r) => !r.answered).length],
+    tip: ['asked by ' + plural(uniq(rs, (r) => r.ip), 'visitor'), 'last ' + ago(rs[0].t)] })).sort((a, b) => sum(b.vals) - sum(a.vals));
+  h += card('Most asked', 'Same wording grouped (case and end punctuation ignored)', legend([{ cls: 's1', label: 'Answered' }, { cls: 'rest', label: 'No answer' }]) +
+    bars(asked, { series: ['s1', 'rest'], top: 12, unit: 'time' }));
+
+  const missed = [...groupBy(rows.filter((r) => !r.answered), (r) => r.q)].map(([, rs]) => rs).sort((a, b) => b.length - a.length || b[0].t - a[0].t);
+  h += card('Unanswered questions', missed.length ? 'What the bot could not answer: ideas for new content' : null, missed.length ?
+    `<div class="tablewrap"><table><thead><tr><th>Question</th><th class="num">Times</th><th>Last asked</th></tr></thead><tbody>${missed.slice(0, 60).map((rs) =>
+      `<tr><td class="q" title="${esc('Last from ' + rs[0].place)}">${esc(rs[0].question)}</td><td class="num">${fmtN(rs.length)}</td><td class="nowrap" title="${esc(dfTime.format(rs[0].t))}">${esc(ago(rs[0].t))}</td></tr>`).join('')}</tbody></table></div>` :
+    '<p class="empty">Every question got an answer.</p>');
+
+  h += card('Answered with', 'The item the bot replied with', bars(simpleItems(countBy(rows, (r) => r.topic)), { field: 'topic', series: ['s1'], unit: 'question' }));
+  h += card('Answer type', '“fallback” = no answer found', bars(simpleItems(countBy(rows, (r) => r.kind)), { field: 'kind', series: ['s1'], unit: 'question' }));
+
+  const perSession = [...groupBy(rows, (r) => r.session)].map(([, rs]) => rs.length);
+  const B = [[1, 1, '1'], [2, 2, '2'], [3, 3, '3'], [4, 5, '4–5'], [6, 9, '6–9'], [10, 1e9, '10+']];
+  h += card('Questions per session', 'How far people go in one chat', slot((w) => columns(w, B.map(([a, b, l]) => {
+    const n = perSession.filter((x) => x >= a && x <= b).length;
+    return { label: l, vals: [n], tip: [l + ' question' + (l === '1' ? '' : 's'), plural(n, 'session')] };
+  }), ['s1'], { every: 1, label: 'Sessions by number of questions' })));
+  h += card('When', 'Day and hour, your local time', slot((w) => heatmap(w, rows, 'question')) + heatLegend());
+  h += placeCards(rows, 'question');
+  h += card('Chat opened on', 'Page the question was asked from', bars(simpleItems(countBy(rows, (r) => r.pageL)), { field: 'pageL', series: ['s1'], unit: 'question' }));
+  h += card('Traffic sources', 'Referrer of the page', bars(simpleItems(countBy(rows, (r) => r.ref)), { field: 'ref', series: ['s1'], unit: 'question' }));
+  h += techCard(rows, 'question');
+  h += recentCard('All questions', rows, [
+    { h: 'When', v: (r) => dfTime.format(r.t), cls: 'nowrap' },
+    { h: 'Question', v: (r) => r.question, cls: 'q' },
+    { h: 'Answer', v: (r) => r.kind + (r.title ? ': ' + r.title : ''), html: (r) => `<span class="tag${r.answered ? '' : ' no'}">${esc(r.kind)}</span> ${esc(r.title || '')}` },
+    { h: 'From', v: (r) => r.place + ' · ' + r.network, cls: 'muted' },
+    { h: 'IP', v: (r) => r.ip || '', cls: 'muted nowrap' },
+    { h: 'Device', v: (r) => r.device + ' · ' + r.browser + ' · ' + r.os, cls: 'muted nowrap' },
+    { h: 'Session', v: (r) => (r.session || '').slice(0, 8), cls: 'muted nowrap', title: (r) => r.session || '' },
+  ]);
+  return h + '</div>';
+}
+
+const SECTION_CLS = { tools: 's1', games: 's2', learn: 's3', home: 's4' };
+const secCls = (s) => SECTION_CLS[s] || 'rest';
+const appItems = (rows) => [...groupBy(rows, (r) => r.app)].map(([k, rs]) => {
+  const used = rs.filter((r) => r.used).length;
+  return { key: k, label: k, vals: [used, rs.length - used], tip: ['used: ' + fmtN(used) + ' (' + pct(used, rs.length) + ')', plural(uniq(rs, (r) => r.ip), 'visitor')] };
+}).sort((a, b) => sum(b.vals) - sum(a.vals));
+const usedLegend = () => legend([{ cls: 's1', label: 'Used (clicked, typed…)' }, { cls: 'rest', label: 'Only opened' }]);
+function visitKpis(rows, prev, extra) {
+  const returning = (rs) => {
+    const ips = [...groupBy(rs, (r) => r.ip).values()];
+    return ips.length ? ips.filter((v) => new Set(v.map((r) => r.day)).size > 1).length / ips.length : null;
+  };
+  return kpis([
+    { label: 'Opens', val: (rs) => rs.length, fmt: fmtN },
+    { label: 'Visitors (IPs)', val: (rs) => uniq(rs, (r) => r.ip), fmt: fmtN },
+    { label: 'Used', val: (rs) => rs.length ? rs.filter((r) => r.used).length / rs.length : null, fmt: (v) => v == null ? '–' : Math.round(100 * v) + '%', type: 'rate' },
+    { label: 'Median time (when used)', val: (rs) => median(rs.filter((r) => r.used).map((r) => r.seconds)), fmt: fmtDur },
+    extra === 'apps' ? { label: 'Apps opened', val: (rs) => uniq(rs, (r) => r.app), fmt: fmtN }
+      : { label: 'Returning visitors', val: returning, fmt: (v) => v == null ? '–' : Math.round(100 * v) + '%', type: 'rate' },
+    { label: 'Countries', val: (rs) => uniq(rs, (r) => r.country), fmt: fmtN },
+  ], rows, prev);
+}
+function visitsView(rows, prev) {
+  let h = visitKpis(rows, prev);
+  if (!rows.length) return h + '<p class="empty">No visits in this range' + (Object.keys(state.f).length ? ' with these filters.' : '.') + '</p>';
+  h += '<div class="grid">';
+  const names = ['Used', 'Only opened'];
+  h += card('Opens per day', null, usedLegend() +
+    slot((w) => columns(w, dayCats(rows, [(r) => r.used, (r) => !r.used], names, 'open'), ['s1', 'rest'], { label: 'Opens per day' })), 'wide');
+  h += mapCard(rows, 'open');
+  h += card('Apps', 'Click one to filter', usedLegend() + bars(appItems(rows), { field: 'app', series: ['s1', 'rest'], top: 12, unit: 'open' }));
+  h += card('Sections', null, bars(countBy(rows, (r) => r.section).map(([k, n]) => ({ key: k, label: k, vals: [n] })), { field: 'section', series: ['s1'], unit: 'open' }));
+  const TB = [[0, 5, '<5s'], [5, 15, '5–15s'], [15, 30, '15–30s'], [30, 60, '30–60s'], [60, 120, '1–2m'], [120, 300, '2–5m'], [300, 900, '5–15m'], [900, 1e9, '15m+']];
+  h += card('Time in view', 'Seconds the tab was visible, per open', usedLegend() + slot((w) => columns(w, TB.map(([a, b, l]) => {
+    const rs = rows.filter((r) => r.seconds >= a && r.seconds < b), u = rs.filter((r) => r.used).length;
+    return { label: l, vals: [u, rs.length - u], tip: [l, plural(rs.length, 'open'), 'used: ' + fmtN(u)] };
+  }), ['s1', 'rest'], { every: 1, label: 'Opens by time in view' })));
+  h += card('When', 'Day and hour, your local time', slot((w) => heatmap(w, rows, 'open')) + heatLegend());
+  h += placeCards(rows, 'open');
+  h += card('Traffic sources', 'Referrer: where they came from', bars(simpleItems(countBy(rows, (r) => r.ref)), { field: 'ref', series: ['s1'], unit: 'open' }));
+  h += techCard(rows, 'open');
+  h += recentCard('All visits', rows, [
+    { h: 'When', v: (r) => dfTime.format(r.t), cls: 'nowrap' },
+    { h: 'App', v: (r) => r.app, cls: 'nowrap' },
+    { h: 'Used', v: (r) => r.used ? 'yes' : 'no', html: (r) => r.used ? '<span class="tag">used</span>' : '<span class="tag no">opened</span>' },
+    { h: 'Time', v: (r) => fmtDur(r.seconds), cls: 'num nowrap' },
+    { h: 'From', v: (r) => r.place + ' · ' + r.network, cls: 'muted' },
+    { h: 'Source', v: (r) => r.ref, cls: 'muted' },
+    { h: 'IP', v: (r) => r.ip || '', cls: 'muted nowrap' },
+    { h: 'Device', v: (r) => r.device + ' · ' + r.browser + ' · ' + r.os, cls: 'muted nowrap' },
+  ]);
+  return h + '</div>';
+}
+
+function sparkline(vals, w = 110, h = 26) {
+  const max = Math.max(1, ...vals), n = vals.length;
+  if (n < 2) return '';
+  const xy = vals.map((v, i) => [(i * (w - 4)) / (n - 1) + 2, h - 3 - (v / max) * (h - 6)]);
+  const last = xy[n - 1];
+  return `<svg width="${w}" height="${h}" aria-hidden="true"><path class="spark" d="M${xy.map((p) => p[0].toFixed(1) + ',' + p[1].toFixed(1)).join('L')}"/><circle class="sparkdot" cx="${last[0].toFixed(1)}" cy="${last[1].toFixed(1)}" r="2.5"/></svg>`;
+}
+function appsView(rows, prev) {
+  let h = visitKpis(rows, prev, 'apps');
+  if (!rows.length) return h + '<p class="empty">No visits in this range.</p>';
+  h += '<div class="grid">';
+  const secs = [...new Set(rows.map((r) => r.section))].sort((a, b) => (SECTION_CLS[a] ? 0 : 1) - (SECTION_CLS[b] ? 0 : 1) || a.localeCompare(b));
+  const fixed = secs.filter((s) => SECTION_CLS[s]), other = secs.filter((s) => !SECTION_CLS[s]);
+  const series = fixed.map((s) => (r) => r.section === s).concat(other.length ? [(r) => !SECTION_CLS[r.section]] : []);
+  const names = fixed.concat(other.length ? ['other'] : []);
+  h += card('Opens per day, by section', null, legend(names.map((s) => ({ cls: secCls(s), label: s }))) +
+    slot((w) => columns(w, dayCats(rows, series, names, 'open'), names.map(secCls), { label: 'Opens per day by section' })), 'wide');
+
+  // Per-app table, sortable.
+  const bucket = D.days > 60 ? 7 : 1, nB = Math.ceil(D.days / bucket);
+  const prevBy = groupBy(prev, (r) => r.app);
+  const apps = [...groupBy(rows, (r) => r.app)].map(([app, rs]) => {
+    const used = rs.filter((r) => r.used);
+    const trend = new Array(nB).fill(0);
+    for (const r of rs) { const i = Math.min(nB - 1, Math.floor((r.t - startCur) / (bucket * DAY))); if (i >= 0) trend[i]++; }
+    const p = (prevBy.get(app) || []).length;
+    const topC = countBy(rs, (r) => r.country)[0];
+    return { app, section: rs[0].section, opens: rs.length, prev: p, change: hasPrev ? (p ? (rs.length - p) / p : null) : null,
+      visitors: uniq(rs, (r) => r.ip), usedPct: used.length / rs.length, med: median(used.map((r) => r.seconds)),
+      avg: rs.length ? sum(rs.map((r) => r.seconds)) / rs.length : 0, top: topC ? cname(topC[0]) : '–', last: rs[0].t, trend };
+  });
+  const { key: sk, dir } = state.sort;
+  apps.sort((a, b) => {
+    const x = a[sk], y = b[sk];
+    if (typeof x === 'string') return dir * x.localeCompare(y);
+    return dir * ((x == null ? -Infinity : +x) - (y == null ? -Infinity : +y));
+  });
+  const th = (k, label, cls) => `<th class="${cls || ''}" data-sort="${k}"${sk === k ? ` aria-sort="${dir > 0 ? 'ascending' : 'descending'}"` : ''}>${esc(label)}${sk === k ? (dir > 0 ? ' ↑' : ' ↓') : ''}</th>`;
+  const chg = (a) => a.change == null ? (hasPrev && a.prev === 0 ? '<span class="delta-up">new</span>' : '–')
+    : `<span class="${a.change > 0 ? 'delta-up' : a.change < 0 ? 'delta-down' : ''}">${a.change > 0 ? '▲' : a.change < 0 ? '▼' : '='} ${Math.abs(Math.round(100 * a.change))}%</span>`;
+  h += card('All apps', `Click a column to sort; click an app for its visits dashboard. Trend = opens per ${bucket === 7 ? 'week' : 'day'}.`,
+    `<div class="tablewrap"><table><thead><tr>${th('app', 'App')}<th>Trend</th>${th('opens', 'Opens', 'num')}${th('change', 'vs prev', 'num')}${th('visitors', 'Visitors', 'num')}` +
+    `${th('usedPct', 'Used', 'num')}${th('med', 'Median time used', 'num')}${th('avg', 'Avg time', 'num')}${th('top', 'Top country')}${th('last', 'Last opened')}</tr></thead><tbody>` +
+    apps.map((a) => `<tr><td class="nowrap"><i class="sw ${secCls(a.section)}"></i> <a href="${esc(link({ view: 'visits', app: a.app }))}">${esc(a.app)}</a></td>` +
+      `<td ${tipAttr([a.app, 'opens per ' + (bucket === 7 ? 'week' : 'day') + ': ' + a.trend.join(', ')])}>${sparkline(a.trend)}</td>` +
+      `<td class="num">${fmtN(a.opens)}</td><td class="num nowrap">${chg(a)}</td><td class="num">${fmtN(a.visitors)}</td>` +
+      `<td class="num">${Math.round(100 * a.usedPct)}%</td><td class="num">${fmtDur(a.med)}</td><td class="num">${fmtDur(a.avg)}</td>` +
+      `<td class="muted">${esc(a.top)}</td><td class="nowrap muted" title="${esc(dfTime.format(a.last))}">${esc(ago(a.last))}</td></tr>`).join('') +
+    '</tbody></table></div>', 'wide');
+
+  h += card('Opens by app', 'Click one to filter this page', usedLegend() + bars(appItems(rows), { field: 'app', series: ['s1', 'rest'], top: 15, unit: 'open' }));
+  const eng = apps.filter((a) => a.opens >= 5).sort((a, b) => b.usedPct - a.usedPct)
+    .map((a) => ({ key: a.app, label: a.app, vals: [Math.round(100 * a.usedPct)], tip: ['of ' + plural(a.opens, 'open')] }));
+  h += card('Share of opens that were used', 'Apps with at least 5 opens; value = % used', eng.length ? bars(eng, { field: 'app', series: ['s1'], top: 15, totalText: (v) => v + '% used' }) : '<p class="empty">No app has 5 opens yet.</p>');
+  return h + '</div>';
+}
+
+// ---------- render ----------
+function renderFilters() {
+  const fs = Object.entries(state.f);
+  document.getElementById('filters').innerHTML = fs.length
+    ? '<span class="lbl">Filtered by</span>' + fs.map(([k, o]) => `<span class="chip">${esc(FIELD[k] || k)}: <b>${esc(o.label)}</b><button type="button" data-clear="${esc(k)}" aria-label="Remove filter">×</button></span>`).join('') +
+      (fs.length > 1 ? '<button type="button" class="linkbtn" data-clear="*">Clear all</button>' : '')
+    : '<span class="lbl">Click any country, city, app, bar or list row to filter the whole page.</span>';
+}
+function drawCharts() {
+  for (const c of charts) {
+    const el = document.getElementById(c.id);
+    if (el) el.innerHTML = c.draw(Math.max(200, el.clientWidth));
+  }
+}
+function render() {
+  charts = []; tables = {}; chartN = 0;
+  const rows = applyF(curAll), prev = applyF(prevAll);
+  renderFilters();
+  const main = document.getElementById('main');
+  main.innerHTML = D.view === 'questions' ? questionsView(rows, prev) : D.view === 'apps' ? appsView(rows, prev) : visitsView(rows, prev);
+  drawCharts();
+  Object.keys(tables).forEach(fillTable);
+}
+
+// ---------- interaction ----------
+const tip = document.getElementById('tip');
+function showTip(el, x, y) {
+  tip.textContent = el.getAttribute('data-tip');
+  tip.hidden = false;
+  const r = tip.getBoundingClientRect();
+  let left = x + 14, top = y + 14;
+  if (left + r.width > innerWidth - 8) left = Math.max(8, x - r.width - 14);
+  if (top + r.height > innerHeight - 8) top = Math.max(8, y - r.height - 14);
+  tip.style.left = left + 'px'; tip.style.top = top + 'px';
+}
+document.addEventListener('pointermove', (e) => {
+  const el = e.target.closest && e.target.closest('[data-tip]');
+  if (el) showTip(el, e.clientX, e.clientY); else tip.hidden = true;
+});
+document.addEventListener('pointerleave', () => { tip.hidden = true; });
+addEventListener('scroll', () => { tip.hidden = true; }, { passive: true });
+document.addEventListener('click', (e) => {
+  const clear = e.target.closest('[data-clear]');
+  if (clear) { const k = clear.getAttribute('data-clear'); if (k === '*') state.f = {}; else delete state.f[k]; render(); return; }
+  const sort = e.target.closest('th[data-sort]');
+  if (sort) {
+    const k = sort.getAttribute('data-sort');
+    state.sort = state.sort.key === k ? { key: k, dir: -state.sort.dir } : { key: k, dir: k === 'app' || k === 'top' ? 1 : -1 };
+    render(); return;
+  }
+  const f = e.target.closest('[data-f]');
+  if (f && !e.target.closest('a,summary')) {
+    const k = f.getAttribute('data-f'), v = f.getAttribute('data-v');
+    if (isOn(k, v)) delete state.f[k]; else state.f[k] = { v, label: f.getAttribute('data-l') || v };
+    tip.hidden = true;
+    render();
+  }
+});
+document.addEventListener('input', (e) => {
+  const id = e.target.getAttribute && e.target.getAttribute('data-search');
+  if (id) { state.search = e.target.value; fillTable(id); }
+});
+let rt;
+addEventListener('resize', () => { clearTimeout(rt); rt = setTimeout(drawCharts, 120); });
+document.addEventListener('keydown', (e) => {
+  if (e.key !== 'Enter' && e.key !== ' ') return;
+  const f = e.target.closest && e.target.closest('[data-f]');
+  if (f) { e.preventDefault(); f.dispatchEvent(new MouseEvent('click', { bubbles: true })); }
+});
+render();
+})();
+</script>
+</body>
+</html>

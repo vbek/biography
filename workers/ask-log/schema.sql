@@ -14,7 +14,9 @@ CREATE TABLE IF NOT EXISTS questions (
     asn INTEGER,
     as_org TEXT,                 -- network owner, e.g. the ISP or a university
     user_agent TEXT,
-    referrer TEXT
+    referrer TEXT,
+    lat REAL,                    -- Cloudflare's rough location (city centre), for the map
+    lon REAL
 );
 CREATE INDEX IF NOT EXISTS questions_ip_ts ON questions (ip, ts);
 CREATE INDEX IF NOT EXISTS questions_ts ON questions (ts);
@@ -36,7 +38,9 @@ CREATE TABLE IF NOT EXISTS visits (
     asn INTEGER,
     as_org TEXT,
     user_agent TEXT,
-    referrer TEXT
+    referrer TEXT,
+    lat REAL,
+    lon REAL
 );
 CREATE INDEX IF NOT EXISTS visits_visit ON visits (visit);
 CREATE INDEX IF NOT EXISTS visits_ip_ts ON visits (ip, ts);

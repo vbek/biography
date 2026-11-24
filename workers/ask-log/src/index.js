@@ -3,12 +3,16 @@
 //
 //   POST /api/ask-log                     called by ask/ask.js after each answer
 //   POST /api/visit                       called by track.js when a tool/game opens and when it's left
-//   GET  /api/ask-log?key=...             newest questions (needs ADMIN_KEY)
-//   GET  /api/ask-log?key=...&view=visits newest tool/game visits
-//   GET  /api/ask-log?key=...&view=apps   per-app summary
-//   add &format=json for raw data, &limit=N for more rows
+//   GET  /api/ask-log?key=...             Ask About Me dashboard (needs ADMIN_KEY)
+//   GET  /api/ask-log?key=...&view=visits tool/game visits dashboard (&app=games/ludo to start filtered)
+//   GET  /api/ask-log?key=...&view=apps   per-app dashboard
+//   add &days=7|30|90|180 for the range (default 30)
+//   add &format=json for the newest raw rows instead, &limit=N for more of them
 //
 // A daily cron deletes entries older than RETENTION_DAYS.
+
+import PAGE from './dashboard.html';
+import { WORLD } from './world.js';
 
 const SITE_HOSTS = ['bibek-koirala.com.np', 'www.bibek-koirala.com.np'];
 const QUESTIONS_PER_IP_PER_MINUTE = 20;
@@ -53,6 +57,8 @@ function where(request) {
         asn: cf.asn || null,
         as_org: cf.asOrganization || null,
         ua: clean(request.headers.get('User-Agent'), 300),
+        lat: coord(cf.latitude, 90),
+        lon: coord(cf.longitude, 180),
     };
 }
 
@@ -78,11 +84,11 @@ async function record(request, env) {
 
     await env.DB.prepare(
         `INSERT INTO questions (ts, question, answer_kind, answer_title, page, session, ip,
-            country, region, city, timezone, asn, as_org, user_agent, referrer)
-         VALUES (datetime('now'), ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)`
+            country, region, city, timezone, asn, as_org, user_agent, referrer, lat, lon)
+         VALUES (datetime('now'), ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)`
     ).bind(
         question, clean(body.kind, 20), clean(body.title, 200), clean(body.page, 200), clean(body.session, 40),
-        w.ip, w.country, w.region, w.city, w.timezone, w.asn, w.as_org, w.ua, clean(body.ref, 300),
+        w.ip, w.country, w.region, w.city, w.timezone, w.asn, w.as_org, w.ua, clean(body.ref, 300), w.lat, w.lon,
     ).run();
     return new Response(null, { status: 204 });
 }
@@ -99,9 +105,10 @@ async function visit(request, env) {
         if (!app) return new Response(null, { status: 400 });
         if (await tooMany(env, 'visits', w.ip, OPENS_PER_IP_PER_MINUTE)) return new Response(null, { status: 429 });
         await env.DB.prepare(
-            `INSERT INTO visits (visit, ts, last_ts, app, page, ip, country, region, city, timezone, asn, as_org, user_agent, referrer)
-             VALUES (?, datetime('now'), datetime('now'), ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)`
-        ).bind(id, app, clean(body.page, 200), w.ip, w.country, w.region, w.city, w.timezone, w.asn, w.as_org, w.ua, clean(body.ref, 300)).run();
+            `INSERT INTO visits (visit, ts, last_ts, app, page, ip, country, region, city, timezone, asn, as_org, user_agent, referrer, lat, lon)
+             VALUES (?, datetime('now'), datetime('now'), ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)`
+        ).bind(id, app, clean(body.page, 200), w.ip, w.country, w.region, w.city, w.timezone, w.asn, w.as_org, w.ua,
+            clean(body.ref, 300), w.lat, w.lon).run();
     } else if (body.event === 'end') {
         const seconds = Math.max(0, Math.min(86400, Math.round(Number(body.seconds) || 0)));
         // Only the browser that opened the visit (same IP) can update it.
@@ -135,48 +142,86 @@ const VIEWS = {
     },
 };
 
+// Rough device / browser / OS from the user agent, worked out by D1 so the Worker stays cheap.
+const UA_COLUMNS = `
+    CASE WHEN user_agent LIKE '%bot%' OR user_agent LIKE '%crawl%' OR user_agent LIKE '%spider%' OR user_agent LIKE '%Headless%' THEN 'Bot'
+         WHEN user_agent LIKE '%iPad%' OR (user_agent LIKE '%Android%' AND user_agent NOT LIKE '%Mobile%') THEN 'Tablet'
+         WHEN user_agent LIKE '%Mobi%' OR user_agent LIKE '%iPhone%' THEN 'Mobile'
+         WHEN user_agent IS NULL THEN 'Unknown' ELSE 'Desktop' END AS device,
+    CASE WHEN user_agent LIKE '%Edg%/%' THEN 'Edge' WHEN user_agent LIKE '%OPR/%' OR user_agent LIKE '%Opera%' THEN 'Opera'
+         WHEN user_agent LIKE '%SamsungBrowser%' THEN 'Samsung Internet'
+         WHEN user_agent LIKE '%Firefox/%' OR user_agent LIKE '%FxiOS%' THEN 'Firefox'
+         WHEN user_agent LIKE '%CriOS%' OR user_agent LIKE '%Chrome/%' THEN 'Chrome'
+         WHEN user_agent LIKE '%Safari/%' THEN 'Safari' WHEN user_agent IS NULL THEN 'Unknown' ELSE 'Other' END AS browser,
+    CASE WHEN user_agent LIKE '%Windows%' THEN 'Windows' WHEN user_agent LIKE '%Android%' THEN 'Android'
+         WHEN user_agent LIKE '%iPhone%' OR user_agent LIKE '%iPad%' THEN 'iOS' WHEN user_agent LIKE '%Macintosh%' THEN 'macOS'
+         WHEN user_agent LIKE '%CrOS%' THEN 'ChromeOS' WHEN user_agent LIKE '%Linux%' THEN 'Linux'
+         WHEN user_agent IS NULL THEN 'Unknown' ELSE 'Other' END AS os`;
+
+// The dashboard gets every row from the chosen range plus the range before it (for the
+// "vs previous" deltas) and works out the charts in the browser.
+const DASH_SQL = {
+    questions: (ll) => `SELECT ts, question, answer_kind AS kind, answer_title AS title, page, session, ip,
+            country, region, city, as_org AS network, ${ll}, referrer, ${UA_COLUMNS}
+        FROM questions WHERE ts > datetime('now', ?) ORDER BY id DESC LIMIT ?`,
+    visits: (ll) => `SELECT ts, app, interacted AS used, seconds, ip, country, region, city, as_org AS network, ${ll},
+            referrer, page, ${UA_COLUMNS}
+        FROM visits WHERE ts > datetime('now', ?) ORDER BY id DESC LIMIT ?`,
+};
+DASH_SQL.apps = DASH_SQL.visits;
+const DASH_MAX_ROWS = 20000;
+const RANGES = [7, 30, 90, 180];
+
 async function view(url, env) {
     const key = url.searchParams.get('key') || '';
     if (!env.ADMIN_KEY || !safeEqual(key, env.ADMIN_KEY)) return new Response('Not found', { status: 404 });
 
     const name = VIEWS[url.searchParams.get('view')] ? url.searchParams.get('view') : 'questions';
-    const limit = Math.min(Number(url.searchParams.get('limit')) || 200, 5000);
-    const { results } = await env.DB.prepare(VIEWS[name].sql).bind(limit).all();
-
     const headers = { 'Cache-Control': 'no-store', 'X-Robots-Tag': 'noindex', 'Referrer-Policy': 'no-referrer' };
-    if (url.searchParams.get('format') === 'json') return Response.json(results, { headers });
 
-    const cols = results.length ? Object.keys(results[0]) : [];
-    const rows = results.map((r) => '<tr>' + cols.map((c) => `<td>${esc(r[c])}</td>`).join('') + '</tr>').join('');
-    const nav = Object.keys(VIEWS).map((v) => v === name
-        ? `<b>${esc(VIEWS[v].title)}</b>`
-        : `<a href="?key=${encodeURIComponent(key)}&amp;view=${v}">${esc(VIEWS[v].title)}</a>`).join(' · ');
-    const html = `<!doctype html><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1">
-<title>Site log</title>
-<style>
-body{font:13px/1.4 system-ui,sans-serif;margin:16px;background:#fff;color:#111}
-a{color:#0b6bcb}
-@media (prefers-color-scheme:dark){body{background:#111;color:#eee}a{color:#6cb6ff}td,th{border-color:#333!important}}
-table{border-collapse:collapse;width:100%}th,td{border:1px solid #ddd;padding:4px 6px;text-align:left;vertical-align:top}
-th{position:sticky;top:0;background:inherit}
-.wrap{overflow-x:auto}
-</style>
-<p>${nav}</p>
-<h1>${esc(VIEWS[name].title)}: ${results.length} rows (times in UTC)</h1>
-<div class="wrap"><table><thead><tr>${cols.map((c) => `<th>${esc(c)}</th>`).join('')}</tr></thead><tbody>${rows}</tbody></table></div>`;
+    if (url.searchParams.get('format') === 'json') {
+        const limit = Math.min(Number(url.searchParams.get('limit')) || 200, 5000);
+        const { results } = await env.DB.prepare(VIEWS[name].sql).bind(limit).all();
+        return Response.json(results, { headers });
+    }
+
+    const days = RANGES.includes(Number(url.searchParams.get('days'))) ? Number(url.searchParams.get('days')) : 30;
+    const since = `-${days * 2} days`;
+    let raw;
+    try {
+        raw = await env.DB.prepare(DASH_SQL[name]('lat, lon')).bind(since, DASH_MAX_ROWS).raw({ columnNames: true });
+    } catch (e) {
+        // Database from before migrations/001-lat-lon.sql: show everything except the city dots.
+        if (!/no such column/i.test(String(e && e.message))) throw e;
+        raw = await env.DB.prepare(DASH_SQL[name]('NULL AS lat, NULL AS lon')).bind(since, DASH_MAX_ROWS).raw({ columnNames: true });
+    }
+    const [cols = [], ...rows] = raw;
+    const data = {
+        view: name, days, ranges: RANGES, app: url.searchParams.get('app') || null,
+        now: new Date().toISOString(), capped: rows.length >= DASH_MAX_ROWS,
+        retentionDays: Number(env.RETENTION_DAYS) || 180, cols, rows,
+        world: name === 'apps' ? null : WORLD,
+    };
+    const nonce = crypto.randomUUID().replace(/-/g, '');
+    const html = PAGE.split('__NONCE__').join(nonce)
+        .replace('__DATA__', () => JSON.stringify(data).replace(/</g, '\\u003c'));
     return new Response(html, {
-        headers: { ...headers, 'Content-Type': 'text/html; charset=utf-8', 'Content-Security-Policy': "default-src 'none'; style-src 'unsafe-inline'" },
+        headers: {
+            ...headers, 'Content-Type': 'text/html; charset=utf-8',
+            'Content-Security-Policy': `default-src 'none'; script-src 'nonce-${nonce}'; style-src 'unsafe-inline'; img-src data:; base-uri 'none'; form-action 'none'`,
+        },
     });
+}
+
+function coord(v, max) {
+    const n = Number(v);
+    return v != null && v !== '' && Number.isFinite(n) && Math.abs(n) <= max ? Math.round(n * 100) / 100 : null;
 }
 
 function clean(v, max) {
     if (v == null) return null;
     const s = String(v).replace(/[\u0000-\u001f\u007f]/g, ' ').trim().slice(0, max);
     return s || null;
-}
-
-function esc(v) {
-    return String(v ?? '').replace(/[&<>"']/g, (c) => ({ '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;', "'": '&#39;' }[c]));
 }
 
 function safeEqual(a, b) {
