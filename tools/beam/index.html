@@ -1,0 +1,170 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<!-- Files go straight from one device to the other over a WebRTC data channel. The PeerJS broker only introduces the devices; it never sees a file. -->
+<meta http-equiv="Content-Security-Policy" content="default-src 'none'; script-src 'self'; style-src 'self' 'unsafe-inline'; img-src 'self' data: blob:; media-src 'self' blob:; connect-src 'self' https://0.peerjs.com wss://0.peerjs.com; manifest-src 'self'; base-uri 'none'; form-action 'none'">
+<meta name="referrer" content="no-referrer">
+<meta name="robots" content="index, follow">
+<meta name="theme-color" content="#0b1020">
+<meta name="mobile-web-app-capable" content="yes">
+<meta name="apple-mobile-web-app-capable" content="yes">
+<title>Beam: Fast File Transfer Between Devices on Your Wi-Fi, Free</title>
+<meta name="description" content="Send files, folders and text between your phone, tablet and computers on the same Wi-Fi. Pair with a QR code, then drop files. No app, no account, no size limit, and files go straight between your devices.">
+<link rel="canonical" href="https://bibek-koirala.com.np/tools/beam/">
+<meta property="og:type" content="website">
+<meta property="og:site_name" content="Bibek Koirala">
+<meta property="og:title" content="Beam: Fast File Transfer Between Devices on Your Wi-Fi, Free">
+<meta property="og:description" content="Send files, folders and text between your phone, tablet and computers. Pair with a QR code. No app, no account, no size limit.">
+<meta property="og:url" content="https://bibek-koirala.com.np/tools/beam/">
+<meta property="og:image" content="https://bibek-koirala.com.np/images/og-image.jpg">
+<meta name="twitter:card" content="summary_large_image">
+<meta name="twitter:creator" content="@_koire">
+<script type="application/ld+json">
+{
+  "@context": "https://schema.org",
+  "@type": "WebApplication",
+  "name": "Beam",
+  "applicationCategory": "UtilitiesApplication",
+  "operatingSystem": "Windows, macOS, Linux, iOS, iPadOS, Android (web browser)",
+  "browserRequirements": "Requires a modern browser with WebRTC",
+  "isAccessibleForFree": true,
+  "offers": { "@type": "Offer", "price": "0", "priceCurrency": "USD" },
+  "featureList": "Peer-to-peer file and folder transfer on a local network; QR code pairing; several devices at once; live speed and progress; text and link sharing",
+  "author": { "@type": "Person", "@id": "https://bibek-koirala.com.np/#person", "name": "Bibek Koirala", "url": "https://bibek-koirala.com.np/" },
+  "url": "https://bibek-koirala.com.np/tools/beam/",
+  "description": "Send files, folders and text between your phone, tablet and computers on the same Wi-Fi. Pair with a QR code, then drop files.",
+  "image": "https://bibek-koirala.com.np/images/og-image.jpg"
+}
+</script>
+<link rel="manifest" href="manifest.webmanifest">
+<link rel="icon" href="icon.svg" type="image/svg+xml">
+<link rel="stylesheet" href="app.css">
+<script src="js/theme.js"></script>
+</head>
+<body class="alone">
+
+<header class="topbar">
+  <a href="../index.html" class="back">&larr; All tools</a>
+  <div class="brand"><img src="icon.svg" alt="" width="30" height="30"><span>Beam</span></div>
+  <div class="me" title="This device's name, as other devices see it">
+    <span class="dot wait" id="me-dot" aria-hidden="true"></span>
+    <label class="sr-only" for="my-name">This device's name</label>
+    <input id="my-name" type="text" maxlength="32" spellcheck="false" autocomplete="off">
+    <span id="my-kind" class="muted small"></span>
+  </div>
+</header>
+
+<p id="unsupported" class="banner" role="alert" hidden>This browser doesn't support WebRTC, so it can't send or receive files. Try the latest Chrome, Edge, Firefox or Safari.</p>
+
+<main class="dash">
+  <div class="col side">
+  <!-- Pairing -->
+  <section class="card pair" aria-labelledby="pair-h">
+    <h2 id="pair-h">Add a device</h2>
+    <p class="muted small">On your other phone, tablet or computer, scan this code or open this page and enter the code.</p>
+    <img id="qr" alt="QR code that opens this page and joins this room" width="196" height="196">
+    <p class="code" id="code" aria-live="polite">------</p>
+    <div class="row center">
+      <button class="btn" id="copy-link" type="button">Copy link</button>
+      <button class="btn" id="new-room" type="button">New code</button>
+    </div>
+    <p id="room-status" class="muted small center" aria-live="polite">Connecting to the pairing service…</p>
+    <form id="join-form" class="join" autocomplete="off">
+      <label class="sr-only" for="code-input">Code from another device</label>
+      <input id="code-input" type="text" inputmode="text" autocapitalize="characters" spellcheck="false" maxlength="6" placeholder="Enter a code">
+      <button class="btn" type="submit">Join</button>
+    </form>
+    <p id="join-error" class="error" role="alert" hidden></p>
+  </section>
+
+  <!-- Devices -->
+  <section class="card devices" aria-labelledby="dev-h">
+    <div class="card-head">
+      <h2 id="dev-h">Devices <span id="dev-count" class="pill">0</span></h2>
+    </div>
+    <ul id="device-list" class="device-list"></ul>
+    <div id="dev-empty" class="empty">
+      <div class="radar" aria-hidden="true"><span></span><span></span><span></span></div>
+      <p><b>Waiting for another device</b></p>
+      <p class="muted small">Open Beam on another device and scan the QR code. For the fastest speed, put both devices on the same Wi-Fi.</p>
+    </div>
+  </section>
+
+  </div>
+
+  <div class="col main">
+  <!-- Live numbers -->
+  <section class="card stats" aria-label="Transfer speed">
+    <div class="tiles">
+      <div class="tile"><span class="tile-label"><i class="swatch up"></i>Sending</span><span class="tile-val" id="st-up">0 B/s</span></div>
+      <div class="tile"><span class="tile-label"><i class="swatch down"></i>Receiving</span><span class="tile-val" id="st-down">0 B/s</span></div>
+      <div class="tile"><span class="tile-label">Sent</span><span class="tile-val" id="st-sent">0 B</span></div>
+      <div class="tile"><span class="tile-label">Received</span><span class="tile-val" id="st-recv">0 B</span></div>
+    </div>
+    <canvas id="spark" height="56" aria-hidden="true"></canvas>
+    <p class="muted small spark-note">Speed over the last minute</p>
+  </section>
+
+  <!-- Send -->
+  <section class="card send" aria-labelledby="send-h">
+    <h2 id="send-h" class="sr-only">Send</h2>
+    <div id="drop" class="drop" tabindex="0" role="button" aria-describedby="drop-hint">
+      <svg viewBox="0 0 48 48" aria-hidden="true"><path d="M24 31V9M15 18l9-9 9 9M9 31v6a3 3 0 0 0 3 3h24a3 3 0 0 0 3-3v-6"/></svg>
+      <p class="drop-title">Drop files or folders here</p>
+      <p id="drop-hint" class="muted small">or choose them. You can also paste files with <kbd>Ctrl</kbd>/<kbd>⌘</kbd>+<kbd>V</kbd>.</p>
+      <div class="row center">
+        <button class="btn primary" id="pick-files" type="button">Choose files</button>
+        <button class="btn" id="pick-folder" type="button">Choose a folder</button>
+      </div>
+    </div>
+    <input id="file-input" type="file" multiple hidden>
+    <input id="folder-input" type="file" webkitdirectory multiple hidden>
+    <div class="send-opts">
+      <label class="field inline"><span>Send to</span>
+        <select id="target"><option value="*">All devices</option></select>
+      </label>
+      <label class="check"><input type="checkbox" id="autosave"> Save received files automatically</label>
+    </div>
+    <form id="text-form" class="text-form">
+      <label class="sr-only" for="text-input">Text or link to send</label>
+      <textarea id="text-input" rows="2" placeholder="Type or paste text or a link to send"></textarea>
+      <button class="btn" type="submit">Send text</button>
+    </form>
+  </section>
+
+  <!-- Activity -->
+  <section class="card activity" aria-labelledby="act-h">
+    <div class="card-head">
+      <h2 id="act-h">Activity</h2>
+      <div class="row">
+        <button class="btn small-btn" id="save-all" type="button" hidden>Download all as ZIP</button>
+        <button class="btn small-btn" id="clear-done" type="button" hidden>Clear finished</button>
+      </div>
+    </div>
+    <ul id="xfers" class="xfers"></ul>
+    <p id="xfers-empty" class="muted small empty-line">Files and messages you send or receive show up here.</p>
+  </section>
+
+  </div>
+
+  <section class="how">
+    <details>
+      <summary>How it works, and privacy</summary>
+      <p>Each device opens this page. One device shows a code, and the others join it with the QR code or by typing the code. Once paired, files travel directly between the devices over an encrypted WebRTC connection. On the same Wi-Fi they stay on your local network and never touch the internet.</p>
+      <p>The free PeerJS service only helps the devices find each other and never sees your files. If the devices aren't on the same network, files still go directly over the internet where possible. Some office and school networks block direct connections; then files go through a relay and are slower. Each device's card shows which route it's using.</p>
+      <p>Received files stay in this tab until you save or clear them, or close the page. Large files are kept in your browser's private storage while they arrive, so there's no size limit beyond your free disk space. Keep the page open on both devices until transfers finish.</p>
+    </details>
+  </section>
+</main>
+
+<div id="drag-veil" class="drag-veil" hidden><p>Drop to send</p></div>
+<div id="toast" class="toast" role="status" hidden></div>
+
+<script src="../../games/party/vendor/peerjs.min.js"></script>
+<script src="../../games/party/vendor/qrcode.js"></script>
+<script src="js/app.js"></script>
+<script src="../../track.js" defer></script>
+</body>
+</html>
