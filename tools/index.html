@@ -56,7 +56,7 @@
         .tool-card { position: relative; overflow: hidden; display: flex; flex-direction: column; gap: 12px; padding: 24px; border: 1px solid var(--border); border-radius: var(--radius); background: var(--surface); color: var(--text); text-decoration: none; transition: var(--transition); }
         .tool-card:hover { border-color: var(--border-strong); transform: translateY(-3px); box-shadow: var(--glow-cyan); }
         .tool-card .tool-icon { width: 46px; height: 46px; display: grid; place-items: center; border-radius: 12px; background: var(--grad-soft); color: var(--accent); font-size: 20px; }
-        .tool-card h2 { font-family: var(--font-display); font-size: 1.2rem; margin: 0; }
+        .tool-card h3 { font-family: var(--font-display); font-size: 1.2rem; margin: 0; }
         .tool-card p { color: var(--text-muted); font-size: 14px; line-height: 1.55; margin: 0; flex: 1; }
         .tool-card .tool-cta { align-self: flex-start; display: inline-flex; align-items: center; gap: 8px; padding: 10px 18px; border-radius: 999px; background: var(--grad); color: #fff; font-weight: 600; font-size: 14px; box-shadow: 0 4px 16px rgba(129, 140, 248, .35); transition: var(--transition); }
         .tool-card:hover .tool-cta { box-shadow: 0 6px 22px rgba(129, 140, 248, .55); }
@@ -65,6 +65,21 @@
         .ribbon { position: absolute; top: 16px; right: -34px; width: 130px; padding: 4px 0; transform: rotate(45deg); background: #22c55e; color: #fff; font-size: 11px; font-weight: 800; letter-spacing: .12em; text-align: center; box-shadow: 0 2px 8px rgba(0, 0, 0, .25); }
         .tools-perks { display: flex; flex-wrap: wrap; gap: 10px 22px; margin: -16px 0 32px; color: var(--text-muted); font-size: 14px; }
         .tools-perks i { color: #22c55e; margin-right: 6px; }
+        .tools-filter { position: sticky; top: 0; z-index: 3; display: flex; gap: 8px; margin: -8px -16px 28px; padding: 10px 16px; overflow-x: auto; scrollbar-width: none; background: color-mix(in srgb, var(--bg) 88%, transparent); backdrop-filter: blur(10px); -webkit-backdrop-filter: blur(10px); }
+        .tools-filter::-webkit-scrollbar { display: none; }
+        .tools-filter button { flex: none; display: inline-flex; align-items: center; gap: 8px; padding: 8px 14px; border: 1px solid var(--border); border-radius: 999px; background: var(--surface); color: var(--text-muted); font: 600 14px var(--font-body, inherit); cursor: pointer; transition: var(--transition); }
+        .tools-filter button:hover { color: var(--text); border-color: var(--border-strong); }
+        .tools-filter button[aria-pressed="true"] { background: var(--grad); border-color: transparent; color: #fff; box-shadow: 0 4px 14px rgba(129, 140, 248, .35); }
+        .tools-filter .count { min-width: 20px; padding: 0 6px; border-radius: 999px; background: color-mix(in srgb, currentColor 16%, transparent); font-size: 12px; text-align: center; }
+        .tools-group { margin: 0 0 36px; scroll-margin-top: 70px; }
+        .group-title { display: flex; align-items: center; gap: 10px; margin: 0 0 16px; font-family: var(--font-display); font-size: 1.25rem; }
+        .group-title i { color: var(--accent); font-size: 1rem; }
+        .tools-list.single .group-title { display: none; }
+        .tools-soon { margin-top: 4px; }
+        .tools-wrap [hidden] { display: none; }
+        .tools-group.fade-in { animation: toolsIn .35s ease-out; }
+        @keyframes toolsIn { from { opacity: 0; transform: translateY(8px); } }
+        @media (prefers-reduced-motion: reduce) { .tools-group.fade-in { animation: none; } }
         .tool-card.soon { opacity: .55; pointer-events: none; border-style: dashed; }
     </style>
 </head>
@@ -83,84 +98,152 @@
                 <span><i class="fas fa-check-circle"></i>No watermarks</span>
             </div>
         </header>
-        <section class="tools-grid">
-            <a class="tool-card" href="pdf-editor/index.html">
-                <span class="ribbon">FREE</span>
-                <div class="tool-icon"><i class="fas fa-file-pdf"></i></div>
-                <h2>PDF Editor</h2>
-                <p>Annotate, add text, sign, fill forms, redact, merge and reorder pages — then export to PDF, Word, images, HTML or Markdown.</p>
-                <span class="tool-cta">Open editor <i class="fas fa-arrow-right"></i></span>
-            </a>
-            <a class="tool-card" href="locallabel/index.html">
-                <span class="ribbon">FREE</span>
-                <div class="tool-icon"><i class="fas fa-vector-square"></i></div>
-                <h2>LocalLabel</h2>
-                <p>Annotate images and videos for ML — boxes, polygons, masks, keypoints, tracks and ONNX-powered AI assist. Export COCO, YOLO, CVAT or Pascal VOC.</p>
-                <span class="tool-cta">Open annotator <i class="fas fa-arrow-right"></i></span>
-            </a>
-            <a class="tool-card" href="media-studio/index.html">
-                <span class="ribbon">FREE</span>
-                <div class="tool-icon"><i class="fas fa-photo-film"></i></div>
-                <h2>Media Studio</h2>
-                <p><strong>Images:</strong> resize, crop, convert to JPEG/PNG/WebP, compress, retouch, watermark — in batches. <strong>Video:</strong> compress to a target size, resize, convert MP4/WebM/MOV, trim, extract audio and make subtitles with on-device Whisper.</p>
-                <span class="tool-cta">Open studio <i class="fas fa-arrow-right"></i></span>
-            </a>
-            <a class="tool-card" href="financial-planner/index.html">
-                <span class="ribbon">NEW</span>
-                <div class="tool-icon"><i class="fas fa-wallet"></i></div>
-                <h2>Financial Planner</h2>
-                <p>Track money, budgets and savings goals, scan receipts on your device, plan groceries from what you usually buy, and keep a calendar, to-do list and loan records. Your data stays in your browser.</p>
-                <span class="tool-cta">Open planner <i class="fas fa-arrow-right"></i></span>
-            </a>
-            <a class="tool-card" href="vitrine/index.html">
-                <span class="ribbon">NEW</span>
-                <div class="tool-icon"><i class="fas fa-display"></i></div>
-                <h2>Vitrine</h2>
-                <p>Digital signage that runs on your own PC. Build playlists, schedule them, and show them on any screen with a browser. Windows download; your data stays on your PC.</p>
-                <span class="tool-cta">Download for Windows <i class="fas fa-arrow-right"></i></span>
-            </a>
-            <a class="tool-card" href="document-reader/index.html">
-                <span class="ribbon">NEW</span>
-                <div class="tool-icon"><i class="fas fa-headphones"></i></div>
-                <h2>Document Reader</h2>
-                <p>Hear PDF, Word, EPUB, PowerPoint, Excel, text and scanned files read aloud at up to 3× speed. Choose from five open voice models, in up to 31 languages. A voice downloads once, then works offline.</p>
-                <span class="tool-cta">Open reader <i class="fas fa-arrow-right"></i></span>
-            </a>
-            <a class="tool-card" href="texlume/index.html">
-                <span class="ribbon">NEW</span>
-                <div class="tool-icon"><i class="fas fa-square-root-variable"></i></div>
-                <h2>Texlume</h2>
-                <p>A free LaTeX editor with a live PDF side by side. TeX Live compiles in your browser with figures, BibTeX, TikZ and two-way SyncTeX. Projects are saved on your device, never uploaded, and work offline after the first load.</p>
-                <span class="tool-cta">Open editor <i class="fas fa-arrow-right"></i></span>
-            </a>
-            <a class="tool-card" href="sidescreen/index.html">
-                <span class="ribbon">NEW</span>
-                <div class="tool-icon"><i class="fas fa-tablet-screen-button"></i></div>
-                <h2>Sidescreen</h2>
-                <p>Use an iPad, Android tablet, phone or spare laptop as a screen for your Windows PC or Mac. Pair with a QR code and share a whole screen or one window. Nothing to install; the picture goes straight between your devices.</p>
-                <span class="tool-cta">Open Sidescreen <i class="fas fa-arrow-right"></i></span>
-            </a>
-            <a class="tool-card" href="beam/index.html">
-                <span class="ribbon">NEW</span>
-                <div class="tool-icon"><i class="fas fa-right-left"></i></div>
-                <h2>Beam</h2>
-                <p>Send files, folders, text and links between your phone, tablet and computers on the same Wi-Fi. Pair with a QR code, then drop files. No app, no account and no size limit; files go straight between your devices with live speed and progress.</p>
-                <span class="tool-cta">Open Beam <i class="fas fa-arrow-right"></i></span>
-            </a>
-            <a class="tool-card" href="guitar-tuner/index.html">
-                <span class="ribbon">NEW</span>
-                <div class="tool-icon"><i class="fas fa-guitar"></i></div>
-                <h2>Guitar Tuner</h2>
-                <p>Pluck a string and the tuner listens through your mic, shows the note, how many cents sharp or flat it is and which way to turn. Live meter, strobe and pitch graph, drop and open tunings, bass and ukulele. Nothing is recorded.</p>
-                <span class="tool-cta">Open tuner <i class="fas fa-arrow-right"></i></span>
-            </a>
-            <div class="tool-card soon">
-                <div class="tool-icon"><i class="fas fa-plus"></i></div>
-                <h2>More coming soon</h2>
-                <p>New tools will be added here.</p>
+        <nav class="tools-filter" id="tools-filter" aria-label="Filter tools by category" hidden></nav>
+        <div id="tools-list">
+        <section class="tools-group" id="cat-documents" data-cat="documents" data-label="Documents" data-icon="fa-file-lines" aria-labelledby="h-documents">
+            <h2 class="group-title" id="h-documents"><i class="fas fa-file-lines"></i>Documents</h2>
+            <div class="tools-grid">
+                <a class="tool-card" href="pdf-editor/index.html">
+                    <span class="ribbon">FREE</span>
+                    <div class="tool-icon"><i class="fas fa-file-pdf"></i></div>
+                    <h3>PDF Editor</h3>
+                    <p>Annotate, add text, sign, fill forms, redact, merge and reorder pages — then export to PDF, Word, images, HTML or Markdown.</p>
+                    <span class="tool-cta">Open editor <i class="fas fa-arrow-right"></i></span>
+                </a>
+                <a class="tool-card" href="document-reader/index.html">
+                    <span class="ribbon">NEW</span>
+                    <div class="tool-icon"><i class="fas fa-headphones"></i></div>
+                    <h3>Document Reader</h3>
+                    <p>Hear PDF, Word, EPUB, PowerPoint, Excel, text and scanned files read aloud at up to 3× speed. Choose from five open voice models, in up to 31 languages. A voice downloads once, then works offline.</p>
+                    <span class="tool-cta">Open reader <i class="fas fa-arrow-right"></i></span>
+                </a>
+                <a class="tool-card" href="texlume/index.html">
+                    <span class="ribbon">NEW</span>
+                    <div class="tool-icon"><i class="fas fa-square-root-variable"></i></div>
+                    <h3>Texlume</h3>
+                    <p>A free LaTeX editor with a live PDF side by side. TeX Live compiles in your browser with figures, BibTeX, TikZ and two-way SyncTeX. Projects are saved on your device, never uploaded, and work offline after the first load.</p>
+                    <span class="tool-cta">Open editor <i class="fas fa-arrow-right"></i></span>
+                </a>
             </div>
         </section>
+        <section class="tools-group" id="cat-media" data-cat="media" data-label="Images &amp; Video" data-icon="fa-photo-film" aria-labelledby="h-media">
+            <h2 class="group-title" id="h-media"><i class="fas fa-photo-film"></i>Images &amp; Video</h2>
+            <div class="tools-grid">
+                <a class="tool-card" href="media-studio/index.html">
+                    <span class="ribbon">FREE</span>
+                    <div class="tool-icon"><i class="fas fa-photo-film"></i></div>
+                    <h3>Media Studio</h3>
+                    <p><strong>Images:</strong> resize, crop, convert to JPEG/PNG/WebP, compress, retouch, watermark — in batches. <strong>Video:</strong> compress to a target size, resize, convert MP4/WebM/MOV, trim, extract audio and make subtitles with on-device Whisper.</p>
+                    <span class="tool-cta">Open studio <i class="fas fa-arrow-right"></i></span>
+                </a>
+                <a class="tool-card" href="locallabel/index.html">
+                    <span class="ribbon">FREE</span>
+                    <div class="tool-icon"><i class="fas fa-vector-square"></i></div>
+                    <h3>LocalLabel</h3>
+                    <p>Annotate images and videos for ML — boxes, polygons, masks, keypoints, tracks and ONNX-powered AI assist. Export COCO, YOLO, CVAT or Pascal VOC.</p>
+                    <span class="tool-cta">Open annotator <i class="fas fa-arrow-right"></i></span>
+                </a>
+            </div>
+        </section>
+        <section class="tools-group" id="cat-devices" data-cat="devices" data-label="Devices &amp; Sharing" data-icon="fa-laptop" aria-labelledby="h-devices">
+            <h2 class="group-title" id="h-devices"><i class="fas fa-laptop"></i>Devices &amp; Sharing</h2>
+            <div class="tools-grid">
+                <a class="tool-card" href="beam/index.html">
+                    <span class="ribbon">NEW</span>
+                    <div class="tool-icon"><i class="fas fa-right-left"></i></div>
+                    <h3>Beam</h3>
+                    <p>Send files, folders, text and links between your phone, tablet and computers on the same Wi-Fi. Pair with a QR code, then drop files. No app, no account and no size limit; files go straight between your devices with live speed and progress.</p>
+                    <span class="tool-cta">Open Beam <i class="fas fa-arrow-right"></i></span>
+                </a>
+                <a class="tool-card" href="sidescreen/index.html">
+                    <span class="ribbon">NEW</span>
+                    <div class="tool-icon"><i class="fas fa-tablet-screen-button"></i></div>
+                    <h3>Sidescreen</h3>
+                    <p>Use an iPad, Android tablet, phone or spare laptop as a screen for your Windows PC or Mac. Pair with a QR code and share a whole screen or one window. Nothing to install; the picture goes straight between your devices.</p>
+                    <span class="tool-cta">Open Sidescreen <i class="fas fa-arrow-right"></i></span>
+                </a>
+                <a class="tool-card" href="vitrine/index.html">
+                    <span class="ribbon">NEW</span>
+                    <div class="tool-icon"><i class="fas fa-display"></i></div>
+                    <h3>Vitrine</h3>
+                    <p>Digital signage that runs on your own PC. Build playlists, schedule them, and show them on any screen with a browser. Windows download; your data stays on your PC.</p>
+                    <span class="tool-cta">Download for Windows <i class="fas fa-arrow-right"></i></span>
+                </a>
+            </div>
+        </section>
+        <section class="tools-group" id="cat-money" data-cat="money" data-label="Money" data-icon="fa-wallet" aria-labelledby="h-money">
+            <h2 class="group-title" id="h-money"><i class="fas fa-wallet"></i>Money</h2>
+            <div class="tools-grid">
+                <a class="tool-card" href="financial-planner/index.html">
+                    <span class="ribbon">NEW</span>
+                    <div class="tool-icon"><i class="fas fa-wallet"></i></div>
+                    <h3>Financial Planner</h3>
+                    <p>Track money, budgets and savings goals, scan receipts on your device, plan groceries from what you usually buy, and keep a calendar, to-do list and loan records. Your data stays in your browser.</p>
+                    <span class="tool-cta">Open planner <i class="fas fa-arrow-right"></i></span>
+                </a>
+            </div>
+        </section>
+        <section class="tools-group" id="cat-music" data-cat="music" data-label="Music" data-icon="fa-music" aria-labelledby="h-music">
+            <h2 class="group-title" id="h-music"><i class="fas fa-music"></i>Music</h2>
+            <div class="tools-grid">
+                <a class="tool-card" href="guitar-tuner/index.html">
+                    <span class="ribbon">NEW</span>
+                    <div class="tool-icon"><i class="fas fa-guitar"></i></div>
+                    <h3>Guitar Tuner</h3>
+                    <p>Pluck a string and the tuner listens through your mic, shows the note, how many cents sharp or flat it is and which way to turn. Live meter, strobe and pitch graph, drop and open tunings, bass and ukulele. Nothing is recorded.</p>
+                    <span class="tool-cta">Open tuner <i class="fas fa-arrow-right"></i></span>
+                </a>
+            </div>
+        </section>
+        </div>
+        <div class="tools-grid tools-soon" id="tools-soon">
+                <div class="tool-card soon">
+                    <div class="tool-icon"><i class="fas fa-plus"></i></div>
+                    <h3>More coming soon</h3>
+                    <p>New tools will be added here.</p>
+                </div>
+        </div>
     </main>
+    <script>
+      // Category filter: the buttons are built from the sections, so a new tool only needs its card in the right section.
+      (function () {
+        var nav = document.getElementById('tools-filter'), list = document.getElementById('tools-list'), soon = document.getElementById('tools-soon');
+        var groups = Array.prototype.slice.call(list.querySelectorAll('.tools-group'));
+        var cats = [{ id: 'all', label: 'All tools', icon: 'fa-border-all', n: 0 }];
+        groups.forEach(function (g) {
+          var n = g.querySelectorAll('.tool-card').length; cats[0].n += n;
+          cats.push({ id: g.getAttribute('data-cat'), label: g.getAttribute('data-label'), icon: g.getAttribute('data-icon'), n: n });
+        });
+        var buttons = cats.map(function (c) {
+          var b = document.createElement('button');
+          b.type = 'button'; b.setAttribute('data-cat', c.id);
+          b.innerHTML = '<i class="fas ' + c.icon + '"></i>' + c.label + ' <span class="count">' + c.n + '</span>';
+          b.addEventListener('click', function () { show(c.id, true); });
+          nav.appendChild(b);
+          return b;
+        });
+        function show(id, user) {
+          if (!cats.some(function (c) { return c.id === id; })) id = 'all';
+          list.classList.add('tools-list');
+          list.classList.toggle('single', id !== 'all');
+          groups.forEach(function (g) {
+            var on = id === 'all' || g.getAttribute('data-cat') === id;
+            g.hidden = !on;
+            if (on && user) { g.classList.remove('fade-in'); void g.offsetWidth; g.classList.add('fade-in'); }
+          });
+          soon.hidden = id !== 'all';
+          buttons.forEach(function (b) {
+            var on = b.getAttribute('data-cat') === id;
+            b.setAttribute('aria-pressed', String(on));
+            if (on && (b.offsetLeft < nav.scrollLeft || b.offsetLeft + b.offsetWidth > nav.scrollLeft + nav.clientWidth)) nav.scrollLeft = b.offsetLeft - 16;
+          });
+          if (user) history.replaceState(null, '', id === 'all' ? location.pathname : '#' + id);
+        }
+        nav.hidden = false;
+        show(location.hash.slice(1));
+        window.addEventListener('hashchange', function () { show(location.hash.slice(1)); });
+      })();
+    </script>
     <script src="../ask/ask.js" defer></script>
 </body>
 </html>
