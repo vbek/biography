@@ -617,7 +617,7 @@
 const PASSWORD_HASH = '2f4abfed0486f0a62f1252c48ec0a284ac8660d0ece6808dc44b156a7f1c8b44';
 // NOTE: regenerate this with the helper at the bottom of the page (open DevTools console)
 
-async function sha256(str) {
+async function sha256(str) { 
     const buf = await crypto.subtle.digest('SHA-256', new TextEncoder().encode(str));
     return Array.from(new Uint8Array(buf)).map(b => b.toString(16).padStart(2,'0')).join('');
 }

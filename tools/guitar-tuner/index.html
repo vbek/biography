@@ -1,0 +1,166 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<!-- The microphone is analysed in this tab with the Web Audio API. Nothing is recorded, stored or sent anywhere. -->
+<meta http-equiv="Content-Security-Policy" content="default-src 'none'; script-src 'self'; style-src 'self' 'unsafe-inline'; img-src 'self' data:; media-src 'self' blob: mediastream:; connect-src 'self'; manifest-src 'self'; base-uri 'none'; form-action 'none'">
+<meta name="referrer" content="no-referrer">
+<meta name="robots" content="index, follow">
+<meta name="theme-color" content="#0b1020">
+<meta name="mobile-web-app-capable" content="yes">
+<meta name="apple-mobile-web-app-capable" content="yes">
+<title>Guitar Tuner Online: Free Microphone Tuner for Guitar, Bass &amp; Ukulele</title>
+<meta name="description" content="A free, accurate online guitar tuner. Pluck a string and it listens through your microphone, shows the note and how many cents sharp or flat you are, and tells you which way to turn. Standard, Drop D, DADGAD, open tunings, bass and ukulele. Nothing is recorded or uploaded.">
+<link rel="canonical" href="https://bibek-koirala.com.np/tools/guitar-tuner/">
+<meta property="og:type" content="website">
+<meta property="og:site_name" content="Bibek Koirala">
+<meta property="og:title" content="Guitar Tuner Online: Free Microphone Tuner for Guitar, Bass &amp; Ukulele">
+<meta property="og:description" content="Pluck a string and see exactly how sharp or flat it is, with a live meter, strobe and pitch history. Standard, drop and open tunings, bass and ukulele. Runs in your browser.">
+<meta property="og:url" content="https://bibek-koirala.com.np/tools/guitar-tuner/">
+<meta property="og:image" content="https://bibek-koirala.com.np/images/og-image.jpg">
+<meta name="twitter:card" content="summary_large_image">
+<meta name="twitter:creator" content="@_koire">
+<script type="application/ld+json">
+{
+  "@context": "https://schema.org",
+  "@type": "WebApplication",
+  "name": "Guitar Tuner",
+  "applicationCategory": "MultimediaApplication",
+  "operatingSystem": "Windows, macOS, Linux, iOS, iPadOS, Android (web browser)",
+  "browserRequirements": "Requires a modern browser with microphone access",
+  "isAccessibleForFree": true,
+  "offers": { "@type": "Offer", "price": "0", "priceCurrency": "USD" },
+  "featureList": "Microphone pitch detection; automatic string detection; cents meter and strobe; pitch history graph; standard, drop and open tunings; bass and ukulele; chromatic mode; A4 calibration; plucked reference tones",
+  "author": { "@type": "Person", "@id": "https://bibek-koirala.com.np/#person", "name": "Bibek Koirala", "url": "https://bibek-koirala.com.np/" },
+  "url": "https://bibek-koirala.com.np/tools/guitar-tuner/",
+  "description": "A free online guitar tuner that listens through your microphone and shows how sharp or flat each string is.",
+  "image": "https://bibek-koirala.com.np/images/og-image.jpg"
+}
+</script>
+<link rel="manifest" href="manifest.webmanifest">
+<link rel="icon" href="icon.svg" type="image/svg+xml">
+<link rel="stylesheet" href="app.css">
+<script src="js/theme.js"></script>
+</head>
+<body>
+
+<header class="topbar">
+  <a href="../index.html" class="back">&larr; All tools</a>
+  <div class="brand"><img src="icon.svg" alt="" width="30" height="30"><span>Guitar Tuner</span></div>
+  <div class="top-right">
+    <div class="level" title="Microphone level" aria-hidden="true"><span id="level-bar"></span></div>
+    <span class="status" id="status"><span class="dot off" id="status-dot"></span><span id="status-text">Mic off</span></span>
+    <button class="btn primary" id="toggle" type="button"><svg viewBox="0 0 24 24" aria-hidden="true"><rect x="9" y="3" width="6" height="11" rx="3"/><path d="M5 11a7 7 0 0 0 14 0M12 18v3"/></svg><span>Start</span></button>
+  </div>
+</header>
+
+<p id="error" class="banner" role="alert" hidden></p>
+
+<main class="tuner">
+
+  <section class="card stage" aria-label="Tuner">
+    <div class="dial" id="dial">
+      <svg class="dial-svg" viewBox="0 0 400 232" role="img" aria-labelledby="dial-title">
+        <title id="dial-title">Tuning meter, from 50 cents flat to 50 cents sharp</title>
+        <defs>
+          <radialGradient id="halo" cx="50%" cy="50%" r="50%">
+            <stop offset="0" class="h1"/>
+            <stop offset="1" class="h2"/>
+          </radialGradient>
+          <filter id="glow" x="-50%" y="-50%" width="200%" height="200%"><feGaussianBlur stdDeviation="4" result="b"/><feMerge><feMergeNode in="b"/><feMergeNode in="SourceGraphic"/></feMerge></filter>
+        </defs>
+        <ellipse class="halo" cx="200" cy="140" rx="170" ry="90" fill="url(#halo)"/>
+        <path class="track" d="M49.65 145.28 A160 160 0 0 1 350.35 145.28"/>
+        <path class="zone" id="zone"/>
+        <g id="ticks"></g>
+        <path class="fill" id="fill" filter="url(#glow)"/>
+        <g class="pointer" id="pointer" filter="url(#glow)">
+          <line x1="200" y1="28" x2="200" y2="66"/>
+          <circle cx="200" cy="40" r="7"/>
+        </g>
+        <text class="flat-sharp" x="40" y="222">&#9837; flat</text>
+        <text class="flat-sharp" x="360" y="222" text-anchor="end">sharp &#9839;</text>
+      </svg>
+      <div class="note-box" aria-live="off">
+        <div class="note" id="note"><span id="note-letter">–</span><sup id="note-acc"></sup><sub id="note-oct"></sub></div>
+      </div>
+      <div class="veil" id="veil">
+        <button class="big-start" id="big-start" type="button">
+          <span class="mic-ring"><svg viewBox="0 0 24 24" aria-hidden="true"><rect x="9" y="3" width="6" height="11" rx="3"/><path d="M5 11a7 7 0 0 0 14 0M12 18v3"/></svg></span>
+          <span class="big-start-label">Start tuning</span>
+        </button>
+        <p class="muted small">Uses your microphone. The sound is analysed on this device and is never recorded or uploaded.</p>
+      </div>
+    </div>
+
+    <div class="readout">
+      <p class="hint" id="hint" aria-live="polite">Press Start, then pluck a string</p>
+      <div class="nums">
+        <div class="num"><span class="num-label">Off by</span><span class="num-val" id="cents">–</span></div>
+        <div class="num"><span class="num-label">Hearing</span><span class="num-val" id="hz">–</span></div>
+        <div class="num"><span class="num-label">Target</span><span class="num-val" id="target">–</span></div>
+      </div>
+    </div>
+
+    <div class="strobe-wrap" title="Strobe: the bands drift left when flat, right when sharp, and stand still when in tune">
+      <canvas id="strobe" height="40" aria-hidden="true"></canvas>
+    </div>
+
+    <div class="history-head"><span>Pitch over the last 10 seconds</span><span class="muted small">±50 cents</span></div>
+    <canvas id="history" height="120" aria-hidden="true"></canvas>
+  </section>
+
+  <aside class="card side" aria-label="Instrument and strings">
+    <div class="seg" role="radiogroup" aria-label="Instrument" id="instrument">
+      <button type="button" role="radio" data-v="guitar">Guitar</button>
+      <button type="button" role="radio" data-v="bass">Bass</button>
+      <button type="button" role="radio" data-v="ukulele">Ukulele</button>
+    </div>
+
+    <label class="field" for="tuning"><span>Tuning</span><select id="tuning"></select></label>
+
+    <div class="headstock-wrap">
+      <svg class="headstock" id="headstock" viewBox="0 0 320 450" aria-label="Strings: tap a tuning key to hear its note"></svg>
+      <div class="tuned-meter"><span id="tuned-count">0 of 6 strings in tune</span><div class="bar"><span id="tuned-bar"></span></div></div>
+    </div>
+
+    <div class="field"><span>Mode</span>
+      <div class="seg" role="radiogroup" aria-label="Mode" id="mode">
+        <button type="button" role="radio" data-v="auto" title="Finds the string you're playing">Auto</button>
+        <button type="button" role="radio" data-v="manual" title="Tune the string you pick on the headstock">Pick string</button>
+        <button type="button" role="radio" data-v="chromatic" title="Shows the nearest note of any pitch">Chromatic</button>
+      </div>
+    </div>
+
+    <div class="row-2">
+      <div class="field"><span>Reference pitch</span>
+        <div class="stepper">
+          <button type="button" class="btn icon" id="a4-down" aria-label="Lower reference pitch">&minus;</button>
+          <output id="a4" aria-live="polite">A4 = 440 Hz</output>
+          <button type="button" class="btn icon" id="a4-up" aria-label="Raise reference pitch">+</button>
+        </div>
+      </div>
+      <label class="check"><input type="checkbox" id="play-tap" checked> Play the note when I tap a key</label>
+    </div>
+    <button class="btn small-btn" id="reset-tuned" type="button">Reset string checkmarks</button>
+  </aside>
+
+  <section class="how">
+    <details>
+      <summary>How to tune, and privacy</summary>
+      <p><b>Tuning.</b> Press Start and allow the microphone. Pluck one string at a time and let it ring. The big letter is the note the tuner hears, and the meter shows how far off it is in cents (a hundredth of a semitone). If the pointer is left of centre the string is flat, so tighten it; if it's right of centre the string is sharp, so loosen it. Turn the key slowly and stop when the meter goes green and the strobe bands stand still. A string gets a checkmark once it has held in tune for half a second.</p>
+      <p><b>Tips.</b> Tune up to the note rather than down to it: if you go past, drop below and come back up, so the string holds its pitch. Pluck with your thumb or a soft pick near the neck for a cleaner reading, and mute the other strings. On a phone, hold the mic close to the sound hole or the amp. If a string is a long way off, use <i>Pick string</i> so the tuner doesn't mistake it for a neighbouring string.</p>
+      <p><b>Modes.</b> <i>Auto</i> works out which string you're playing. <i>Pick string</i> locks the tuner to the key you tap. <i>Chromatic</i> shows the nearest note for any pitch, which is handy for other instruments. Tap any tuning key to hear a plucked reference note. The reference pitch (A4 = 440 Hz) can be moved for bands or recordings tuned a little higher or lower.</p>
+      <p><b>Privacy.</b> The microphone is analysed in this browser tab using the Web Audio API. Nothing is recorded, saved or uploaded, and the page makes no network requests while you tune. Your instrument, tuning and settings are remembered on this device only. Press Stop or close the tab to turn the microphone off.</p>
+      <p class="muted small">Keyboard: <kbd>Space</kbd> start or stop, <kbd>1</kbd>–<kbd>6</kbd> play a string, <kbd>A</kbd> auto, <kbd>P</kbd> pick string, <kbd>C</kbd> chromatic.</p>
+    </details>
+  </section>
+</main>
+
+<div id="toast" class="toast" role="status" hidden></div>
+
+<script src="js/app.js"></script>
+<script src="../../track.js" defer></script>
+</body>
+</html>
